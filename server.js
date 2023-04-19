@@ -240,8 +240,48 @@ const generateZip = (folderPath, res) => {
   // Add the folder to the archive.
   archive.directory(folderPath, false);
 
-  // Finalize the archive.
-  archive.finalize();
+  // Finalize the archive and delete the dump folders/files.
+  archive.finalize().then(() => {
+    // Remove the folder once the archive is complete.
+    fs.rm(folderPath , { recursive: true }, (err) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log(folderPath,'Directory removed');
+      }
+    });
+
+    // Remove all .json and .jdl files except [ "package.json", "package-lock.json" ,"wdi-wda-example.json", "reminder.jdl" ]
+    const excludedFiles = [
+      "package.json",
+      "package-lock.json",
+      "wdi-wda-example.json",
+      "reminder.jdl"
+    ];
+    fs.readdir(`${process.cwd()}`, (err, files) => {
+      if (err) {
+        console.error(err);
+      } else {
+        files.forEach((file) => {
+          if (file.endsWith(".json") || file.endsWith(".jdl")) {
+            if (!excludedFiles.includes(file)) {
+              fs.unlink(`${process.cwd()}/${file}`, (err) => {
+                if (err) {
+                  console.error(err);
+                } else {
+                  console.log(`${file} removed`);
+                }
+              });
+            }
+          }
+        });
+      }
+    })
+  }).catch((err) => {
+    console.error(err);
+    res.status(500).send({ error: err.message });
+  });
+
 };
 
 app.listen(3001, () => {
