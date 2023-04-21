@@ -121,10 +121,6 @@ app.post("/generateJDL", (req, res) => {
         const jsonFileForTerrafrom = nanoid(9);
           body.wdi.generateInfra = generateInfra;
 
-          // These values can be removed once they are passed properly from frontend
-          body.wdi.monitoring = "true";
-          body.wdi.k8sWebUI   = "true";
-
           // Collect the appsFolders to create the ECR repositories, if cloud provider is AWS
           body.wdi.appFolders = appsFolders;
 
