@@ -11,6 +11,11 @@ const createJdlFromJson = (fileName, res) => {
     const applicationCount = Object.keys(applications).length;
     const appData = [];
     const applicationError = new Map();
+    var logManagementType = "no";
+    if(jsonData.wdi !== undefined && jsonData.wdi.enableECK === "true"){
+        logManagementType ="eck";
+    }
+
     for (let i = 0; i < applicationCount; i++) {
         // Error handling
         if (applications[i].applicationName === "") {
@@ -81,8 +86,8 @@ application {
         clientFramework ${applications[i].clientFramework.toLowerCase()},
         serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()},
         serverPort ${applications[i].serverPort},
+        logManagementType ${logManagementType.toLowerCase()}
     }
-    entities *
 }
     
 `;

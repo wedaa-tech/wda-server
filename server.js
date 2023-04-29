@@ -76,6 +76,12 @@ app.post("/generateJDL", (req, res) => {
   if (generateInfra === "true" && body.wdi.cloudProvider === "aws")
     body.deployment.dockerRepositoryName = `${body.wdi.awsAccountId}.dkr.ecr.${body.wdi.awsRegion}.amazonaws.com`;
 
+  if (generateInfra === "true" && body.wdi.enableECK === "true") {
+    for (let i = 0; i < applicationCount; i++) {
+      body.application[i].logManagementType = "eck";
+    }
+  }
+
   const errorData = new Map();
   if (applicationError.size > 0)
     errorData["applications"] = applicationError;
