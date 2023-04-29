@@ -23,7 +23,7 @@ RUN cd generator-tf-wdi && npm i && npm link
 RUN cd generator-jhipster && npm i && npm link
 
 # Install go-blueprints
-RUN cd jhipster-blueprints/generator-jhipster-go && npm i && npm link generator-jhipster-go
+RUN cd jhipster-blueprints/generator-jhipster-go && npm i && npm link 
 
 # Add user
 RUN groupadd wdi && useradd wdi -s /bin/bash -m -g wdi
