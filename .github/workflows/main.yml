@@ -41,6 +41,14 @@ jobs:
           ref: main
           path: generator-jhipster
           # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
+      
+      - name: Clone Jhipster blueprints repository
+        uses: actions/checkout@v2
+        with:
+          repository: coMakeIT-TIC/jhipster-blueprints
+          ref: main
+          path: jhipster-blueprints
+          # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
