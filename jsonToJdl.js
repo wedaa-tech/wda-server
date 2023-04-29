@@ -92,33 +92,22 @@ application {
 
     // Communications
     const communications = jsonData.communication;
-    const communicationCount = Object.keys(communications).length;
     const communicationData = [];
-    const communicationError = new Map();
-    for (let i = 0; i < communicationCount; i++) {
-        // Error handling
-        if (communications[i].clientName === "") {
-            if (i in communicationError)
-                communicationError.get(i).set("Client Name cannot be empty");
-            else
-                communicationError[i] = ["Client Name cannot be empty"];
-        }
-        if (communications[i].serverName === "") {
-            if (i in communicationError)
-                communicationError.get(i).set("Server Name cannot be empty");
-            else
-                communicationError[i] = ["Server Name cannot be empty"];
-        }
-        const data = `
+    if(communications !== undefined){
+        const communicationCount = Object.keys(communications).length;
+        for (let i = 0; i < communicationCount; i++) {
+            if(communications[i].clientName !== "" && communications[i].serverName !== "") {
+            const data = `
 communication {
     client "${communications[i].clientName.toLowerCase()}",
     server "${communications[i].serverName.toLowerCase()}"
 }
     
 `;
-
-    communicationData.push(data);
-    }
+            communicationData.push(data);
+            }
+        }
+}
 
 
     // deployment 
@@ -161,9 +150,7 @@ deployment {
     ingressDomain "${deployment.ingressDomain.toLowerCase()}",
     kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()},
     kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}",
-    kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}",
-
-
+    kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}"
 }
 
 `;
@@ -172,8 +159,8 @@ deployment {
     const errorData = new Map();
     if(applicationError.size > 0)
         errorData["applications"] = applicationError;
-    if(communicationError.size > 0)
-        errorData["communication"] = communicationError;
+    // if(communicationError.size > 0)
+    //     errorData["communication"] = communicationError;
     if(deploymentError.length > 0)
         errorData["deployment"] = deploymentError;
 
@@ -195,8 +182,13 @@ deployment {
     fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
         if (err) throw err;
         console.log('Json data written to JDL file');
+            fs.writeFile(`${jsonData.projectName}/blueprints/${fileName}.jdl`,
+            concatenatedJDL,
+            (err) => {
+            if (err) throw err;
+            }
+        );
     });
-
 };
 
 

@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+const path = require('path');
 const { nanoid } = require("nanoid");
 const archiver = require("archiver");
 const cors = require("cors");
@@ -28,10 +29,20 @@ app.post("/generateJDL", (req, res) => {
     generateInfra
   );
 
+  // filter the request sent from UI
+
+  delete req.body.entity;
+
+  if (req.body.communication[0].clientName === "" && req.body.communication[0].serverName === "") {
+    delete req.body.communication;
+  }
+
   const body = req.body;
   const fileName = nanoid(9);
   body.projectName = req.query.projectName + "-" + fileName; // To over rider the frontend values (and to maintain uniq folder name)
 
+  // Generates the Dir for Blueprints 
+  generateBlueprint(body.projectName, fileName, res);
 
   // Validate the Deployment section //
   body.deployment.kubernetesServiceType = "Ingress";  // no need to ask the to user
@@ -62,7 +73,7 @@ app.post("/generateJDL", (req, res) => {
   }
 
   // if cloud provider is AWS, update the dockerRepositoryName
-  if(generateInfra === "true" && body.wdi.cloudProvider === "aws")
+  if (generateInfra === "true" && body.wdi.cloudProvider === "aws")
     body.deployment.dockerRepositoryName = `${body.wdi.awsAccountId}.dkr.ecr.${body.wdi.awsRegion}.amazonaws.com`;
 
   const errorData = new Map();
@@ -74,7 +85,7 @@ app.post("/generateJDL", (req, res) => {
     return res.status(400).send(errorData);
 
   body.deployment.appsFolders = appsFolders;
-  
+
   // if cloud provider is AWS 
   body.deployment.kubernetesStorageProvisioner = "ebs.csi.aws.com";
 
@@ -82,7 +93,7 @@ app.post("/generateJDL", (req, res) => {
   createJsonFile(fileName, body);
 
   // JSON to JDL, with 5 sec wait for the json to get generated 
-  setTimeout(function() {
+  setTimeout(function () {
     console.log('Waiting 5 sec for the jdl to be generated');
     const response = jdlConverter.createJdlFromJson(fileName, res);
     // check if the error response object exists before returning it
@@ -90,55 +101,55 @@ app.post("/generateJDL", (req, res) => {
       return response;
     }
 
-  // Child process to generate the architecture
-  console.log("Generating Architecture files...");
-  exec(
-    `mkdir ${body.projectName} && cd ${body.projectName} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight`,
-    function(error, stdout, stderr) {
-      if (stdout !== "") {
-        console.log("---------stdout: ---------\n" + stdout);
-      }
+    // Child process to generate the architecture
+    console.log("Generating Architecture files...");
+    exec(
+      `cd ${body.projectName} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight`,
+      function (error, stdout, stderr) {
+        if (stdout !== "") {
+          console.log("---------stdout: ---------\n" + stdout);
+        }
 
-      if (stderr !== "") {
-        console.log("---------stderr: ---------\n" + stderr);
-      }
+        if (stderr !== "") {
+          console.log("---------stderr: ---------\n" + stderr);
+        }
 
-      if (error !== null) {
-        console.log("---------exec error: ---------\n[" + error + "]");
-      }
+        if (error !== null) {
+          console.log("---------exec error: ---------\n[" + error + "]");
+        }
 
-      console.log("Architecture Generation completed successfully.....");
+        console.log("Architecture Generation completed successfully.....");
 
-      const folderPath = `./${body.projectName}`;
+        const folderPath = `./${body.projectName}`;
 
-      // If generateInfra is true, then generate Terraform files as well and then generate the zip archive.
-      if (generateInfra === "true") {
-        console.log("Generating Infrastructure files...");
+        // If generateInfra is true, then generate Terraform files as well and then generate the zip archive.
+        if (generateInfra === "true") {
+          console.log("Generating Infrastructure files...");
 
-        body.wdi.projectName = req.query.projectName + "-" + fileName;
+          body.wdi.projectName = req.query.projectName + "-" + fileName;
 
-        
-        const jsonFileForTerrafrom = nanoid(9);
+
+          const jsonFileForTerrafrom = nanoid(9);
           body.wdi.generateInfra = generateInfra;
 
           // Collect the appsFolders to create the ECR repositories, if cloud provider is AWS
           body.wdi.appFolders = appsFolders;
 
-        //Below method will generate json file for the req.body.wdi, if generateInfra is true
-        createJsonFile(jsonFileForTerrafrom, req.body.wdi);
+          //Below method will generate json file for the req.body.wdi, if generateInfra is true
+          createJsonFile(jsonFileForTerrafrom, req.body.wdi);
 
-        generateTerrafromFiles(jsonFileForTerrafrom, folderPath, res);
+          generateTerrafromFiles(jsonFileForTerrafrom, folderPath, res);
 
-        console.log(
-          "Zipping Architecture/Infrastructure files completed successfully....."
-        );
-      } else {
-        // Generation of Architecture zip, with in the call back function of child process.
-        generateZip(folderPath, res);
-        console.log("Zipping Architecture files completed successfully.....");
+          console.log(
+            "Zipping Architecture/Infrastructure files completed successfully....."
+          );
+        } else {
+          // Generation of Architecture zip, with in the call back function of child process.
+          generateZip(folderPath, res);
+          console.log("Zipping Architecture files completed successfully.....");
+        }
       }
-    }
-  );
+    );
 
   }, 5000);
 
@@ -153,11 +164,15 @@ app.post("/generate", (req, res) => {
   body.projectName = body.projectName + "-" + fileName; // To over ride the frontend values (and to maintain uniqe folder name)
   const folderPath = `./${body.projectName}`;
 
+  // Generates the Dir for Blueprints 
+  generateBlueprint(body.projectName, fileName, res);
+
   // Create a json file for the generator
   createJsonFile(fileName, body);
 
   // Child process uses the above generated json file to write the terrafrom files.
   generateTerrafromFiles(fileName, folderPath, res);
+
 });
 
 /**
@@ -208,10 +223,16 @@ const createJsonFile = (fileName, body) => {
     `${fileName}.json`,
     JSON.stringify(body, null, 4),
     "utf8",
-    err => {
-      if (err) throw err;
-    }
-  );
+    function(err, result){ 
+      fs.writeFile(
+        `${body.projectName}/blueprints/${fileName}.json`,
+        JSON.stringify(body, null, 4),
+        "utf8",
+        err => {
+          if (err) throw err;
+        }
+      );
+  });
 };
 
 /**
@@ -235,6 +256,8 @@ const generateZip = (folderPath, res) => {
 
   // Add the folder to the archive.
   archive.directory(folderPath, false);
+
+  // archive.finalize();
 
   // Finalize the archive and delete the dump folders/files.
   archive.finalize().then(() => {
@@ -279,6 +302,25 @@ const generateZip = (folderPath, res) => {
   });
 
 };
+
+const generateBlueprint = (folderPath, fileName, res) => {
+  const destDir = folderPath;
+  fs.mkdir(destDir, { recursive: true }, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error creating destination folder');
+      return;
+    }
+  });
+  const destDirForBlueprints = path.join(folderPath, `blueprints`);
+  fs.mkdir(destDirForBlueprints, { recursive: true }, (err) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error creating destination folder');
+      return;
+    }
+  });
+}
 
 app.listen(3001, () => {
   console.log("⚡: Server listening on port 3001");
