@@ -110,7 +110,7 @@ app.post("/generateJDL", (req, res) => {
     // Child process to generate the architecture
     console.log("Generating Architecture files...");
     exec(
-      `cd ${body.projectName} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight`,
+      `cd ${body.projectName} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies`,
       function (error, stdout, stderr) {
         if (stdout !== "") {
           console.log("---------stdout: ---------\n" + stdout);
