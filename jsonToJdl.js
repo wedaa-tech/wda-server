@@ -76,28 +76,34 @@ const createJdlFromJson = (fileName, res) => {
         }
 
         var appFramework = false;
+        var withExample  = false;
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true ;
+        }
+        if ( applications[i].applicationType.toLowerCase() === "gateway" && applications[i].withExample !== undefined && applications[i].withExample === "true") {
+            withExample = true;
         }
         // Conversion of json to jdl (Application Options)
         const data = `
 application {
     config {
-        baseName ${applications[i].applicationName.toLowerCase()},
-        applicationType ${applications[i].applicationType.toLowerCase()},
-        packageName ${applications[i].packageName.toLowerCase()},
-        authenticationType ${applications[i].authenticationType.toLowerCase()},
-        databaseType ${applications[i].databaseType.toLowerCase()},
-        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()},
-        clientFramework ${applications[i].clientFramework.toLowerCase()},
-        serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()},
-        serverPort ${applications[i].serverPort},
-        logManagementType ${logManagementType.toLowerCase()},
+        baseName ${applications[i].applicationName.toLowerCase()}
+        applicationType ${applications[i].applicationType.toLowerCase()}
+        packageName ${applications[i].packageName.toLowerCase()}
+        authenticationType ${applications[i].authenticationType.toLowerCase()}
+        databaseType ${applications[i].databaseType.toLowerCase()}
+        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}
+        clientFramework ${applications[i].clientFramework.toLowerCase()}
+        serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}
+        serverPort ${applications[i].serverPort}
+        logManagementType ${logManagementType.toLowerCase()}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
+        ${withExample  ? `withExample true` : ''}
     }
 }
     
 `;
+        // data.replace(/^\s*[\r\n]/gm,'');
         appData.push(data);
     }
 
@@ -153,15 +159,15 @@ communication {
     
     const deploymentData = `
 deployment {
-    deploymentType ${deployment.deploymentType.toLowerCase()},
-    appsFolders [${deployment.appsFolders}],
-    dockerRepositoryName "${deployment.dockerRepositoryName.toLowerCase()}",
-    kubernetesNamespace ${deployment.kubernetesNamespace.toLowerCase()},
-    serviceDiscoveryType ${deployment.serviceDiscoveryType.toLowerCase()},
-    istio ${deployment.istio.toLowerCase()},
-    ingressDomain "${deployment.ingressDomain.toLowerCase()}",
-    kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()},
-    kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}",
+    deploymentType ${deployment.deploymentType.toLowerCase()}
+    appsFolders [${deployment.appsFolders}]
+    dockerRepositoryName "${deployment.dockerRepositoryName.toLowerCase()}"
+    kubernetesNamespace ${deployment.kubernetesNamespace.toLowerCase()}
+    serviceDiscoveryType ${deployment.serviceDiscoveryType.toLowerCase()}
+    istio ${deployment.istio.toLowerCase()}
+    ingressDomain "${deployment.ingressDomain.toLowerCase()}"
+    kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}
+    kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"
     kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}"
 }
 
