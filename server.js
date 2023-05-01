@@ -229,16 +229,28 @@ const createJsonFile = (fileName, body) => {
     `${fileName}.json`,
     JSON.stringify(body, null, 4),
     "utf8",
-    function(err, result){ 
-      fs.writeFile(
-        `${body.projectName}/blueprints/${fileName}.json`,
-        JSON.stringify(body, null, 4),
-        "utf8",
-        err => {
-          if (err) throw err;
-        }
-      );
-  });
+    function (err, result) {
+      console.log(body);
+      if (body.appFolders !== undefined) {
+        fs.writeFile(
+          `${body.projectName}/blueprints/infra-blueprint.json`,
+          JSON.stringify(body, null, 4),
+          "utf8",
+          err => {
+            if (err) throw err;
+          }
+        );
+      } else {
+        fs.writeFile(
+          `${body.projectName}/blueprints/main-blueprint.json`,
+          JSON.stringify(body, null, 4),
+          "utf8",
+          err => {
+            if (err) throw err;
+          }
+        );
+      }
+    });
 };
 
 /**
@@ -268,11 +280,11 @@ const generateZip = (folderPath, res) => {
   // Finalize the archive and delete the dump folders/files.
   archive.finalize().then(() => {
     // Remove the folder once the archive is complete.
-    fs.rm(folderPath , { recursive: true }, (err) => {
+    fs.rm(folderPath, { recursive: true }, (err) => {
       if (err) {
         console.error(err);
       } else {
-        console.log(folderPath,'Directory removed');
+        console.log(folderPath, 'Directory removed');
       }
     });
 

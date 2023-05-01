@@ -200,7 +200,7 @@ deployment {
     fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
         if (err) throw err;
         console.log('Json data written to JDL file');
-            fs.writeFile(`${jsonData.projectName}/blueprints/${fileName}.jdl`,
+            fs.writeFile(`${jsonData.projectName}/blueprints/apps-blueprint.jdl`,
             concatenatedJDL,
             (err) => {
             if (err) throw err;
