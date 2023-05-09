@@ -97,6 +97,7 @@ application {
         serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}
         serverPort ${applications[i].serverPort}
         logManagementType ${logManagementType.toLowerCase()}
+        messageBroker ${applications[i].messageBroker.toLowerCase()}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample  ? `withExample true` : ''}
     }
