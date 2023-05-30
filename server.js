@@ -7,10 +7,26 @@ const archiver = require("archiver");
 const cors = require("cors");
 const exec = require("child_process").exec;
 const jdlConverter = require("./jsonToJdl.js");
+const wdaRoutes = require('./designer/router.routes');
+const db = require('./config/database');
 
+// call the database connectivity function
+// db();
 
 app.use(express.json()); // Body parser
 app.use(cors());
+
+
+
+//initialise express router
+var router = express.Router();
+
+// use express router
+app.use('/api',router);
+
+//call wda routing
+wdaRoutes(router);
+
 
 /**
  * Post call for JHipster Yeoman Generator
@@ -343,3 +359,9 @@ const generateBlueprint = (folderPath, fileName, res) => {
 app.listen(3001, () => {
   console.log("⚡: Server listening on port 3001");
 });
+
+
+
+module.exports = {
+  generateBlueprint: generateBlueprint
+} 

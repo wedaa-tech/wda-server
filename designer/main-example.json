@@ -1,0 +1,63 @@
+{
+    "projectName": "reminder",
+    "services": {
+        "0": {
+            "applicationName": "client",
+            "applicationFramework": "java",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "databaseType": "sql",
+            "prodDatabaseType": "postgreSQL",
+            "clientFramework": "react",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9000",
+            "withExample": "true",
+            "logManagementType": "eck"
+        }
+    },
+    "deployment": {
+        "deploymentType": "kubernetes",
+        "dockerRepositoryName": "379605592402.dkr.ecr.ap-south-1.amazonaws.com",
+        "ingressDomain": "shopt.gq",
+        "ingressType": "istio",
+        "kubernetesNamespace": "k8s",
+        "kubernetesServiceType": "Ingress",
+        "kubernetesStorageClassName": "demosc",
+        "kubernetesUseDynamicStorage": "true",
+        "serviceDiscoveryType": "eureka",
+        "istio": "true",
+        "appsFolders": [
+            "client",
+            "products",
+            "carts",
+            "users"
+        ],
+        "kubernetesStorageProvisioner": "ebs.csi.aws.com"
+    },
+    "communication": {
+        "0": {
+            "clientName": "client",
+            "serverName": "products"
+        },
+        "1": {
+            "clientName": "products",
+            "serverName": "client"
+        }
+    },
+    "wdi": {
+        "domain": "shopt.gq",
+        "cloudProvider": "aws",
+        "awsAccountId": "379605592402",
+        "orchestration": "kubernetes",
+        "awsRegion": "ap-south-1",
+        "awsAccessKey": "<awsAccessKey>",
+        "awsSecretKey": "<awsSecretKey>",
+        "instanceType": "t3.medium",
+        "clusterName": "reminder",
+        "ingress": "istio",
+        "monitoring": "true",
+        "enableECK": "true",
+        "k8sWebUI": "true"
+    }
+}
