@@ -1,93 +1,98 @@
+const { application } = require("express");
 const fs = require("fs");
 
 
 exports.createJdlFromJson = (fileName, res) => {
-    console.log("processing json to jdl with the file name {}", fileName);
+    console.log("processing json to jdl with the file name:", fileName);
 
     // read the JSON file
     const jsonData = JSON.parse(fs.readFileSync(fileName + '.json', 'utf8'));
 
-    // Applications
+    // applications
     const applications = jsonData.services;
 
     const applicationCount = Object.keys(applications).length;
     const appData = [];
-    const applicationError = new Map();
-    var logManagementType = "no";
+    
+
+    // below attributes are conditionally checked and added to jdl file commonly to all application blocks
+    var logManagementType       = false;
+    var serviceDiscoveryType    = false;
+
 
     // if(jsonData.wdi !== undefined && jsonData.wdi.enableECK === "true"){
     //     logManagementType ="eck";
     // }
 
-    var blueprints = [ "go"];
+    var blueprints              = [ "go"];
+    var clientFrameworks        = [ "react", "angular" ];
+    var serviceDiscoveryTypes   = [ "eureka", "consul"]
+    var messageBrokers          = [ "rabbitmq", "kafka"];
 
+    
     for (let i = 0; i < applicationCount; i++) {
+        var applicationError = new Map();
+        var applicationErrorList = [];
+
         // Error handling
-        if (applications[i].applicationName === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Service Name cannot be empty");
-            else
-                applicationError[i] = ["Service Name cannot be empty"];
+        if (applications[i].applicationName === undefined || applications[i].applicationName === "") {
+            applicationErrorList.push("Service Name cannot be empty");
         }
-        if (applications[i].applicationType === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Service Type cannot be empty");
-            else
-                applicationError[i] = ["Service Type cannot be empty"];
+        if (applications[i].applicationType === undefined  || applications[i].applicationType === "") {
+            applicationErrorList.push("Service Type cannot be empty");
         }
-        if (applications[i].packageName === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Package Name cannot be empty");
-            else
-                applicationError[i] = ["Package Name cannot be empty"];
+        if (applications[i].packageName === undefined  || applications[i].packageName === "") {
+            applicationErrorList.push("Package Name cannot be empty");
         }
-        if (applications[i].authenticationType === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Authentication Type cannot be empty");
-            else
-                applicationError[i] = ["Authentication Type cannot be empty"];
+        if (applications[i].authenticationType === undefined  || applications[i].authenticationType === "") {
+            applicationErrorList.push("Authentication Type cannot be empty");
         }
-        if (applications[i].databaseType === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Database cannot be empty");
-            else
-                applicationError[i] = ["Database cannot be empty"];
+        if (applications[i].databaseType === undefined  || applications[i].databaseType === "") {
+            applicationErrorList.push("Database cannot be empty");
         }
-        if (applications[i].prodDatabaseType === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Prod Database cannot be empty");
-            else
-                applicationError[i] = ["Prod Database cannot be empty"];
+        if (applications[i].prodDatabaseType === undefined  || applications[i].prodDatabaseType === "") {
+            applicationErrorList.push("Prod Database cannot be empty");
         }
-        if (applications[i].clientFramework === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Client framework cannot be empty");
-            else
-                applicationError[i] = ["Client framework cannot be empty"];
-        }
-        if (applications[i].serviceDiscoveryType === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Service discovery type cannot be empty");
-            else
-                applicationError[i] = ["Service discovery type cannot be empty"];
-        }
-        if (applications[i].serverPort === "") {
-            if (i in applicationError)
-                applicationError.get(i).set("Server Port cannot be empty");
-            else
-                applicationError[i] = ["Server Port cannot be empty"];
+        if (applications[i].serverPort === undefined  || applications[i].serverPort === "") {
+            applicationErrorList.push("Server Port cannot be empty");
         }
 
-        var appFramework = false;
-        var withExample  = false;
+        // return error response
+        if (applicationErrorList.length > 0){
+            applicationError[i] = applicationErrorList;
+            console.log(applicationError);
+            return res.status(406).send(applicationError);
+        }
+
+        // below attributes are conditionally checked and added to jdl file in each application block
+        var appFramework            = false;
+        var withExample             = false;
+        var clientFramework         = false;
+        var messageBroker           = false;
+
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true ;
         }
-        if ( applications[i].applicationType.toLowerCase() === "gateway" && applications[i].withExample !== undefined && applications[i].withExample === "true") {
+        if (applications[i].applicationType !== undefined && applications[i].applicationType.toLowerCase() === "gateway" && 
+            applications[i].withExample !== undefined && applications[i].withExample === "true") {
             withExample = true;
         }
+        if(applications[i].applicationType !== undefined && applications[i].applicationType.toLowerCase() === "gateway" && 
+            applications[i].clientFramework !== undefined && clientFrameworks.includes(applications[i].clientFramework)){
+            clientFramework = true;
+        }
+        if(applications[i].serviceDiscoveryType !== undefined &&  serviceDiscoveryTypes.includes(applications[i].serviceDiscoveryType)){
+            serviceDiscoveryType = true;
+        }
+        if(applications[i].logManagementType !== undefined &&  applications[i].withExample === "eck"){
+            logManagementType = true;
+        }
+        if(applications[i].messageBroker !== undefined && messageBrokers.includes(applications[i].messageBroker)){
+            messageBroker = true;
+        }
+
         // Conversion of json to jdl (Application Options)
-        const data = `
+        var data = `
 application {
     config {
         baseName ${applications[i].applicationName.toLowerCase()}
@@ -96,21 +101,21 @@ application {
         authenticationType ${applications[i].authenticationType.toLowerCase()}
         databaseType ${applications[i].databaseType.toLowerCase()}
         prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}
-        clientFramework ${applications[i].clientFramework.toLowerCase()}
-        serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}
         serverPort ${applications[i].serverPort}
-        logManagementType ${logManagementType.toLowerCase()}
+        ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
+        ${logManagementType ? `logManagementType ${logManagementType.toLowerCase()}` : ''}
+        ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : ''}
+        ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : ''}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample  ? `withExample true` : ''}
     }
 }
     
 `;
-        // data.replace(/^\s*[\r\n]/gm,'');
+        data = data.replace(/^\s*[\r\n]/gm, ''); // remove extra lines from jdl data
         appData.push(data);
     }
 
-    // messageBroker ${applications[i].messageBroker.toLowerCase()}
 
     // Communications
 //     const communications = jsonData.communication;
@@ -178,20 +183,20 @@ application {
 // `;
 
 
-    const errorData = new Map();
-    if(applicationError.size > 0)
-        errorData["applications"] = applicationError;
-    // if(communicationError.size > 0)
-    //     errorData["communication"] = communicationError;
-    // if(deploymentError.length > 0)
-    //     errorData["deployment"] = deploymentError;
+    // const errorData = new Map();
+    // if(applicationError.size > 0)
+    //     errorData["applications"] = applicationError;
+    // // if(communicationError.size > 0)
+    // //     errorData["communication"] = communicationError;
+    // // if(deploymentError.length > 0)
+    // //     errorData["deployment"] = deploymentError;
 
 
-    // return error response
-    if (Object.keys(errorData).length >= 1){
-        console.log(errorData);
-        return res.status(400).send(errorData);
-    }
+    // // return error response
+    // if (Object.keys(errorData).length >= 1){
+    //     console.log(errorData);
+    //     return res.status(400).send(errorData);
+    // }
 
 
     // let combinedData = appData.concat(communicationData, deploymentData);
