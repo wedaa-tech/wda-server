@@ -7,8 +7,22 @@ const archiver = require("archiver");
 const cors = require("cors");
 const exec = require("child_process").exec;
 const jdlConverter = require("./jsonToJdl.js");
-const wdaRoutes = require('./designer/router.routes');
+const wdaRoutes = require('./designer/router.js');
 const db = require('./config/database');
+const session = require('express-session');
+const Keycloak = require('keycloak-connect');
+const keycloakConfig = require('./config/keycloak-config.js').keycloakConfig;
+
+// Create a session-store to be used by both the express-session
+// middleware and the keycloak middleware.
+const memoryStore = new session.MemoryStore();
+
+app.use(session({
+  secret: 'Zephyr78#*',
+  resave: false,
+  saveUninitialized: true,
+  store: memoryStore
+}));
 
 // call the database connectivity function
 // db();
@@ -17,12 +31,30 @@ app.use(express.json()); // Body parser
 app.use(cors());
 
 
+// Provide the session store to the Keycloak so that sessions
+// can be invalidated from the Keycloak console callback.
+//
+// Additional configuration is read from keycloak.json file
+// installed from the Keycloak web console.
+
+const keycloak = new Keycloak({
+  store: memoryStore,
+}, keycloakConfig );
+
+app.use(keycloak.middleware({
+  logout: '/logout',
+  admin: '/'
+}));
+
+
 
 //initialise express router
 var router = express.Router();
 
 // use express router
-app.use('/api',router);
+app.use('/api',keycloak.protect(), router);
+
+
 
 //call wda routing
 wdaRoutes(router);
@@ -363,5 +395,6 @@ app.listen(3001, () => {
 
 
 module.exports = {
-  generateBlueprint: generateBlueprint
+  generateBlueprint: generateBlueprint ,
+  keycloak: keycloak
 } 
