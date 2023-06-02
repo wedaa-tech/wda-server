@@ -25,7 +25,7 @@ app.use(session({
 }));
 
 // call the database connectivity function
-// db();
+db();
 
 app.use(express.json()); // Body parser
 app.use(cors());
