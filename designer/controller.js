@@ -69,30 +69,27 @@ exports.generate = function (req, res) {
     // Generates the Dir for Blueprints 
     utility.generateBlueprint(body.projectName, fileName, res);
 
+    // Validate & Create a json file for the jhipster generator 
+    utility.createJsonFile(fileName, body);
+
     // preprocessing the request json 
     var deployment = false;
     if(body.deployment !== undefined) {
         deployment = true
-
-        // prepare infra json for tf-wdi
-        var infaJson = {
-            cloudProvider: body.deployment.cloudProvider,
-
-            domain: body.deployment.ingressDomain,
-            orchestration: body.deployment.deploymentType,
-            clusterName: body.deployment.clusterName,
-
-        };
+        // set app folders, for container registry
+        const applications = req.body.services;
+        const applicationCount = Object.keys(applications).length;
+        const appFolders = [];
+        for (let i = 0; i < applicationCount; i++) {
+            appFolders.push(applications[i].applicationName);
+        }
+        var infraJson = utility.infraJsonGenerator(body, appFolders);    
     }
-
-    // Create a json file for the jhipster generator
-    utility.createJsonFile(fileName, body);
 
     // persist the blueprint to DB
     var blueprint = {
         project_id: body.projectName,
-        request_json: body,
-        main_json: body
+        request_json: body
     };
 
     blueprintDao.create(blueprint)
@@ -133,21 +130,13 @@ exports.generate = function (req, res) {
 
                 const folderPath = `./${body.projectName}`;
 
-                // If generateInfra is true, then generate Terraform files as well and then generate the zip archive.
-                if (false) {
+                // If deployment is true, then generate Terraform files as well and then generate the zip archive.
+                if (deployment) {
                     console.log("Generating Infrastructure files...");
-
-                    body.wdi.projectName = req.query.projectName + "-" + fileName;
-
-
                     const jsonFileForTerrafrom = nanoid(9);
-                    body.wdi.generateInfra = generateInfra;
-
-                    // Collect the appsFolders to create the ECR repositories, if cloud provider is AWS
-                    body.wdi.appFolders = appsFolders;
-
-                    //Below method will generate json file for the req.body.wdi, if generateInfra is true
-                    createJsonFile(jsonFileForTerrafrom, req.body.wdi);
+                    
+                    // Generate json file for infraJson, if deployment is true
+                    utility.createJsonFile(jsonFileForTerrafrom, infraJson);
 
                     generateTerrafromFiles(jsonFileForTerrafrom, folderPath, res);
 
@@ -166,3 +155,33 @@ exports.generate = function (req, res) {
 
 
 };
+
+/**
+ * Child process to generate the Infrastructure files
+ *
+ * @param {*} fileName : random string with 9 characters
+ * @param {*} folderPath : combination of the projectName +fileName
+ * @param {*} res  : response to be sent to the user
+ */
+const generateTerrafromFiles = (fileName, folderPath, res) => {
+    exec(`yo tf-wdi --file ./${fileName}.json`, function (
+      error,
+      stdout,
+      stderr
+    ) {
+      if (stdout !== "") {
+        console.log("---------stdout: ---------\n" + stdout);
+      }
+  
+      if (stderr !== "") {
+        console.log("---------stderr: ---------\n" + stderr);
+      }
+  
+      if (error !== null) {
+        console.log("---------exec error: ---------\n[" + error + "]");
+      }
+  
+      // Generation of Infrastructure zip file with in the callback function of child process.
+      utility.generateZip(folderPath, res);
+    });
+  };
