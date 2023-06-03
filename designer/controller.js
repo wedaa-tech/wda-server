@@ -86,20 +86,6 @@ exports.generate = function (req, res) {
         var infraJson = utility.infraJsonGenerator(body, appFolders);    
     }
 
-    // persist the blueprint to DB
-    var blueprint = {
-        project_id: body.projectName,
-        request_json: body
-    };
-
-    blueprintDao.create(blueprint)
-    .then(savedBlueprint => {
-        console.log("Blueprint was added successfully!");
-    })
-    .catch(error => {
-        console.error(error);
-    });
-
     // JSON to JDL, with 5 sec wait for the json to get generated 
     setTimeout(function () {
         console.log('Waiting 5 sec for the jdl to be generated');

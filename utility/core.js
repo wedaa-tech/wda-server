@@ -14,7 +14,7 @@ exports.createJsonFile = (fileName, body) => {
     JSON.stringify(body, null, 4),
     "utf8",
     function (err, result) {
-      console.log(body);
+      // console.log(body);
       if (body.appFolders !== undefined) {
         fs.writeFile(
           `${body.projectName}/blueprints/infra-blueprint.json`,

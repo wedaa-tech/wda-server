@@ -1,4 +1,4 @@
-const { application } = require("express");
+const blueprintDao = require('../dao/blueprintDao');
 const fs = require("fs");
 
 
@@ -157,6 +157,9 @@ communication {
         if (deployment.deploymentType === undefined || deployment.deploymentType === "") {
             deploymentError.push("Deployment Type cannot be empty");
         }
+        if (deployment.clusterName === undefined || deployment.clusterName === "") {
+            deploymentError.push("Cluster Name cannot be empty");
+        }
         if (deployment.ingressDomain === undefined || deployment.ingressDomain === "") {
             deploymentError.push("Ingress Domain cannot be empty");
         }
@@ -166,7 +169,7 @@ communication {
         if (deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true
             && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === ""
                 || deployment.kubernetesStorageProvisioner === undefined || deployment.kubernetesStorageProvisioner === "")) {
-            deploymentError.push("Storage Provisioner/ Storage Class Name cannot be empty");
+            deploymentError.push("Storage Provisioner/Storage Class Name cannot be empty");
         }
 
         // return error response
@@ -180,15 +183,15 @@ communication {
         // set apps folders 
         const appsFolders = [];
         for (let i = 0; i < applicationCount; i++) {
-            appsFolders.push(applications[i].applicationName);
+            appsFolders.push(applications[i].applicationName.toLowerCase());
         }
-        deployment.appsFolders = appsFolders;
 
         // set repository name based on cloud provider
+        var dockerRepositoryName;
         if (deployment.cloudProvider === "aws") {
-            deployment.dockerRepositoryName = `${deployment.awsAccountId}.dkr.ecr.${deployment.awsRegion}.amazonaws.com`;
+            dockerRepositoryName = `${deployment.awsAccountId}.dkr.ecr.${deployment.awsRegion}.amazonaws.com`;
         } else if (deployment.cloudProvider === "azure") {
-            deployment.dockerRepositoryName = "mycontainerregistry"
+            dockerRepositoryName = "mycontainerregistry"
         }
 
         // set kubernetesServiceType to Ingress if ingressType is istio
@@ -213,8 +216,8 @@ communication {
         deploymentData = `
 deployment {
     deploymentType ${deployment.deploymentType.toLowerCase()}
-    appsFolders [${deployment.appsFolders}]
-    dockerRepositoryName "${deployment.dockerRepositoryName.toLowerCase()}"
+    appsFolders [${appsFolders}]
+    dockerRepositoryName "${dockerRepositoryName.toLowerCase()}"
     kubernetesNamespace ${deployment.kubernetesNamespace.toLowerCase()}
     ${serviceDiscoveryType ? `serviceDiscoveryType ${deployment.serviceDiscoveryType.toLowerCase()}` : `serviceDiscoveryType no`}
     ${ingressType ? `kubernetesServiceType Ingress` : `kubernetesServiceType LoadBalancer`}
@@ -238,6 +241,19 @@ deployment {
     }
     const combinedArrayData = Array.from(combinedData);
     const concatenatedJDL = combinedArrayData.join(' ');
+
+    // persist the blueprint to DB, if there is no error 
+    var blueprint = {
+        project_id: jsonData.projectName,
+        request_json: jsonData
+    };
+    blueprintDao.create(blueprint)
+    .then(savedBlueprint => {
+        console.log("Blueprint was added successfully!");
+    })
+    .catch(error => {
+        console.error(error);
+    });
 
     fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
         if (err) throw err;
