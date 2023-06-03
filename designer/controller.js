@@ -69,6 +69,22 @@ exports.generate = function (req, res) {
     // Generates the Dir for Blueprints 
     utility.generateBlueprint(body.projectName, fileName, res);
 
+    // preprocessing the request json 
+    var deployment = false;
+    if(body.deployment !== undefined) {
+        deployment = true
+
+        // prepare infra json for tf-wdi
+        var infaJson = {
+            cloudProvider: body.deployment.cloudProvider,
+
+            domain: body.deployment.ingressDomain,
+            orchestration: body.deployment.deploymentType,
+            clusterName: body.deployment.clusterName,
+
+        };
+    }
+
     // Create a json file for the jhipster generator
     utility.createJsonFile(fileName, body);
 
