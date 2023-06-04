@@ -4,24 +4,21 @@ const jdlConverter = require('../utility/jsonToJdl');
 const exec = require("child_process").exec;
 const blueprintDao = require('../dao/blueprintDao');
 
-exports.test = function (req, res) {
-    return res.status(200).send({ message: "Test API for wda server" });
-};
-
-
 /**
  * Get specific blueprint with given project Id
  * @param {*} req 
  * @param {*} res 
  */
 exports.getBlueprint = function (req, res) {
+  const userId = req.kauth.grant.access_token.content.sub;
   blueprintDao.getByProjectId({project_id: req.params.project_id})
   .then(result => {
-    console.log("Retrieved blueprint:", result);
     if (Array.isArray(result) && result.length === 1) {
         var uniqueResult = result[0];
+        console.log("Retrieved blueprint with project Id: "+ uniqueResult.project_id + ", for the user: " + userId); 
         return res.status(200).send(uniqueResult);
       } else {
+        console.log("Retrieved blueprint with project Id: "+ result.project_id + ", for the user: " + userId); 
         return res.status(200).send({result});
       }
   })
@@ -39,7 +36,7 @@ exports.getBlueprint = function (req, res) {
 exports.getBlueprints = function (req, res) {
     blueprintDao.getByUserId({user_id: req.params.user_id})
     .then(results => {
-      console.log("Retrieved blueprints:", results);
+      console.log("Retrieved blueprints of user:", req.params.user_id);
       return res.status(200).send(results);
     })
     .catch(error => {
@@ -55,12 +52,10 @@ exports.getBlueprints = function (req, res) {
  */
 exports.generate = function (req, res) {
     const body = req.body;
-    // console.log(body)
-
+    const userId = req.kauth.grant.access_token.content.sub;
     console.log(
-        "Hi",
-        "Your project Name is",
-        body.projectName
+      "Generating project: " + body.projectName + 
+      ", for user: " + userId
     );
 
     const fileName = nanoid(9);

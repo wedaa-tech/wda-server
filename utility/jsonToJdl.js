@@ -54,7 +54,7 @@ exports.createJdlFromJson = (fileName, res) => {
         if (applicationErrorList.length > 0) {
             applicationError[i] = applicationErrorList;
             console.log(applicationError);
-            return res.status(406).send(applicationError);
+            return res.status(400).send(applicationError);
         }
 
         // below attributes are conditionally checked and added to jdl file in each application block
@@ -175,7 +175,7 @@ communication {
         // return error response
         if (deploymentError.length > 0) {
             console.log(deploymentError);
-            return res.status(406).send(deploymentError);
+            return res.status(400).send(deploymentError);
         }
 
         // preprocessing deployment block, before jdl generation
