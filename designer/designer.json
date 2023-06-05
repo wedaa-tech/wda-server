@@ -1,0 +1,58 @@
+{
+    "projectName": "reminder",
+    "services": {
+        "0": {
+            "applicationName": "client",
+            "applicationFramework": "java",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "databaseType": "sql",
+            "prodDatabaseType": "postgreSQL",
+            "clientFramework": "react",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9000",
+            "withExample": "false",
+            "messageBroker": "rabbitmq",
+            "logManagementType": "eck"
+        },
+        "1": {
+            "applicationName": "backend",
+            "applicationFramework": "java",
+            "applicationType": "microservice",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "databaseType": "sql",
+            "prodDatabaseType": "postgreSQL",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9001"
+        }
+    },
+    "communications": {
+        "0": {
+            "clientName": "client",
+            "serverName": "backend"
+        },
+        "1": {
+            "clientName": "backend",
+            "serverName": "client"
+        }
+    },
+    "deployment": {
+        "cloudProvider": "aws",
+        "awsAccountId": "379605592402",
+        "awsRegion": "ap-south-1",
+        "deploymentType": "kubernetes",
+        "clusterName": "reminder",
+        "kubernetesNamespace": "k8s",
+        "ingressDomain": "shopt.gq",
+        "ingressType": "istio",
+        "kubernetesUseDynamicStorage": "true",
+        "kubernetesStorageClassName": "demosc",
+        "kubernetesStorageProvisioner": "ebs.csi.aws.com",
+        "serviceDiscoveryType": "eureka",
+        "monitoring": "true",
+        "enableECK": "true",
+        "k8sWebUI": "true"
+    }
+}
