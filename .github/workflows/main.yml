@@ -4,7 +4,7 @@ name: Wda Server Build
 on:
   # Triggers the workflow on push event but only for the branch specified with in []
   push:
-    branches: [ main ]
+    branches: [ feature/designer_api ]
 
 env:
   AWS_REGION: ap-south-1
