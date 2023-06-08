@@ -1,4 +1,6 @@
+require('dotenv').config()
+
 module.exports = {
     PORT : 3001,
-    DB : 'mongodb://localhost:27017/wda-db',
+    DB : process.env.DB_URI,
 }
