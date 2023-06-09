@@ -191,7 +191,7 @@ communication {
         if (deployment.cloudProvider === "aws") {
             dockerRepositoryName = `${deployment.awsAccountId}.dkr.ecr.${deployment.awsRegion}.amazonaws.com`;
         } else if (deployment.cloudProvider === "azure") {
-            dockerRepositoryName = "mycontainerregistry"
+            dockerRepositoryName = `acr${deployment.projectName}.azurecr.io`;
         }
 
         // set kubernetesServiceType to Ingress if ingressType is istio
@@ -224,8 +224,8 @@ deployment {
     ${ingressType ? `istio true` : `istio false`}
     ingressDomain "${deployment.ingressDomain.toLowerCase()}"
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
-    ${dynamicStorage ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
-    ${dynamicStorage ? `kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}"` : ''}
+    ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
+    ${dynamicStorage && deployment.kubernetesStorageProvisioner !== undefined ? `kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}"` : ''}
 }
 
 `;
@@ -244,7 +244,7 @@ deployment {
 
     // persist the blueprint to DB, if there is no error 
     var blueprint = {
-        project_id: jsonData.projectName,
+        project_id: jsonData.projectId,
         request_json: jsonData
     };
     blueprintDao.create(blueprint)
@@ -258,7 +258,7 @@ deployment {
     fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
         if (err) throw err;
         console.log('Json data written to JDL file');
-        fs.writeFile(`${jsonData.projectName}/blueprints/apps-blueprint.jdl`,
+        fs.writeFile(`${jsonData.projectId}/blueprints/apps-blueprint.jdl`,
             concatenatedJDL,
             (err) => {
                 if (err) throw err;
