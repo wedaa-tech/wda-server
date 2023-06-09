@@ -17,7 +17,7 @@ exports.createJsonFile = (fileName, body) => {
       // console.log(body);
       if (body.appFolders !== undefined) {
         fs.writeFile(
-          `${body.projectName}/blueprints/infra-blueprint.json`,
+          `${body.projectId}/blueprints/infra-blueprint.json`,
           JSON.stringify(body, null, 4),
           "utf8",
           err => {
@@ -26,7 +26,7 @@ exports.createJsonFile = (fileName, body) => {
         );
       } else {
         fs.writeFile(
-          `${body.projectName}/blueprints/req-blueprint.json`,
+          `${body.projectId}/blueprints/req-blueprint.json`,
           JSON.stringify(body, null, 4),
           "utf8",
           err => {
@@ -42,10 +42,9 @@ exports.createJsonFile = (fileName, body) => {
  * The method will generate dir for the blueprint
  *
  * @param {*} folderPath : 
- * @param {*} fileName : 
  */
 
-exports.generateBlueprint = (folderPath, fileName, res) => {
+exports.generateBlueprint = (folderPath, res) => {
   const destDir = folderPath;
   fs.mkdir(destDir, { recursive: true }, (err) => {
     if (err) {
@@ -134,6 +133,7 @@ exports.generateZip = (folderPath, res) => {
 
 exports.infraJsonGenerator = (body, appFolders) => {
   var infraJson = {
+    projectId: body.projectId,
     projectName: body.projectName,
     cloudProvider: body.deployment.cloudProvider,
     domain: body.deployment.ingressDomain,
@@ -155,6 +155,7 @@ exports.infraJsonGenerator = (body, appFolders) => {
   } else if (body.deployment.cloudProvider === "azure") {
     infraJson.subscriptionId = body.deployment.subscriptionId
     infraJson.tenantId = body.deployment.tenantId
+    infraJson.location = body.deployment.location
   }
   return infraJson;
 }
