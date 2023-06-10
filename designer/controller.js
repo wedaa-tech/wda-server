@@ -60,26 +60,19 @@ exports.generate = function (req, res) {
 
     const fileName = nanoid(9);
     body.projectId = body.projectName + "-" + fileName; // To over ride the frontend value (and to maintain unique folder name)
-    // Generates the Dir for Blueprints 
-    utility.generateBlueprint(body.projectId, res);
-
-    // Validate & Create a json file for the jhipster generator 
-    utility.createJsonFile(fileName, body);
 
     // preprocessing the request json 
     var deployment = false;
     if(body.deployment !== undefined) {
         deployment = true;
         body.deployment.projectName = body.projectName;
-        // set app folders, for container registry
-        const applications = req.body.services;
-        const applicationCount = Object.keys(applications).length;
-        const appFolders = [];
-        for (let i = 0; i < applicationCount; i++) {
-            appFolders.push(applications[i].applicationName);
-        }
-        var infraJson = utility.infraJsonGenerator(body, appFolders);    
     }
+
+    // Generates the Dir for Blueprints 
+    utility.generateBlueprint(body.projectId, res);
+
+    // Validate & Create a json file for the jhipster generator 
+    utility.createJsonFile(fileName, body);
 
     // JSON to JDL, with 5 sec wait for the json to get generated 
     setTimeout(function () {
@@ -116,6 +109,7 @@ exports.generate = function (req, res) {
                     console.log("Generating Infrastructure files...");
                     const jsonFileForTerraform = nanoid(9);
                     
+                    var infraJson = utility.infraJsonGenerator(body);
                     // Generate json file for infraJson, if deployment is true
                     utility.createJsonFile(jsonFileForTerraform, infraJson);
 

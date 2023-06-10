@@ -131,7 +131,15 @@ exports.generateZip = (folderPath, res) => {
 
 };
 
-exports.infraJsonGenerator = (body, appFolders) => {
+exports.infraJsonGenerator = (body) => {
+  // set app folders, for container registry
+  const applications = body.services;
+  const applicationCount = Object.keys(applications).length;
+  const appFolders = [];
+  for (let i = 0; i < applicationCount; i++) {
+      appFolders.push(applications[i].applicationName);
+  }
+
   var infraJson = {
     projectId: body.projectId,
     projectName: body.projectName,
