@@ -22,6 +22,7 @@ exports.createJdlFromJson = (fileName, res) => {
     var clientFrameworks = ["react", "angular"];
     var serviceDiscoveryTypes = ["eureka", "consul"]
     var messageBrokers = ["rabbitmq", "kafka"];
+    var databaseTypes = ["postgresql", "mysql", "mongodb"];
 
 
     for (let i = 0; i < applicationCount; i++) {
@@ -40,11 +41,8 @@ exports.createJdlFromJson = (fileName, res) => {
         if (applications[i].authenticationType === undefined || applications[i].authenticationType === "") {
             applicationErrorList.push("Authentication Type cannot be empty");
         }
-        if (applications[i].databaseType === undefined || applications[i].databaseType === "") {
-            applicationErrorList.push("Database cannot be empty");
-        }
-        if (applications[i].prodDatabaseType === undefined || applications[i].prodDatabaseType === "") {
-            applicationErrorList.push("Prod Database cannot be empty");
+        if (applications[i].prodDatabaseType !== undefined && !databaseTypes.includes(applications[i].prodDatabaseType)) {
+            applicationErrorList.push("Unknow Database Type, database must be among the following: " + databaseTypes);
         }
         if (applications[i].serverPort === undefined || applications[i].serverPort === "") {
             applicationErrorList.push("Server Port cannot be empty");
@@ -62,6 +60,7 @@ exports.createJdlFromJson = (fileName, res) => {
         var withExample = false;
         var clientFramework = false;
         var messageBroker = false;
+        var databaseType = false;
 
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true;
@@ -83,6 +82,16 @@ exports.createJdlFromJson = (fileName, res) => {
         if (applications[i].messageBroker !== undefined && messageBrokers.includes(applications[i].messageBroker)) {
             messageBroker = true;
         }
+        if (applications[i].prodDatabaseType === undefined) {
+            databaseType = "no";
+        }
+        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === "mongodb") {
+            databaseType = "mongodb";
+        }
+        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() !== "mongodb"
+            && databaseTypes.includes(applications[i].prodDatabaseType)) {
+            databaseType = "sql";
+        }
 
         // Conversion of json to jdl (Application Options)
         var data = `
@@ -92,9 +101,10 @@ application {
         applicationType ${applications[i].applicationType.toLowerCase()}
         packageName ${applications[i].packageName.toLowerCase()}
         authenticationType ${applications[i].authenticationType.toLowerCase()}
-        databaseType ${applications[i].databaseType.toLowerCase()}
-        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}
         serverPort ${applications[i].serverPort}
+        ${databaseType === "no" ? 'databaseType no\n        prodDatabaseType no' : ''}
+        ${databaseType === "mongodb" ? 'databaseType mongodb' : ''}
+        ${databaseType === "sql" ? `databaseType sql\n        devDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${logManagementType.toLowerCase()}` : ''}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : ''}
@@ -112,19 +122,19 @@ application {
     // Communications
     const communications = jsonData.communications;
     const communicationData = [];
-    if (communications !== undefined){
+    if (communications !== undefined) {
         const communicationCount = Object.keys(communications).length;
         for (let i = 0; i < communicationCount; i++) {
-            if(communications[i].clientName !== "" && communications[i].serverName !== "") {
-            const data = `
+            if (communications[i].clientName !== "" && communications[i].serverName !== "") {
+                const data = `
 communication {
     client "${communications[i].clientName.toLowerCase()}",
     server "${communications[i].serverName.toLowerCase()}"
 }
 
 `;
-            communicationData.push(data);
-            }       
+                communicationData.push(data);
+            }
         }
     }
 
@@ -139,17 +149,17 @@ communication {
         }
         if (deployment.cloudProvider !== undefined) {
             if (deployment.cloudProvider === "aws") {
-                if(deployment.awsAccountId === undefined || deployment.awsAccountId === ""){
+                if (deployment.awsAccountId === undefined || deployment.awsAccountId === "") {
                     deploymentError.push("AWS account id cannot be empty");
                 }
-                if(deployment.awsRegion === undefined || deployment.awsRegion === ""){
+                if (deployment.awsRegion === undefined || deployment.awsRegion === "") {
                     deploymentError.push("AWS account id cannot be empty");
                 }
             } else if (deployment.cloudProvider === "azure") {
-                if(deployment.subscriptionId === undefined || deployment.subscriptionId === ""){
+                if (deployment.subscriptionId === undefined || deployment.subscriptionId === "") {
                     deploymentError.push("Azure subscription id cannot be empty");
                 }
-                if(deployment.tenantId === undefined || deployment.tenantId === ""){
+                if (deployment.tenantId === undefined || deployment.tenantId === "") {
                     deploymentError.push("Azure tenant id cannot be empty");
                 }
             }
@@ -233,7 +243,7 @@ deployment {
     }
 
     let combinedData = appData;
-    if( communications !== undefined) {
+    if (communications !== undefined) {
         combinedData = combinedData.concat(communicationData);
     }
     if (deployment !== undefined) {
@@ -248,12 +258,12 @@ deployment {
         request_json: jsonData
     };
     blueprintDao.create(blueprint)
-    .then(savedBlueprint => {
-        console.log("Blueprint was added successfully!");
-    })
-    .catch(error => {
-        console.error(error);
-    });
+        .then(savedBlueprint => {
+            console.log("Blueprint was added successfully!");
+        })
+        .catch(error => {
+            console.error(error);
+        });
 
     fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
         if (err) throw err;

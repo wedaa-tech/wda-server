@@ -1,0 +1,55 @@
+{
+    "projectName": "reminder",
+    "services": {
+        "0": {
+            "applicationName": "webui",
+            "applicationFramework": "java",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "databaseType": "sql",
+            "prodDatabaseType": "postgreSQL",
+            "clientFramework": "react",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9000",
+            "withExample": "true",
+            "logManagementType": "eck"
+        },
+        "1": {
+            "applicationName": "scheduler",
+            "applicationFramework": "java",
+            "applicationType": "microservice",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "databaseType": "sql",
+            "prodDatabaseType": "postgreSQL",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9001",
+            "messageBroker": "rabbitmq",
+            "logManagementType": "eck"
+        }
+    },
+    "communications": {
+        "0": {
+            "clientName": "client",
+            "serverName": "backend"
+        }
+    },
+    "deployment": {
+        "cloudProvider": "azure",
+        "subscriptionId": "81d11f56-93d4-4ecf-ab8a-b083965af423",
+        "tenantId": "08396ad5-fd8c-4c92-a481-e11e65398d12",
+        "location": "canadacentral",
+        "orchestration": "kubernetes",
+        "deploymentType": "kubernetes",
+        "clusterName": "reminder",
+        "kubernetesNamespace": "reminder",
+        "ingressDomain": "shopt.gq",
+        "ingressType": "istio",
+        "kubernetesUseDynamicStorage": "true",
+        "serviceDiscoveryType": "eureka",
+        "monitoring": "true",
+        "enableECK": "true",
+        "k8sWebUI": "true"
+    }
+}
