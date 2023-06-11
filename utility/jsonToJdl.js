@@ -177,10 +177,9 @@ communication {
         if (deployment.ingressType === undefined || deployment.ingressType === "") {
             deploymentError.push("Ingress Type cannot be empty");
         }
-        if (deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true
-            && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === ""
-                || deployment.kubernetesStorageProvisioner === undefined || deployment.kubernetesStorageProvisioner === "")) {
-            deploymentError.push("Storage Provisioner/Storage Class Name cannot be empty");
+        if ((deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true)
+            && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === "")) {
+            deploymentError.push("Storage Class Name cannot be empty");
         }
 
         // return error response
@@ -236,7 +235,7 @@ deployment {
     ingressDomain "${deployment.ingressDomain.toLowerCase()}"
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
     ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
-    ${dynamicStorage && deployment.kubernetesStorageProvisioner !== undefined ? `kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}"` : ''}
+    ${dynamicStorage && deployment.cloudProvider === "aws" ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
 }
 
 `;
