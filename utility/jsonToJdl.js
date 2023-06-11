@@ -23,6 +23,7 @@ exports.createJdlFromJson = (fileName, res) => {
     var serviceDiscoveryTypes = ["eureka", "consul"]
     var messageBrokers = ["rabbitmq", "kafka"];
     var databaseTypes = ["postgresql", "mysql", "mongodb"];
+    var logManagementTypes = ["eck"];
 
 
     for (let i = 0; i < applicationCount; i++) {
@@ -76,7 +77,7 @@ exports.createJdlFromJson = (fileName, res) => {
         if (applications[i].serviceDiscoveryType !== undefined && serviceDiscoveryTypes.includes(applications[i].serviceDiscoveryType)) {
             serviceDiscoveryType = true;
         }
-        if (applications[i].logManagementType !== undefined && applications[i].withExample === "eck") {
+        if (applications[i].logManagementType !== undefined && logManagementTypes.includes(applications[i].logManagementType)) {
             logManagementType = true;
         }
         if (applications[i].messageBroker !== undefined && messageBrokers.includes(applications[i].messageBroker)) {
@@ -106,7 +107,7 @@ application {
         ${databaseType === "mongodb" ? 'databaseType mongodb' : ''}
         ${databaseType === "sql" ? `databaseType sql\n        devDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
-        ${logManagementType ? `logManagementType ${logManagementType.toLowerCase()}` : ''}
+        ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : ''}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : ''}
         ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : ''}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
@@ -152,8 +153,8 @@ communication {
                 if (deployment.awsAccountId === undefined || deployment.awsAccountId === "") {
                     deploymentError.push("AWS account id cannot be empty");
                 }
-                if (deployment.awsRegion === undefined || deployment.awsRegion === "") {
-                    deploymentError.push("AWS account id cannot be empty");
+                if(deployment.awsRegion === undefined || deployment.awsRegion === ""){
+                    deploymentError.push("AWS region cannot be empty");
                 }
             } else if (deployment.cloudProvider === "azure") {
                 if (deployment.subscriptionId === undefined || deployment.subscriptionId === "") {
