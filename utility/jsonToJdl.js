@@ -126,11 +126,11 @@ application {
     if (communications !== undefined) {
         const communicationCount = Object.keys(communications).length;
         for (let i = 0; i < communicationCount; i++) {
-            if (communications[i].clientName !== "" && communications[i].serverName !== "") {
+            if (communications[i].client !== "" && communications[i].server !== "") {
                 const data = `
 communication {
-    client "${communications[i].clientName.toLowerCase()}",
-    server "${communications[i].serverName.toLowerCase()}"
+    client "${communications[i].client.toLowerCase()}",
+    server "${communications[i].server.toLowerCase()}"
 }
 
 `;
