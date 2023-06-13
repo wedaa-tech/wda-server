@@ -59,27 +59,20 @@ exports.generate = function (req, res) {
     );
 
     const fileName = nanoid(9);
-    body.projectName = body.projectName + "-" + fileName; // To over ride the frontend value (and to maintain unique folder name)
-
-    // Generates the Dir for Blueprints 
-    utility.generateBlueprint(body.projectName, fileName, res);
-
-    // Validate & Create a json file for the jhipster generator 
-    utility.createJsonFile(fileName, body);
+    body.projectId = body.projectName + "-" + fileName; // To over ride the frontend value (and to maintain unique folder name)
 
     // preprocessing the request json 
     var deployment = false;
     if(body.deployment !== undefined) {
-        deployment = true
-        // set app folders, for container registry
-        const applications = req.body.services;
-        const applicationCount = Object.keys(applications).length;
-        const appFolders = [];
-        for (let i = 0; i < applicationCount; i++) {
-            appFolders.push(applications[i].applicationName);
-        }
-        var infraJson = utility.infraJsonGenerator(body, appFolders);    
+        deployment = true;
+        body.deployment.projectName = body.projectName;
     }
+
+    // Generates the Dir for Blueprints 
+    utility.generateBlueprint(body.projectId, res);
+
+    // Validate & Create a json file for the jhipster generator 
+    utility.createJsonFile(fileName, body);
 
     // JSON to JDL, with 5 sec wait for the json to get generated 
     setTimeout(function () {
@@ -93,7 +86,7 @@ exports.generate = function (req, res) {
         // Child process to generate the architecture
         console.log("Generating Architecture files...");
         exec(
-            `cd ${body.projectName} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies`,
+            `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies`,
             function (error, stdout, stderr) {
                 if (stdout !== "") {
                     console.log("---------stdout: ---------\n" + stdout);
@@ -109,17 +102,18 @@ exports.generate = function (req, res) {
 
                 console.log("Architecture Generation completed successfully.....");
 
-                const folderPath = `./${body.projectName}`;
+                const folderPath = `./${body.projectId}`;
 
                 // If deployment is true, then generate Terraform files as well and then generate the zip archive.
                 if (deployment) {
                     console.log("Generating Infrastructure files...");
-                    const jsonFileForTerrafrom = nanoid(9);
+                    const jsonFileForTerraform = nanoid(9);
                     
+                    var infraJson = utility.infraJsonGenerator(body);
                     // Generate json file for infraJson, if deployment is true
-                    utility.createJsonFile(jsonFileForTerrafrom, infraJson);
+                    utility.createJsonFile(jsonFileForTerraform, infraJson);
 
-                    generateTerrafromFiles(jsonFileForTerrafrom, folderPath, res);
+                    generateTerraformFiles(jsonFileForTerraform, folderPath, res);
 
                     console.log(
                         "Zipping Architecture/Infrastructure files completed successfully....."
@@ -144,7 +138,7 @@ exports.generate = function (req, res) {
  * @param {*} folderPath : combination of the projectName +fileName
  * @param {*} res  : response to be sent to the user
  */
-const generateTerrafromFiles = (fileName, folderPath, res) => {
+const generateTerraformFiles = (fileName, folderPath, res) => {
     exec(`yo tf-wdi --file ./${fileName}.json`, function (
       error,
       stdout,

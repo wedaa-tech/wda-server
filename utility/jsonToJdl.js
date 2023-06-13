@@ -22,6 +22,8 @@ exports.createJdlFromJson = (fileName, res) => {
     var clientFrameworks = ["react", "angular"];
     var serviceDiscoveryTypes = ["eureka", "consul"]
     var messageBrokers = ["rabbitmq", "kafka"];
+    var databaseTypes = ["postgresql", "mysql", "mongodb"];
+    var logManagementTypes = ["eck"];
 
 
     for (let i = 0; i < applicationCount; i++) {
@@ -40,11 +42,8 @@ exports.createJdlFromJson = (fileName, res) => {
         if (applications[i].authenticationType === undefined || applications[i].authenticationType === "") {
             applicationErrorList.push("Authentication Type cannot be empty");
         }
-        if (applications[i].databaseType === undefined || applications[i].databaseType === "") {
-            applicationErrorList.push("Database cannot be empty");
-        }
-        if (applications[i].prodDatabaseType === undefined || applications[i].prodDatabaseType === "") {
-            applicationErrorList.push("Prod Database cannot be empty");
+        if (applications[i].prodDatabaseType !== undefined && !databaseTypes.includes(applications[i].prodDatabaseType)) {
+            applicationErrorList.push("Unknow Database Type, database must be among the following: " + databaseTypes);
         }
         if (applications[i].serverPort === undefined || applications[i].serverPort === "") {
             applicationErrorList.push("Server Port cannot be empty");
@@ -62,6 +61,7 @@ exports.createJdlFromJson = (fileName, res) => {
         var withExample = false;
         var clientFramework = false;
         var messageBroker = false;
+        var databaseType = false;
 
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true;
@@ -77,11 +77,21 @@ exports.createJdlFromJson = (fileName, res) => {
         if (applications[i].serviceDiscoveryType !== undefined && serviceDiscoveryTypes.includes(applications[i].serviceDiscoveryType)) {
             serviceDiscoveryType = true;
         }
-        if (applications[i].logManagementType !== undefined && applications[i].withExample === "eck") {
+        if (applications[i].logManagementType !== undefined && logManagementTypes.includes(applications[i].logManagementType)) {
             logManagementType = true;
         }
         if (applications[i].messageBroker !== undefined && messageBrokers.includes(applications[i].messageBroker)) {
             messageBroker = true;
+        }
+        if (applications[i].prodDatabaseType === undefined) {
+            databaseType = "no";
+        }
+        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === "mongodb") {
+            databaseType = "mongodb";
+        }
+        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() !== "mongodb"
+            && databaseTypes.includes(applications[i].prodDatabaseType)) {
+            databaseType = "sql";
         }
 
         // Conversion of json to jdl (Application Options)
@@ -92,11 +102,12 @@ application {
         applicationType ${applications[i].applicationType.toLowerCase()}
         packageName ${applications[i].packageName.toLowerCase()}
         authenticationType ${applications[i].authenticationType.toLowerCase()}
-        databaseType ${applications[i].databaseType.toLowerCase()}
-        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}
         serverPort ${applications[i].serverPort}
+        ${databaseType === "no" ? 'databaseType no\n        prodDatabaseType no' : ''}
+        ${databaseType === "mongodb" ? 'databaseType mongodb' : ''}
+        ${databaseType === "sql" ? `databaseType sql\n        devDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
-        ${logManagementType ? `logManagementType ${logManagementType.toLowerCase()}` : ''}
+        ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : ''}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : ''}
         ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : ''}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
@@ -112,19 +123,19 @@ application {
     // Communications
     const communications = jsonData.communications;
     const communicationData = [];
-    if (communications !== undefined){
+    if (communications !== undefined) {
         const communicationCount = Object.keys(communications).length;
         for (let i = 0; i < communicationCount; i++) {
-            if(communications[i].clientName !== "" && communications[i].serverName !== "") {
-            const data = `
+            if (communications[i].client !== "" && communications[i].server !== "") {
+                const data = `
 communication {
-    client "${communications[i].clientName.toLowerCase()}",
-    server "${communications[i].serverName.toLowerCase()}"
+    client "${communications[i].client.toLowerCase()}",
+    server "${communications[i].server.toLowerCase()}"
 }
 
 `;
-            communicationData.push(data);
-            }       
+                communicationData.push(data);
+            }
         }
     }
 
@@ -139,17 +150,17 @@ communication {
         }
         if (deployment.cloudProvider !== undefined) {
             if (deployment.cloudProvider === "aws") {
-                if(deployment.awsAccountId === undefined || deployment.awsAccountId === ""){
+                if (deployment.awsAccountId === undefined || deployment.awsAccountId === "") {
                     deploymentError.push("AWS account id cannot be empty");
                 }
                 if(deployment.awsRegion === undefined || deployment.awsRegion === ""){
-                    deploymentError.push("AWS account id cannot be empty");
+                    deploymentError.push("AWS region cannot be empty");
                 }
             } else if (deployment.cloudProvider === "azure") {
-                if(deployment.subscriptionId === undefined || deployment.subscriptionId === ""){
+                if (deployment.subscriptionId === undefined || deployment.subscriptionId === "") {
                     deploymentError.push("Azure subscription id cannot be empty");
                 }
-                if(deployment.tenantId === undefined || deployment.tenantId === ""){
+                if (deployment.tenantId === undefined || deployment.tenantId === "") {
                     deploymentError.push("Azure tenant id cannot be empty");
                 }
             }
@@ -166,10 +177,9 @@ communication {
         if (deployment.ingressType === undefined || deployment.ingressType === "") {
             deploymentError.push("Ingress Type cannot be empty");
         }
-        if (deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true
-            && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === ""
-                || deployment.kubernetesStorageProvisioner === undefined || deployment.kubernetesStorageProvisioner === "")) {
-            deploymentError.push("Storage Provisioner/Storage Class Name cannot be empty");
+        if ((deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true)
+            && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === "")) {
+            deploymentError.push("Storage Class Name cannot be empty");
         }
 
         // return error response
@@ -191,7 +201,7 @@ communication {
         if (deployment.cloudProvider === "aws") {
             dockerRepositoryName = `${deployment.awsAccountId}.dkr.ecr.${deployment.awsRegion}.amazonaws.com`;
         } else if (deployment.cloudProvider === "azure") {
-            dockerRepositoryName = "mycontainerregistry"
+            dockerRepositoryName = `acr${deployment.projectName}.azurecr.io`;
         }
 
         // set kubernetesServiceType to Ingress if ingressType is istio
@@ -224,8 +234,8 @@ deployment {
     ${ingressType ? `istio true` : `istio false`}
     ingressDomain "${deployment.ingressDomain.toLowerCase()}"
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
-    ${dynamicStorage ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
-    ${dynamicStorage ? `kubernetesStorageProvisioner "${deployment.kubernetesStorageProvisioner.toLowerCase()}"` : ''}
+    ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
+    ${dynamicStorage && deployment.cloudProvider === "aws" ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
 }
 
 `;
@@ -233,7 +243,7 @@ deployment {
     }
 
     let combinedData = appData;
-    if( communications !== undefined) {
+    if (communications !== undefined) {
         combinedData = combinedData.concat(communicationData);
     }
     if (deployment !== undefined) {
@@ -244,21 +254,21 @@ deployment {
 
     // persist the blueprint to DB, if there is no error 
     var blueprint = {
-        project_id: jsonData.projectName,
+        project_id: jsonData.projectId,
         request_json: jsonData
     };
     blueprintDao.create(blueprint)
-    .then(savedBlueprint => {
-        console.log("Blueprint was added successfully!");
-    })
-    .catch(error => {
-        console.error(error);
-    });
+        .then(savedBlueprint => {
+            console.log("Blueprint was added successfully!");
+        })
+        .catch(error => {
+            console.error(error);
+        });
 
     fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
         if (err) throw err;
         console.log('Json data written to JDL file');
-        fs.writeFile(`${jsonData.projectName}/blueprints/apps-blueprint.jdl`,
+        fs.writeFile(`${jsonData.projectId}/blueprints/apps-blueprint.jdl`,
             concatenatedJDL,
             (err) => {
                 if (err) throw err;

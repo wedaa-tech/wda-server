@@ -1,0 +1,47 @@
+{
+    "projectName": "reminder",
+    "services": {
+        "0": {
+            "applicationName": "client",
+            "applicationFramework": "java",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "prodDatabaseType": "postgresql",
+            "clientFramework": "react",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9000",
+            "withExample": "false",
+            "logManagementType": "eck"
+        },
+        "1": {
+            "applicationName": "backend",
+            "applicationFramework": "java",
+            "applicationType": "microservice",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "prodDatabaseType": "mongodb",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9001"
+        },
+        "2": {
+            "applicationName": "caller",
+            "applicationFramework": "java",
+            "applicationType": "microservice",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9002"
+        }
+    },
+    "communications": {
+        "0": {
+            "clientName": "client",
+            "serverName": "backend"
+        },
+        "1": {
+            "clientName": "backend",
+            "serverName": "client"
+        }
+    }
+}
