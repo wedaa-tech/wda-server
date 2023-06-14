@@ -2,7 +2,7 @@ const blueprintDao = require('../dao/blueprintDao');
 const fs = require("fs");
 
 
-exports.createJdlFromJson = (fileName, res) => {
+exports.createJdlFromJson = (fileName, metadata, req, res) => {
     console.log("processing json to jdl with the file name:", fileName);
 
     // read the JSON file
@@ -153,7 +153,7 @@ communication {
                 if (deployment.awsAccountId === undefined || deployment.awsAccountId === "") {
                     deploymentError.push("AWS account id cannot be empty");
                 }
-                if(deployment.awsRegion === undefined || deployment.awsRegion === ""){
+                if (deployment.awsRegion === undefined || deployment.awsRegion === "") {
                     deploymentError.push("AWS region cannot be empty");
                 }
             } else if (deployment.cloudProvider === "azure") {
@@ -255,7 +255,9 @@ deployment {
     // persist the blueprint to DB, if there is no error 
     var blueprint = {
         project_id: jsonData.projectId,
-        request_json: jsonData
+        request_json: jsonData,
+        metadata: metadata,
+        user_id: req.kauth.grant.access_token.content.sub
     };
     blueprintDao.create(blueprint)
         .then(savedBlueprint => {
