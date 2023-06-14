@@ -34,9 +34,10 @@ exports.getBlueprint = function (req, res) {
  * @param {*} res 
  */
 exports.getBlueprints = function (req, res) {
-    blueprintDao.getByUserId({user_id: req.params.user_id})
+    const userId = req.kauth.grant.access_token.content.sub;
+    blueprintDao.getByUserId({user_id: userId})
     .then(results => {
-      console.log("Retrieved blueprints of user:", req.params.user_id);
+      console.log("Retrieved blueprints of user:", userId);
       return res.status(200).send(results);
     })
     .catch(error => {
@@ -60,7 +61,7 @@ exports.generate = function (req, res) {
 
     const fileName = nanoid(9);
     body.projectId = body.projectName + "-" + fileName; // To over ride the frontend value (and to maintain unique folder name)
-
+    const metadata = body.metadata;
     // preprocessing the request json 
     var deployment = false;
     if(body.deployment !== undefined) {
@@ -71,13 +72,16 @@ exports.generate = function (req, res) {
     // Generates the Dir for Blueprints 
     utility.generateBlueprint(body.projectId, res);
 
+    // Delete the "metadata" attribute from the JSON data
+    delete body.metadata;
+
     // Validate & Create a json file for the jhipster generator 
     utility.createJsonFile(fileName, body);
 
     // JSON to JDL, with 5 sec wait for the json to get generated 
     setTimeout(function () {
         console.log('Waiting 5 sec for the jdl to be generated');
-        const response = jdlConverter.createJdlFromJson(fileName, res);
+        const response = jdlConverter.createJdlFromJson(fileName, metadata, req, res);
         // check if the error response object exists before returning it
         if (response) {
             return response;
