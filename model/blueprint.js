@@ -19,8 +19,7 @@ var blueprintSchema = new Schema({
     },
     user_id: {
         type: String,
-        unique: true,
-        sparse: true,
+        unique: false,
         required: false
       }
 }, {

@@ -31,8 +31,16 @@
     },
     "communications": {
         "0": {
-            "clientName": "client",
-            "serverName": "backend"
+            "client": "client",
+            "server": "backend",
+            "type": "asynchronous",
+            "framework": "rabbitmq"
+        },
+        "1": {
+            "client": "backend",
+            "server": "client",
+            "type": "synchronous",
+            "framework": "rest-api"
         }
     },
     "deployment": {
