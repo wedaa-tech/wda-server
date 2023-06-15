@@ -123,18 +123,25 @@ application {
     // Communications
     const communications = jsonData.communications;
     const communicationData = [];
+    const communicationBrokers = ['rabbitmq', 'rest-api'];
     if (communications !== undefined) {
         const communicationCount = Object.keys(communications).length;
         for (let i = 0; i < communicationCount; i++) {
-            if (communications[i].client !== "" && communications[i].server !== "") {
+            if (communications[i].client !== "" && communications[i].server !== "" && communicationBrokers.includes(communications[i].framework.toLowerCase())) {
                 const data = `
 communication {
-    client "${communications[i].client.toLowerCase()}",
+    client "${communications[i].client.toLowerCase()}"
     server "${communications[i].server.toLowerCase()}"
+    ${communications[i].type.toLowerCase() === "asynchronous" ? `type "async"` : `type "sync"`}
+    framework "${communications[i].framework.toLowerCase()}"
 }
 
 `;
                 communicationData.push(data);
+            }
+            else{
+                console.log("communication framework is not supported, must below to one of the following: " + communicationBrokers);
+                return res.status(400).send("communication framework is not supported, must below to one of the following: " + communicationBrokers);
             }
         }
     }

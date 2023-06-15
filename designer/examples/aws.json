@@ -22,6 +22,7 @@
             "authenticationType": "oauth2",
             "prodDatabaseType": "mongodb",
             "serviceDiscoveryType": "eureka",
+            "logManagementType": "eck",
             "serverPort": "9001"
         },
         "2": {
@@ -31,17 +32,22 @@
             "packageName": "com.cmi.tic",
             "authenticationType": "oauth2",
             "serviceDiscoveryType": "eureka",
+            "logManagementType": "eck",
             "serverPort": "9002"
         }
     },
     "communications": {
         "0": {
-            "clientName": "client",
-            "serverName": "backend"
+            "client": "client",
+            "server": "backend",
+            "type": "asynchronous",
+            "framework": "rabbitmq"
         },
         "1": {
-            "clientName": "backend",
-            "serverName": "client"
+            "client": "backend",
+            "server": "client",
+            "type": "synchronous",
+            "framework": "rest-api"
         }
     },
     "deployment": {
