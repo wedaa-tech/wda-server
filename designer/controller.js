@@ -38,13 +38,41 @@ exports.getBlueprints = function (req, res) {
     blueprintDao.getByUserId({user_id: userId})
     .then(results => {
       console.log("Retrieved blueprints of user:", userId);
-      return res.status(200).send(results);
+      return res.status(200).json({data:results});
     })
     .catch(error => {
       console.error("Error retrieving blueprints:", error);
       return res.status(500).send({ message: "Error retrieving blueprints" });
     });
   };
+
+/**
+ * Save delete the blueprint with given project Id
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.deleteBlueprint = function (req, res) {
+  blueprintDao.getByProjectId({project_id: req.params.project_id})
+  .then(result => {
+    if (Array.isArray(result) && result.length === 1) {
+      blueprintDao.deleteByProjectId({ project_id: req.params.project_id })
+        .then(result => {
+          return res.status(200).send({ message: "Blueprint deleted successfully" });
+        })
+        .catch(error => {
+          console.error("Error while deleting blueprint:", error);
+          return res.status(500).send({ message: "Error while deleting blueprint" });
+        });
+    } else {
+      console.log("No blueprint is present with project Id: "+ req.params.project_id); 
+      return res.status(204);
+    }
+  })
+  .catch(error => {
+    console.error("Error retrieving blueprint:", error);
+    return res.status(500).send({ message: "Error retrieving blueprint" });
+  });
+};
 
 /**
  * generates services/infrastructure code from blueprint

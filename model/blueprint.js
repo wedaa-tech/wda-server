@@ -21,7 +21,11 @@ var blueprintSchema = new Schema({
         type: String,
         unique: false,
         required: false
-      }
+    },
+    deleted: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true
 });

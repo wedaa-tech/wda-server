@@ -18,7 +18,7 @@ blueprintSchema.statics = {
 
     getByUserId: function (query) {
         return this.aggregate([
-            { $match: { ...query, metadata: { $ne: null } } },
+            { $match: { ...query, metadata: { $ne: null }, deleted: false } },
             {
                 $project: {
                     _id: 1,
@@ -36,9 +36,9 @@ blueprintSchema.statics = {
     //     this.findOneAndUpdate(query, {$set: updateData},{new: true}, cb);
     // },
 
-    // delete: function(query, cb) {
-    //     this.findOneAndDelete(query,cb);
-    // }
+    deleteByProjectId: function (query) {
+        return this.findOneAndUpdate(query, { $set: { deleted: true } }, { new: true });
+    }
 }
 
 var blueprintModel = mongoose.model('blueprints', blueprintSchema);
