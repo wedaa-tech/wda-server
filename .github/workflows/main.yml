@@ -12,7 +12,7 @@ env:
   ECS_SERVICE: wda-service
   ECS_CLUSTER: wda
   ECS_TASK_DEFINITION: wda-server.json
-  CONTAINER_NAME: wda-server-image
+  CONTAINER_NAME: wda-server
 
 permissions:
   id-token: write # required to use OIDC authentication
