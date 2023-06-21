@@ -18,7 +18,7 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
     var logManagementType = false;
     var serviceDiscoveryType = false;
 
-    var blueprints = ["go"];
+    var blueprints = ["go", "gomicro"];
     var clientFrameworks = ["react", "angular"];
     var serviceDiscoveryTypes = ["eureka", "consul"]
     var messageBrokers = ["rabbitmq", "kafka"];
