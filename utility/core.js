@@ -15,7 +15,7 @@ exports.createJsonFile = (fileName, body) => {
     "utf8",
     function (err, result) {
       // console.log(body);
-      if (body.appFolders !== undefined) {
+      if (body.cloudProvider !== undefined) {
         fs.writeFile(
           `${body.projectId}/blueprints/infra-blueprint.json`,
           JSON.stringify(body, null, 4),
@@ -139,7 +139,7 @@ exports.infraJsonGenerator = (body) => {
   for (let i = 0; i < applicationCount; i++) {
       appFolders.push(applications[i].applicationName);
   }
-
+  var cloudProvider =  body.deployment.cloudProvider;
   var infraJson = {
     projectId: body.projectId,
     projectName: body.projectName,
@@ -165,5 +165,18 @@ exports.infraJsonGenerator = (body) => {
     infraJson.tenantId = body.deployment.tenantId
     infraJson.location = body.deployment.location
   }
-  return infraJson;
+
+  var infraJsonForLocalDeployment = {
+    projectId: body.projectId,
+    projectName: body.projectName,
+    cloudProvider: body.deployment.cloudProvider,
+    orchestration: "kubernetes",
+    ingress: body.deployment.ingressType,
+    monitoring: "false",
+    enableECK: "false"
+  };
+  infraJsonForLocalDeployment.monitoring = body.deployment?.monitoring ?? infraJsonForLocalDeployment.monitoring;
+  infraJsonForLocalDeployment.enableECK = body.deployment?.enableECK ?? infraJsonForLocalDeployment.enableECK;
+  
+  return (cloudProvider == "minikube") ? infraJsonForLocalDeployment : infraJson;
 }

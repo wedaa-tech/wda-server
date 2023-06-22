@@ -1,0 +1,28 @@
+{
+    "projectName": "reminder",
+    "services": {
+        "0": {
+            "applicationName": "client",
+            "applicationFramework": "java",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "oauth2",
+            "prodDatabaseType": "postgresql",
+            "clientFramework": "react",
+            "serviceDiscoveryType": "eureka",
+            "serverPort": "9000",
+            "withExample": "false",
+            "logManagementType": "eck"
+        }
+    },
+    "deployment": {
+        "cloudProvider": "minikube",
+        "kubernetesNamespace": "k8s",
+        "dockerRepositoryName": "craxkumar",
+        "ingressType": "istio",
+        "kubernetesUseDynamicStorage": "true",
+        "serviceDiscoveryType": "eureka",
+        "monitoring": "true",
+        "enableECK": "true"
+    }
+}

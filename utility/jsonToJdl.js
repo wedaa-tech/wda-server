@@ -150,6 +150,9 @@ communication {
     const deployment = jsonData.deployment;
     var deploymentData;
     if (deployment !== undefined) {
+        var deploymentTypes = [ "kubernetes" ];
+        var cloudProviders = [ "aws", "azure" ];
+        var localProviders = [ "minikube" ];
         // Error handling
         let deploymentError = [];
         if (deployment.cloudProvider === undefined || deployment.cloudProvider === "") {
@@ -172,21 +175,33 @@ communication {
                 }
             }
         }
-        if (deployment.deploymentType === undefined || deployment.deploymentType === "") {
-            deploymentError.push("Deployment Type cannot be empty");
-        }
-        if (deployment.clusterName === undefined || deployment.clusterName === "") {
-            deploymentError.push("Cluster Name cannot be empty");
-        }
-        if (deployment.ingressDomain === undefined || deployment.ingressDomain === "") {
-            deploymentError.push("Ingress Domain cannot be empty");
-        }
-        if (deployment.ingressType === undefined || deployment.ingressType === "") {
-            deploymentError.push("Ingress Type cannot be empty");
-        }
-        if ((deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true)
-            && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === "")) {
-            deploymentError.push("Storage Class Name cannot be empty");
+        if(cloudProviders.includes(deployment.cloudProvider)){
+            if (deployment.deploymentType === undefined || deployment.deploymentType === "") {
+                deploymentError.push("Deployment Type cannot be empty");
+            }
+            if (deployment.clusterName === undefined || deployment.clusterName === "") {
+                deploymentError.push("Cluster Name cannot be empty");
+            }
+            if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === "") {
+                deploymentError.push("Kubernetes namespace cannot be empty");
+            }
+            if (deployment.ingressDomain === undefined || deployment.ingressDomain === "") {
+                deploymentError.push("Ingress Domain cannot be empty");
+            }
+            if (deployment.ingressType === undefined || deployment.ingressType === "") {
+                deploymentError.push("Ingress Type cannot be empty");
+            }
+            if ((deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true)
+                && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === "")) {
+                deploymentError.push("Storage Class Name cannot be empty");
+            }
+        } else if (localProviders.includes(deployment.cloudProvider)) {
+            if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === "") {
+                deploymentError.push("Kubernetes namespace cannot be empty");
+            }
+            if (deployment.dockerRepositoryName === undefined || deployment.dockerRepositoryName === "") {
+                deploymentError.push("docker repository cannot be empty");
+            }
         }
 
         // return error response
@@ -209,6 +224,8 @@ communication {
             dockerRepositoryName = `${deployment.awsAccountId}.dkr.ecr.${deployment.awsRegion}.amazonaws.com`;
         } else if (deployment.cloudProvider === "azure") {
             dockerRepositoryName = `acr${deployment.projectName}.azurecr.io`;
+        } else if (deployment.cloudProvider === "minikube") {
+            dockerRepositoryName = deployment.dockerRepositoryName;
         }
 
         // set kubernetesServiceType to Ingress if ingressType is istio
@@ -229,17 +246,29 @@ communication {
             dynamicStorage = true;
         }
 
+        // set deploymentType 
+        var deploymentType = "kubernetes";
+        if (deployment.deploymentType !== undefined && deploymentTypes.includes(deployment.deploymentType.toLowerCase())) {
+            deploymentType = deployment.deploymentType.toLowerCase();
+        } 
+
+        // set ingressDomain
+        var ingressDomain = "example.com";
+        if (deployment.ingressDomain !== undefined) {
+            ingressDomain = deployment.ingressDomain;
+        } 
+
         // Conversion of json to jdl (Deployment Options)
         deploymentData = `
 deployment {
-    deploymentType ${deployment.deploymentType.toLowerCase()}
+    deploymentType ${deploymentType}
     appsFolders [${appsFolders}]
     dockerRepositoryName "${dockerRepositoryName.toLowerCase()}"
     kubernetesNamespace ${deployment.kubernetesNamespace.toLowerCase()}
     ${serviceDiscoveryType ? `serviceDiscoveryType ${deployment.serviceDiscoveryType.toLowerCase()}` : `serviceDiscoveryType no`}
     ${ingressType ? `kubernetesServiceType Ingress` : `kubernetesServiceType LoadBalancer`}
     ${ingressType ? `istio true` : `istio false`}
-    ingressDomain "${deployment.ingressDomain.toLowerCase()}"
+    ingressDomain "${ingressDomain.toLowerCase()}"
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
     ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
     ${dynamicStorage && deployment.cloudProvider === "aws" ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}

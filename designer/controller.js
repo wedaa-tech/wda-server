@@ -114,11 +114,16 @@ exports.generate = function (req, res) {
         if (response) {
             return response;
         }
+        // Check if deployment type is minikube
+        var minikube = "";
+        if(body.deployment.cloudProvider === "minikube"){
+          minikube = "--minikube";
+        }
 
         // Child process to generate the architecture
         console.log("Generating Architecture files...");
         exec(
-            `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies`,
+            `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies ${minikube}`,
             function (error, stdout, stderr) {
                 if (stdout !== "") {
                     console.log("---------stdout: ---------\n" + stdout);
