@@ -116,7 +116,7 @@ exports.generate = function (req, res) {
         }
         // Check if deployment type is minikube
         var minikube = "";
-        if(body.deployment.cloudProvider === "minikube"){
+        if(body.deployment !== undefined && body.deployment.cloudProvider !== undefined && body.deployment.cloudProvider === "minikube"){
           minikube = "--minikube";
         }
 
