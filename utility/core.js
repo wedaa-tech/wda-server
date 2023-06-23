@@ -139,44 +139,46 @@ exports.infraJsonGenerator = (body) => {
   for (let i = 0; i < applicationCount; i++) {
       appFolders.push(applications[i].applicationName);
   }
-  var cloudProvider =  body.deployment.cloudProvider;
+  var deployment = body.deployment;
+  var cloudProvider = deployment.cloudProvider;
   var infraJson = {
     projectId: body.projectId,
     projectName: body.projectName,
-    cloudProvider: body.deployment.cloudProvider,
-    domain: body.deployment.ingressDomain,
-    orchestration: body.deployment.deploymentType,
-    clusterName: body.deployment.clusterName,
-    ingress: body.deployment.ingressType,
+    cloudProvider: deployment.cloudProvider,
+    domain: deployment.ingressDomain,
+    orchestration: deployment.deploymentType,
+    clusterName: deployment.clusterName,
+    ingress: deployment.ingressType,
     monitoring: "false",
     enableECK: "false",
     k8sWebUI: "false",
     generateInfra: "true",
     appFolders: appFolders
   };
-  infraJson.monitoring = body.deployment?.monitoring ?? infraJson.monitoring;
-  infraJson.enableECK = body.deployment?.enableECK ?? infraJson.enableECK;
-  infraJson.k8sWebUI = body.deployment?.k8sWebUI ?? infraJson.k8sWebUI;
-  if (body.deployment.cloudProvider === "aws") {
-    infraJson.awsAccountId = body.deployment.awsAccountId
-    infraJson.awsRegion = body.deployment.awsRegion
-  } else if (body.deployment.cloudProvider === "azure") {
-    infraJson.subscriptionId = body.deployment.subscriptionId
-    infraJson.tenantId = body.deployment.tenantId
-    infraJson.location = body.deployment.location
+  infraJson.monitoring = deployment?.monitoring ?? infraJson.monitoring;
+  infraJson.enableECK = deployment?.enableECK ?? infraJson.enableECK;
+  infraJson.k8sWebUI = deployment?.k8sWebUI ?? infraJson.k8sWebUI;
+  if (deployment.cloudProvider === "aws") {
+    infraJson.awsAccountId = deployment.awsAccountId
+    infraJson.awsRegion = deployment.awsRegion
+  } else if (deployment.cloudProvider === "azure") {
+    infraJson.subscriptionId = deployment.subscriptionId
+    infraJson.tenantId = deployment.tenantId
+    infraJson.location = deployment.location
   }
 
   var infraJsonForLocalDeployment = {
     projectId: body.projectId,
     projectName: body.projectName,
-    cloudProvider: body.deployment.cloudProvider,
+    cloudProvider: deployment.cloudProvider,
     orchestration: "kubernetes",
-    ingress: body.deployment.ingressType,
+    ingress: deployment.ingressType,
+    dockerRepositoryName: deployment.dockerRepositoryName,
     monitoring: "false",
     enableECK: "false"
   };
-  infraJsonForLocalDeployment.monitoring = body.deployment?.monitoring ?? infraJsonForLocalDeployment.monitoring;
-  infraJsonForLocalDeployment.enableECK = body.deployment?.enableECK ?? infraJsonForLocalDeployment.enableECK;
+  infraJsonForLocalDeployment.monitoring = deployment?.monitoring ?? infraJsonForLocalDeployment.monitoring;
+  infraJsonForLocalDeployment.enableECK = deployment?.enableECK ?? infraJsonForLocalDeployment.enableECK;
   
   return (cloudProvider == "minikube") ? infraJsonForLocalDeployment : infraJson;
 }
