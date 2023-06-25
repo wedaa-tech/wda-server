@@ -392,6 +392,15 @@ app.listen(3001, () => {
   console.log("⚡: Server listening on port 3001");
 });
 
+// signal interrupt
+process.on('SIGINT', () => {
+  process.exit(0);
+});
+
+// event listener for the 'uncaughtException' event
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
 
 
 module.exports = {
