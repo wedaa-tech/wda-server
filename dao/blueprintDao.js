@@ -17,20 +17,21 @@ blueprintSchema.statics = {
     },
 
     getByUserId: function (query) {
-        return this.aggregate([
-            { $match: { ...query, metadata: { $ne: null }, deleted: false } },
-            {
-                $project: {
-                    _id: 1,
-                    project_id: 1,
-                    projectName: "$request_json.projectName",
-                    metadata: 1,
-                    createdAt: 1,
-                    updatedAt: 1
-                }
-            },
-            { $sort: { createdAt: 1 } }
-        ]);
+        const projection = {
+            _id: 1,
+            project_id: 1,
+            projectName: "$request_json.projectName",
+            metadata: 1,
+            createdAt: 1,
+            updatedAt: 1
+        };
+
+        return this.find({
+            ...query,
+            metadata: { $ne: null },
+            deleted: false
+        }, projection)
+            .sort({ createdAt: 1 })
     },
 
     // update: function(query, updateData, cb) {
@@ -42,18 +43,20 @@ blueprintSchema.statics = {
     },
 
     getByProjectNamesAndUserId: function (query) {
-        return this.aggregate([
-            { $match: { ...query, metadata: { $ne: null }, deleted: false } },
-            {
-                $project: {
-                    _id: 0,
-                    projectName: "$request_json.projectName"
-                }
-            },
-            { $sort: { createdAt: 1 } }
-        ]).then(results => results.map(result => result.projectName));
-    }
-
+        const projection = {
+          _id: 0,
+          "request_json.projectName": 1
+        };
+      
+        return this.find({
+          ...query,
+          metadata: { $ne: null },
+          deleted: false
+        }, projection)
+          .sort({ createdAt: 1 })
+          .then(results => results.map(result => result.request_json.projectName));
+      }
+      
 }
 
 var blueprintModel = mongoose.model('blueprints', blueprintSchema);
