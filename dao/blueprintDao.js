@@ -28,7 +28,8 @@ blueprintSchema.statics = {
                     createdAt: 1,
                     updatedAt: 1
                 }
-            }
+            },
+            { $sort: { createdAt: 1 } }
         ]);
     },
 
@@ -38,7 +39,21 @@ blueprintSchema.statics = {
 
     deleteByProjectId: function (query) {
         return this.findOneAndUpdate(query, { $set: { deleted: true } }, { new: true });
+    },
+
+    getByProjectNamesAndUserId: function (query) {
+        return this.aggregate([
+            { $match: { ...query, metadata: { $ne: null }, deleted: false } },
+            {
+                $project: {
+                    _id: 0,
+                    projectName: "$request_json.projectName"
+                }
+            },
+            { $sort: { createdAt: 1 } }
+        ]).then(results => results.map(result => result.projectName));
     }
+
 }
 
 var blueprintModel = mongoose.model('blueprints', blueprintSchema);

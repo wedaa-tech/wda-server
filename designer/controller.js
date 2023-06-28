@@ -75,6 +75,24 @@ exports.deleteBlueprint = function (req, res) {
 };
 
 /**
+ * Get all project names with given user Id
+ * @param {*} req 
+ * @param {*} res 
+ */
+exports.getProjectNames = function (req, res) {
+  const userId = req.kauth.grant.access_token.content.sub;
+  blueprintDao.getByProjectNamesAndUserId({user_id: userId})
+  .then(results => {
+    console.log("Retrieved list of project names");
+    return res.status(200).json(results);
+  })
+  .catch(error => {
+    console.error("Error retrieving projects:", error);
+    return res.status(500).send({ message: "Error retrieving projects" });
+  });
+}
+
+/**
  * generates services/infrastructure code from blueprint
  * @param {*} req 
  * @param {*} res 
