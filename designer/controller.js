@@ -99,7 +99,7 @@ exports.getProjectNames = function (req, res) {
  */
 exports.generate = function (req, res) {
     const body = req.body;
-    const userId = req.kauth.grant.access_token.content.sub;
+    const userId = req.kauth?.grant?.access_token?.content?.sub;
     console.log(
       "Generating project: " + body.projectName + 
       ", for user: " + userId

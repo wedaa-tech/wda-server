@@ -12,6 +12,7 @@ const db = require('./config/database');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 const keycloakConfig = require('./config/keycloak-config.js').keycloakConfig;
+var wda = require('./designer/controller.js');
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
@@ -48,7 +49,7 @@ app.use(keycloak.middleware({
 
 
 
-//initialise express router
+//initialise protected express router
 var router = express.Router();
 
 // use express router
@@ -58,6 +59,11 @@ app.use('/api',keycloak.protect(), router);
 
 //call wda routing
 wdaRoutes(router);
+
+//initialise unprotected express router
+var unprotectedRouter = express.Router();
+unprotectedRouter.post('/generate', wda.generate);
+app.use(unprotectedRouter);
 
 
 /**
