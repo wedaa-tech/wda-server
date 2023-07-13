@@ -141,13 +141,18 @@ exports.infraJsonGenerator = (body) => {
   }
   var deployment = body.deployment;
   var cloudProvider = deployment.cloudProvider;
+  var domainName = "";
+  if(deployment.ingressDomain !== undefined) {
+    domainName = deployment.ingressDomain;
+  }
   var infraJson = {
     projectId: body.projectId,
     projectName: body.projectName,
     cloudProvider: deployment.cloudProvider,
-    domain: deployment.ingressDomain,
+    domain: domainName,
     orchestration: deployment.deploymentType,
     clusterName: deployment.clusterName,
+    kubernetesNamespace: deployment.kubernetesNamespace,
     ingress: deployment.ingressType,
     monitoring: "false",
     enableECK: "false",
@@ -172,6 +177,7 @@ exports.infraJsonGenerator = (body) => {
     projectName: body.projectName,
     cloudProvider: deployment.cloudProvider,
     orchestration: "kubernetes",
+    kubernetesNamespace: deployment.kubernetesNamespace,
     ingress: deployment.ingressType,
     dockerRepositoryName: deployment.dockerRepositoryName,
     monitoring: "false",

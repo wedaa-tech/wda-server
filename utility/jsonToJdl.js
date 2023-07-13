@@ -185,9 +185,6 @@ communication {
             if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === "") {
                 deploymentError.push("Kubernetes namespace cannot be empty");
             }
-            if (deployment.ingressDomain === undefined || deployment.ingressDomain === "") {
-                deploymentError.push("Ingress Domain cannot be empty");
-            }
             if (deployment.ingressType === undefined || deployment.ingressType === "") {
                 deploymentError.push("Ingress Type cannot be empty");
             }
@@ -230,7 +227,7 @@ communication {
 
         // set kubernetesServiceType to Ingress if ingressType is istio
         let ingressType = false;
-        if (deployment.ingressType === "istio") {
+        if (deployment.ingressType === "istio" && deployment.ingressDomain !== undefined && deployment.ingressDomain !== "") {
             ingressType = true;
         }
 
@@ -252,10 +249,11 @@ communication {
             deploymentType = deployment.deploymentType.toLowerCase();
         } 
 
-        // set ingressDomain
-        var ingressDomain = "example.com";
-        if (deployment.ingressDomain !== undefined) {
-            ingressDomain = deployment.ingressDomain;
+        // set monitoring as istio for external-lb 
+        //TODO: should be changed to some other attribute, else monitoring with prometheus provided by jhipster won't work
+        var monitoring = "no";
+        if (deployment.monitoring !== undefined && deployment.monitoring !== "" && deployment.monitoring === "true") {
+            monitoring = "istio";
         } 
 
         // Conversion of json to jdl (Deployment Options)
@@ -268,10 +266,11 @@ deployment {
     ${serviceDiscoveryType ? `serviceDiscoveryType ${deployment.serviceDiscoveryType.toLowerCase()}` : `serviceDiscoveryType no`}
     ${ingressType ? `kubernetesServiceType Ingress` : `kubernetesServiceType LoadBalancer`}
     ${ingressType ? `istio true` : `istio false`}
-    ingressDomain "${ingressDomain.toLowerCase()}"
+    ${ingressType ? `ingressDomain "${deployment.ingressDomain.toLowerCase()}"`: ``}
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
     ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
     ${dynamicStorage && deployment.cloudProvider === "aws" ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
+    ${monitoring === "istio" ? `monitoring istio` : `monitoring no`}
 }
 
 `;
