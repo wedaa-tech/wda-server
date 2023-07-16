@@ -29,7 +29,7 @@ jobs:
       - name: Clone Generator-tf-wdi repository
         uses: actions/checkout@v2
         with:
-          repository: coMakeIT-TIC/generator-tf-wdi
+          repository: tic-oss/generator-tf-wdi
           ref: main
           path: generator-tf-wdi
           # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
@@ -37,7 +37,7 @@ jobs:
       - name: Clone Generator-jhipster repository
         uses: actions/checkout@v2
         with:
-          repository: rohithteja-cmi/generator-jhipster
+          repository: tic-oss/generator-jhipster
           ref: main
           path: generator-jhipster
           # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
@@ -45,7 +45,7 @@ jobs:
       - name: Clone Jhipster blueprints repository
         uses: actions/checkout@v2
         with:
-          repository: coMakeIT-TIC/jhipster-blueprints
+          repository: tic-oss/jhipster-blueprints
           ref: main
           path: jhipster-blueprints
           # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
