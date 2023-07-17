@@ -3,7 +3,7 @@ require('dotenv').config()
 var keycloakConfig = {
     clientId: 'wda',
     bearerOnly: true,
-    serverUrl: 'http://'+process.env.KC_HOST+':'+process.env.KC_HOST_PORT,
+    serverUrl: process.env.KC_HOST,
     realm: 'wda'
 };
 
