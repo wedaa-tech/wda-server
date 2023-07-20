@@ -2,6 +2,8 @@ name: Wda Server Build
 
 # Controls when the workflow will run
 on:
+  # Trigger the workflow manually
+  workflow_dispatch:
   # Triggers the workflow on push event but only for the branch specified with in []
   push:
     branches: [ main ]
