@@ -63,6 +63,7 @@ wdaRoutes(router);
 //initialise unprotected express router
 var unprotectedRouter = express.Router();
 unprotectedRouter.post('/generate', wda.generate);
+unprotectedRouter.get('/blueprints/:project_id',wda.getBlueprint);
 app.use(unprotectedRouter);
 
 

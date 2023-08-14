@@ -137,14 +137,22 @@ exports.infraJsonGenerator = (body) => {
   const applicationCount = Object.keys(applications).length;
   const appFolders = [];
   for (let i = 0; i < applicationCount; i++) {
-      appFolders.push(applications[i].applicationName);
+    appFolders.push(applications[i].applicationName);
   }
   var deployment = body.deployment;
   var cloudProvider = deployment.cloudProvider;
   var domainName = "";
-  if(deployment.ingressDomain !== undefined) {
+  if (deployment.ingressDomain !== undefined) {
     domainName = deployment.ingressDomain;
   }
+
+  // Iterate through applications and form appConfigs
+  const appConfigs = Object.values(applications).map(serviceData => ({
+    name: serviceData.applicationName,
+    port: serviceData.serverPort,
+    type: serviceData.applicationType,
+  }));
+
   var infraJson = {
     projectId: body.projectId,
     projectName: body.projectName,
@@ -158,7 +166,8 @@ exports.infraJsonGenerator = (body) => {
     enableECK: "false",
     k8sWebUI: "false",
     generateInfra: "true",
-    appFolders: appFolders
+    appFolders: appFolders,
+    appConfigs: appConfigs
   };
   infraJson.monitoring = deployment?.monitoring ?? infraJson.monitoring;
   infraJson.enableECK = deployment?.enableECK ?? infraJson.enableECK;

@@ -34,12 +34,28 @@ blueprintSchema.statics = {
             .sort({ createdAt: 1 })
     },
 
-    // update: function(query, updateData, cb) {
-    //     this.findOneAndUpdate(query, {$set: updateData},{new: true}, cb);
-    // },
+    createOrUpdate: function(query,data){
+        return this.findOneAndUpdate(
+            query, 
+            {$set: data},
+            {upsert: true}
+        );
+    },
+
+    update: function(query, updateData) {
+        return this.findOneAndUpdate(
+            query, 
+            {$set: updateData},
+            {new: true}
+        );
+    },
 
     deleteByProjectId: function (query) {
-        return this.findOneAndUpdate(query, { $set: { deleted: true } }, { new: true });
+        return this.findOneAndUpdate(
+            query, 
+            { $set: { deleted: true } }, 
+            { new: true }
+        );
     },
 
     getByProjectNamesAndUserId: function (query) {
