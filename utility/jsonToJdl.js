@@ -294,7 +294,7 @@ deployment {
         metadata: metadata,
         user_id: req.kauth?.grant?.access_token?.content?.sub
     };
-    blueprintDao.create(blueprint)
+    blueprintDao.createOrUpdate({project_id: blueprint.project_id},blueprint)
         .then(savedBlueprint => {
             console.log("Blueprint was added successfully!");
         })
