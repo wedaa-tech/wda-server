@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require('path');
 const archiver = require("archiver");
+const { nanoid } = require("nanoid");
 
 /**
  * The method will generate json file for the Terraform generator
@@ -196,4 +197,14 @@ exports.infraJsonGenerator = (body) => {
   infraJsonForLocalDeployment.enableECK = deployment?.enableECK ?? infraJsonForLocalDeployment.enableECK;
   
   return (cloudProvider == "minikube") ? infraJsonForLocalDeployment : infraJson;
+}
+
+/**
+ * The method will generate unique Id 
+ *
+ * @param {*} name : 
+ */
+exports.createUniqueId = (name) => {
+  const uniqueId= name.trim() + "-" + nanoid(9);
+  return uniqueId; 
 }
