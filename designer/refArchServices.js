@@ -104,7 +104,7 @@ exports.updateRefArchs = function (req, res) {
 
 
  /**
-  * Delete the blueprint with given project Id
+  * Delete the Specific Architecture with given Id
   * @param {*} req 
   * @param {*} res 
   */
