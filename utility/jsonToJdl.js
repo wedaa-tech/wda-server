@@ -18,8 +18,8 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
     var logManagementType = false;
     var serviceDiscoveryType = false;
 
-    var blueprints = ["go", "gomicro"];
-    var clientFrameworks = ["react", "angular"];
+    var blueprints = ["go", "gomicro", "react"];
+    var clientFrameworks = ["react", "angular", "vue"];
     var serviceDiscoveryTypes = ["eureka", "consul"]
     var messageBrokers = ["rabbitmq", "kafka"];
     var databaseTypes = ["postgresql", "mysql", "mongodb"];
@@ -107,9 +107,9 @@ application {
         ${databaseType === "mongodb" ? 'databaseType mongodb' : ''}
         ${databaseType === "sql" ? `databaseType sql\n        devDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
-        ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : ''}
-        ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : ''}
-        ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : ''}
+        ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
+        ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : 'serviceDiscoveryType no'}
+        ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : 'clientFramework no'}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample ? `withExample true` : ''}
     }
