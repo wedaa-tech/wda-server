@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var chalk = require('chalk');
 var dbURL = require('./properties').DB;
+var databaseName = require('./properties').MONGODB_DATABASE;
 
 // color codes
 var connected = chalk.bold.cyan;
@@ -11,7 +12,7 @@ var termination = chalk.bold.magenta;
 //export this function and imported by server.js
 module.exports =function(){
 
-    mongoose.connect(dbURL);
+    mongoose.connect(dbURL, { dbName: databaseName });
 
     mongoose.connection.on('connected', function(){
         console.log(connected("Mongoose default connection is open to ", dbURL));
