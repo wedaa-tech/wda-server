@@ -27,13 +27,13 @@
     "oauth2DevicePollingInterval": 5,
     "enabled": true,
     "sslRequired": "external",
-    "registrationAllowed": false,
+    "registrationAllowed": true,
     "registrationEmailAsUsername": false,
-    "rememberMe": false,
+    "rememberMe": true,
     "verifyEmail": false,
     "loginWithEmailAllowed": true,
     "duplicateEmailsAllowed": false,
-    "resetPasswordAllowed": false,
+    "resetPasswordAllowed": true,
     "editUsernameAllowed": false,
     "bruteForceProtected": false,
     "permanentLockout": false,
@@ -1340,7 +1340,44 @@
     "enabledEventTypes": [],
     "adminEventsEnabled": false,
     "adminEventsDetailsEnabled": false,
-    "identityProviders": [],
+    "identityProviders": [
+      {
+        "alias": "google",
+        "internalId": "209dc3d0-7b5b-48d5-8de1-a8ef17088227",
+        "providerId": "google",
+        "enabled": true,
+        "updateProfileFirstLoginMode": "on",
+        "trustEmail": false,
+        "storeToken": false,
+        "addReadTokenRoleOnCreate": false,
+        "authenticateByDefault": false,
+        "linkOnly": false,
+        "firstBrokerLoginFlowAlias": "first broker login",
+        "config": {
+          "offlineAccess": "false",
+          "userIp": "false",
+          "clientSecret": "**********",
+          "clientId": "485747818227-8qmaithh57jo4tovd6gd7cghe8d8204g.apps.googleusercontent.com"
+        }
+      },
+      {
+        "alias": "github",
+        "internalId": "ca3a58f2-f1b6-415a-972e-ee6daaaf873e",
+        "providerId": "github",
+        "enabled": true,
+        "updateProfileFirstLoginMode": "on",
+        "trustEmail": false,
+        "storeToken": false,
+        "addReadTokenRoleOnCreate": false,
+        "authenticateByDefault": false,
+        "linkOnly": false,
+        "firstBrokerLoginFlowAlias": "first broker login",
+        "config": {
+          "clientSecret": "**********",
+          "clientId": "8172dfea0b812eb3a2a2"
+        }
+      }
+    ],
     "identityProviderMappers": [],
     "components": {
       "org.keycloak.services.clientregistration.policy.ClientRegistrationPolicy": [
