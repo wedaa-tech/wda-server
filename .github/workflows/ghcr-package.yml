@@ -73,3 +73,11 @@ jobs:
             ghcr.io/tic-oss/wda-server:latest
           labels: ${{ steps.meta.outputs.labels }}
       
+      - name: Trigger server-deploy.yml Workflow in Hetzner repository
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" \
+            https://api.github.com/repos/tic-oss/hetzner/actions/workflows/server-deploy.yml/dispatches \
+            -d '{"ref": "main"}'
+      
