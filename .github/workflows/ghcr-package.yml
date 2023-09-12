@@ -22,11 +22,8 @@ jobs:
       packages: write
       # 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
       - name: Clone Generator-tf-wdi repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: wedaa-tech/generator-tf-wdi
           ref: main
@@ -34,7 +31,7 @@ jobs:
           # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
 
       - name: Clone Generator-jhipster repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: wedaa-tech/generator-jhipster
           ref: main
@@ -42,7 +39,7 @@ jobs:
           # token: ${{ secrets.PAT }} # or ssh-key: ${{ secrets.SSH_KEY }}
       
       - name: Clone Jhipster blueprints repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           repository: wedaa-tech/jhipster-blueprints
           ref: main
