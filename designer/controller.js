@@ -229,7 +229,7 @@ exports.generate = function (req, res) {
         // Child process to generate the architecture
         console.log("Generating Architecture files...");
         exec(
-            `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies ${minikube}`,
+            `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies --force ${minikube}`,
             function (error, stdout, stderr) {
                 if (stdout !== "") {
                     console.log("---------stdout: ---------\n" + stdout);
