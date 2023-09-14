@@ -9,6 +9,35 @@ const archiver = require("archiver");
  * @param {*} body : body of json file to generate
  */
 exports.createJsonFile = (fileName, body) => {
+  var documentGenerator = false;
+  var services = body.services;
+  var docsDetails;
+
+  // Check if services contains an element with applicationFramework set to "docusaurus"
+  for (var key in services) {
+      if (services[key].applicationFramework === "docusaurus") {
+          documentGenerator = true;
+          docsDetails = services[key];
+          break;
+      }
+  }
+
+  if (documentGenerator) {
+      const filePath = `${fileName}-docusaurus.json`;
+      fs.writeFile(
+          filePath,
+          JSON.stringify(docsDetails, null, 4),
+          'utf8',
+          (err) => {
+              if (err) {
+                  console.error('Error writing docusaurus config file:', err);
+              } else {
+                  console.log('Docusaurus config file saved successfully:', filePath);
+              }
+          }
+      );
+  }
+  
   fs.writeFile(
     `${fileName}.json`,
     JSON.stringify(body, null, 4),

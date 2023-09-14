@@ -247,6 +247,24 @@ exports.generate = function (req, res) {
 
                 const folderPath = `./${body.projectId}`;
 
+                // check if application documentation is enabled
+                var documentGenerator = false;
+                var services = body.services;
+                var docsDetails;
+
+                // Check if services contains an element with applicationFramework set to "docusaurus"
+                for (var key in services) {
+                    if (services[key].applicationFramework === "docusaurus") {
+                        documentGenerator = true;
+                        docsDetails = services[key];
+                        break; // Exit the loop once we find the desired element
+                    }
+                }
+                if(documentGenerator){
+                  console.log("Generating Docusaurus files...");
+                  // generateDocusaurusFiles(fileName, folderPath, docsDetails);
+                }
+
                 // If deployment is true, then generate Terraform files as well and then generate the zip archive.
                 if (deployment) {
                     console.log("Generating Infrastructure files...");
@@ -303,3 +321,28 @@ const generateTerraformFiles = (fileName, folderPath, res) => {
       utility.generateZip(folderPath, res);
     });
   };
+
+  /**
+ * Child process to generate the Docusaurus files
+ *
+ * @param {*} fileName : random string with 9 characters
+ */
+const generateDocusaurusFiles = (fileName) => {
+  exec(`yo docusaurus --file ./${fileName}-docusaurus.json`, function (
+    error,
+    stdout,
+    stderr
+  ) {
+    if (stdout !== "") {
+      console.log("---------stdout: ---------\n" + stdout);
+    }
+
+    if (stderr !== "") {
+      console.log("---------stderr: ---------\n" + stderr);
+    }
+
+    if (error !== null) {
+      console.log("---------exec error: ---------\n[" + error + "]");
+    }
+  });
+};
