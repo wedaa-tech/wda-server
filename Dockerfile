@@ -22,8 +22,11 @@ RUN cd generator-tf-wdi && npm i && npm link
 # Install custom generator-tf-wdi
 RUN cd generator-jhipster && npm i && npm link
 
-# Install gomicro-blueprints
+# Install gomicro-blueprint
 RUN cd jhipster-blueprints/generator-jhipster-gomicro && npm i && npm link 
+
+# Install react-blueprint
+RUN cd jhipster-blueprints/generator-jhipster-react && npm i && npm link 
 
 # Add user
 RUN groupadd wdi && useradd wdi -s /bin/bash -m -g wdi
