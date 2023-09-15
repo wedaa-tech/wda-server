@@ -248,18 +248,10 @@ exports.generate = function (req, res) {
                 const folderPath = `./${body.projectId}`;
 
                 // check if application documentation is enabled
-                var documentGenerator = false;
                 var services = body.services;
-                var docsDetails;
-
-                // Check if services contains an element with applicationFramework set to "docusaurus"
-                for (var key in services) {
-                    if (services[key].applicationFramework === "docusaurus") {
-                        documentGenerator = true;
-                        docsDetails = services[key];
-                        break; // Exit the loop once we find the desired element
-                    }
-                }
+                var docsDetails = Object.values(services).find(service => service.applicationFramework === "docusaurus");
+                var documentGenerator = !!docsDetails; 
+                
                 if(documentGenerator){
                   console.log("Generating Docusaurus files...");
                   // generateDocusaurusFiles(fileName, folderPath, docsDetails);

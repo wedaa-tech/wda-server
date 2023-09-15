@@ -9,19 +9,11 @@ const archiver = require("archiver");
  * @param {*} body : body of json file to generate
  */
 exports.createJsonFile = (fileName, body) => {
-  var documentGenerator = false;
   var services = body.services;
-  var docsDetails;
+  var docsDetails = Object.values(services).find(service => service.applicationFramework === "docusaurus");
+  var documentGenerator = !!docsDetails; 
 
-  // Check if services contains an element with applicationFramework set to "docusaurus"
-  for (var key in services) {
-      if (services[key].applicationFramework === "docusaurus") {
-          documentGenerator = true;
-          docsDetails = services[key];
-          break;
-      }
-  }
-
+  
   if (documentGenerator) {
       const filePath = `${fileName}-docusaurus.json`;
       fs.writeFile(
@@ -43,7 +35,6 @@ exports.createJsonFile = (fileName, body) => {
     JSON.stringify(body, null, 4),
     "utf8",
     function (err, result) {
-      // console.log(body);
       if (body.cloudProvider !== undefined) {
         fs.writeFile(
           `${body.projectId}/blueprints/infra-blueprint.json`,
