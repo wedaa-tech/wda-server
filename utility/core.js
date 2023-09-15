@@ -10,26 +10,25 @@ const archiver = require("archiver");
  */
 exports.createJsonFile = (fileName, body) => {
   var services = body.services;
-  var docsDetails = Object.values(services).find(service => service.applicationFramework === "docusaurus");
-  var documentGenerator = !!docsDetails; 
-
-  
-  if (documentGenerator) {
-      const filePath = `${fileName}-docusaurus.json`;
-      fs.writeFile(
-          filePath,
-          JSON.stringify(docsDetails, null, 4),
-          'utf8',
-          (err) => {
-              if (err) {
-                  console.error('Error writing docusaurus config file:', err);
-              } else {
-                  console.log('Docusaurus config file saved successfully:', filePath);
-              }
-          }
-      );
+  if(services !== undefined && services !== null) { 
+    var docsDetails = Object.values(services).find(service => service.applicationFramework === "docusaurus");
+    var documentGenerator = !!docsDetails; 
+    if (documentGenerator) {
+        const filePath = `${fileName}-docusaurus.json`;
+        fs.writeFile(
+            filePath,
+            JSON.stringify(docsDetails, null, 4),
+            'utf8',
+            (err) => {
+                if (err) {
+                    console.error('Error writing docusaurus config file:', err);
+                } else {
+                    console.log('Docusaurus config file saved successfully:', filePath);
+                }
+            }
+        );
+    }
   }
-  
   fs.writeFile(
     `${fileName}.json`,
     JSON.stringify(body, null, 4),
@@ -48,6 +47,14 @@ exports.createJsonFile = (fileName, body) => {
         fs.writeFile(
           `${body.projectId}/blueprints/req-blueprint.json`,
           JSON.stringify(body, null, 4),
+          "utf8",
+          err => {
+            if (err) throw err;
+          }
+        );
+        fs.writeFile(
+          `${body.projectId}/blueprints/docs-blueprint.json`,
+          JSON.stringify(docsDetails, null, 4),
           "utf8",
           err => {
             if (err) throw err;

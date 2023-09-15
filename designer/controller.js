@@ -254,27 +254,7 @@ exports.generate = function (req, res) {
                 
                 if(documentGenerator){
                   console.log("Generating Docusaurus files...");
-                  // generateDocusaurusFiles(fileName, folderPath, docsDetails);
-                }
-
-                // If deployment is true, then generate Terraform files as well and then generate the zip archive.
-                if (deployment) {
-                    console.log("Generating Infrastructure files...");
-                    const jsonFileForTerraform = nanoid(9);
-                    
-                    var infraJson = utility.infraJsonGenerator(body);
-                    // Generate json file for infraJson, if deployment is true
-                    utility.createJsonFile(jsonFileForTerraform, infraJson);
-
-                    generateTerraformFiles(jsonFileForTerraform, folderPath, res);
-
-                    console.log(
-                        "Zipping Architecture/Infrastructure files completed successfully....."
-                    );
-                } else {
-                    // Generation of Architecture zip, with in the call back function of child process.
-                    utility.generateZip(folderPath, res);
-                    console.log("Zipping Architecture files completed successfully.....");
+                  generateDocusaurusFiles(fileName, folderPath, deployment, body, res);
                 }
             }
         );
@@ -314,13 +294,17 @@ const generateTerraformFiles = (fileName, folderPath, res) => {
     });
   };
 
-  /**
+/**
  * Child process to generate the Docusaurus files
  *
- * @param {*} fileName : random string with 9 characters
+ * @param {*} fileName   : random string with 9 characters
+ * @param {*} folderPath : combination of filename and project name
+ * @param {*} deployment : deployment check boolean
+ * @param {*} body       : request body
+ * @param {*} res        : response object
  */
-const generateDocusaurusFiles = (fileName) => {
-  exec(`yo docusaurus --file ./${fileName}-docusaurus.json`, function (
+const generateDocusaurusFiles = (fileName, folderPath, deployment, body, res) => {
+  exec(`cd ${folderPath} && yo docusaurus --file ../${fileName}-docusaurus.json`, function (
     error,
     stdout,
     stderr
@@ -336,5 +320,26 @@ const generateDocusaurusFiles = (fileName) => {
     if (error !== null) {
       console.log("---------exec error: ---------\n[" + error + "]");
     }
+
+    // If deployment is true, then generate Terraform files as well and then generate the zip archive.
+    if (deployment) {
+      console.log("Generating Infrastructure files...");
+      const jsonFileForTerraform = nanoid(9);
+
+      var infraJson = utility.infraJsonGenerator(body);
+      // Generate json file for infraJson, if deployment is true
+      utility.createJsonFile(jsonFileForTerraform, infraJson);
+
+      generateTerraformFiles(jsonFileForTerraform, folderPath, res);
+
+      console.log(
+        "Zipping Architecture/Infrastructure files completed successfully....."
+      );
+    } else {
+      // Generation of Architecture zip, with in the call back function of child process.
+      utility.generateZip(folderPath, res);
+      console.log("Zipping Architecture files completed successfully.....");
+    }
+
   });
 };
