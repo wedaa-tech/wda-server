@@ -15,7 +15,9 @@ projectSchema.statics = {
                 if (results && results.length > 0) {
                     return results.map((result) => ({
                         id: result._id,
-                        name: result.name
+                        name: result.name,
+                        imageUrl: result.imageUrl,
+                        description: result.description
                     })) || [];
                 }
             });
@@ -28,7 +30,9 @@ projectSchema.statics = {
                 if (results && results.length > 0) {
                     return results.map((result) => ({
                         id: result._id,
-                        name: result.name
+                        name: result.name,
+                        imageUrl: result.imageUrl,
+                        description: result.description
                     })) || [];
                 }
             });

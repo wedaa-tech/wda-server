@@ -15,7 +15,17 @@ var projectSchema = new Schema({
     deleted: {
         type: Boolean,
         default: false
-    }
+    },
+    imageUrl: {
+        type: String,
+        unique: false,
+        required: false
+    },
+    description: {
+        type: String,
+        unique: false,
+        required: false
+    },
 }, {
     timestamps: true
 });
