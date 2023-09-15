@@ -25,6 +25,11 @@ var blueprintSchema = new Schema({
     deleted: {
         type: Boolean,
         default: false
+    },
+    parentId: {
+        type: String,
+        unique: false,
+        required: false
     }
 }, {
     timestamps: true

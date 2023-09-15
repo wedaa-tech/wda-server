@@ -292,7 +292,8 @@ deployment {
         project_id: jsonData.projectId,
         request_json: jsonData,
         metadata: metadata,
-        user_id: req.kauth?.grant?.access_token?.content?.sub
+        user_id: req.kauth?.grant?.access_token?.content?.sub,
+        parentId: req.body?.parentId
     };
     blueprintDao.createOrUpdate({project_id: blueprint.project_id},blueprint)
         .then(savedBlueprint => {
