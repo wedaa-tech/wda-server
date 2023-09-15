@@ -22,6 +22,8 @@ blueprintSchema.statics = {
             project_id: 1,
             projectName: "$request_json.projectName",
             metadata: 1,
+            imageUrl: 1,
+            description: 1,
             createdAt: 1,
             updatedAt: 1
         };

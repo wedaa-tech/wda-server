@@ -30,7 +30,17 @@ var blueprintSchema = new Schema({
         type: String,
         unique: false,
         required: false
-    }
+    },
+    imageUrl: {
+        type: String,
+        unique: false,
+        required: false
+    },
+    description: {
+        type: String,
+        unique: false,
+        required: false
+    },
 }, {
     timestamps: true
 });
