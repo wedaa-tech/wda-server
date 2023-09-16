@@ -166,7 +166,10 @@ exports.infraJsonGenerator = (body) => {
   const applicationCount = Object.keys(applications).length;
   const appFolders = [];
   for (let i = 0; i < applicationCount; i++) {
-    appFolders.push(applications[i].applicationName);
+      // Skip infra config if applicationFramework is docusaurus
+      if (applications[i].applicationFramework.toLowerCase() !== "docusaurus") {
+        appFolders.push(applications[i].applicationName);
+    }
   }
   var deployment = body.deployment;
   var cloudProvider = deployment.cloudProvider;
