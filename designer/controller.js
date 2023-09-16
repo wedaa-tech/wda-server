@@ -246,22 +246,19 @@ exports.generate = function (req, res) {
                 console.log("Architecture Generation completed successfully.....");
 
                 const folderPath = `./${body.projectId}`;
-
                 // check if application documentation is enabled
                 var services = body.services;
                 var docsDetails = Object.values(services).find(service => service.applicationFramework === "docusaurus");
                 var documentGenerator = !!docsDetails; 
-                
                 if(documentGenerator){
                   console.log("Generating Docusaurus files...");
                   generateDocusaurusFiles(fileName, folderPath, deployment, body, res);
+                } else {
+                  triggerTerraformGenerator(folderPath, deployment, body, res);
                 }
             }
         );
-
     }, 5000);
-
-
 };
 
 /**
@@ -320,18 +317,28 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, res) =>
     if (error !== null) {
       console.log("---------exec error: ---------\n[" + error + "]");
     }
+    triggerTerraformGenerator(folderPath, deployment, body, res);
+  });
+};
 
+/**
+ * trigger tf-wdi generator to generate the Infrastructure files
+ *
+ * @param {*} folderPath : combination of filename and project name
+ * @param {*} deployment : deployment check boolean
+ * @param {*} body       : request body
+ * @param {*} res        : response object
+ */
+const triggerTerraformGenerator = (folderPath, deployment, body, res) => {
     // If deployment is true, then generate Terraform files as well and then generate the zip archive.
     if (deployment) {
       console.log("Generating Infrastructure files...");
       const jsonFileForTerraform = nanoid(9);
-
       var infraJson = utility.infraJsonGenerator(body);
       // Generate json file for infraJson, if deployment is true
       utility.createJsonFile(jsonFileForTerraform, infraJson);
-
+      //Invoke tf-wdi generator
       generateTerraformFiles(jsonFileForTerraform, folderPath, res);
-
       console.log(
         "Zipping Architecture/Infrastructure files completed successfully....."
       );
@@ -340,6 +347,4 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, res) =>
       utility.generateZip(folderPath, res);
       console.log("Zipping Architecture files completed successfully.....");
     }
-
-  });
 };

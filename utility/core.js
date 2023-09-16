@@ -52,14 +52,16 @@ exports.createJsonFile = (fileName, body) => {
             if (err) throw err;
           }
         );
-        fs.writeFile(
-          `${body.projectId}/blueprints/docs-blueprint.json`,
-          JSON.stringify(docsDetails, null, 4),
-          "utf8",
-          err => {
-            if (err) throw err;
-          }
-        );
+        if(docsDetails !== undefined) {
+          fs.writeFile(
+            `${body.projectId}/blueprints/docs-blueprint.json`,
+            JSON.stringify(docsDetails, null, 4),
+            "utf8",
+            err => {
+              if (err) throw err;
+            }
+          );
+        }
       }
     });
 };
