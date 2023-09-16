@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 const projectSchema = require('../model/project');
+const blueprintModel = require('./blueprintDao');
 
 projectSchema.statics = {
     create: function (data) {
