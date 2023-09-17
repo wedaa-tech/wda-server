@@ -99,6 +99,10 @@ exports.generateBlueprint = (folderPath, res) => {
  * @param {*} res : Response header
  */
 exports.generateZip = (folderPath, res) => {
+  // Set a custom response header with blueprintId
+  var blueprintId = folderPath;
+  blueprintId = blueprintId.substring(2);
+  res.setHeader('blueprintId', blueprintId);
   const archive = archiver("zip", { zlib: { level: 9 } });
 
   archive.on("error", function (err) {
