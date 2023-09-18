@@ -22,7 +22,17 @@ var refArchSchema = new Schema({
         enum: ['APPLICATION','INFRASTRUCTURE','DATA_PIPELINES','DEV_SEC_OPS'],
         default: 'APPLICATION',
         required: true
-    }
+    },
+    image: {
+        type: String,
+        unique: false,
+        required: false
+    },
+    description: {
+        type: String,
+        unique: false,
+        required: false
+    },
 }, {
     timestamps: true
 });

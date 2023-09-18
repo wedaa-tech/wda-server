@@ -20,6 +20,7 @@ projectSchema.statics = {
                     return {
                         id: project._id,
                         name: project.name,
+                        description: project.description,
                         blueprintCount: blueprintCount,
                     };
                 });
