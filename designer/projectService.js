@@ -13,7 +13,7 @@ exports.saveProject = function (req, res) {
     projectDao.create(project)
         .then(savedProject => {
             console.log("Project was added successfully!");
-            return res.status(200).send({ message: "Project was added successfully!" });
+            return res.status(200).send({ message: 'Project was added successfully!', data: { name: savedProject.name, id: savedProject._id} });
         })
         .catch(error => {
             console.error(error);
