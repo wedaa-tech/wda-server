@@ -9,12 +9,31 @@ const archiver = require("archiver");
  * @param {*} body : body of json file to generate
  */
 exports.createJsonFile = (fileName, body) => {
+  var services = body.services;
+  if(services !== undefined && services !== null) { 
+    var docsDetails = Object.values(services).find(service => service.applicationFramework === "docusaurus");
+    var documentGenerator = !!docsDetails; 
+    if (documentGenerator) {
+        const filePath = `${fileName}-docusaurus.json`;
+        fs.writeFile(
+            filePath,
+            JSON.stringify(docsDetails, null, 4),
+            'utf8',
+            (err) => {
+                if (err) {
+                    console.error('Error writing docusaurus config file:', err);
+                } else {
+                    console.log('Docusaurus config file saved successfully:', filePath);
+                }
+            }
+        );
+    }
+  }
   fs.writeFile(
     `${fileName}.json`,
     JSON.stringify(body, null, 4),
     "utf8",
     function (err, result) {
-      // console.log(body);
       if (body.cloudProvider !== undefined) {
         fs.writeFile(
           `${body.projectId}/blueprints/infra-blueprint.json`,
@@ -33,6 +52,16 @@ exports.createJsonFile = (fileName, body) => {
             if (err) throw err;
           }
         );
+        if(docsDetails !== undefined) {
+          fs.writeFile(
+            `${body.projectId}/blueprints/docs-blueprint.json`,
+            JSON.stringify(docsDetails, null, 4),
+            "utf8",
+            err => {
+              if (err) throw err;
+            }
+          );
+        }
       }
     });
 };
@@ -70,6 +99,10 @@ exports.generateBlueprint = (folderPath, res) => {
  * @param {*} res : Response header
  */
 exports.generateZip = (folderPath, res) => {
+  // Set a custom response header with blueprintId
+  var blueprintId = folderPath;
+  blueprintId = blueprintId.substring(2);
+  res.setHeader('blueprintId', blueprintId);
   const archive = archiver("zip", { zlib: { level: 9 } });
 
   archive.on("error", function (err) {
@@ -137,7 +170,10 @@ exports.infraJsonGenerator = (body) => {
   const applicationCount = Object.keys(applications).length;
   const appFolders = [];
   for (let i = 0; i < applicationCount; i++) {
-    appFolders.push(applications[i].applicationName);
+      // Skip infra config if applicationFramework is docusaurus
+      if (applications[i].applicationFramework.toLowerCase() !== "docusaurus") {
+        appFolders.push(applications[i].applicationName);
+    }
   }
   var deployment = body.deployment;
   var cloudProvider = deployment.cloudProvider;

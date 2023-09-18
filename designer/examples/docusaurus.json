@@ -1,0 +1,45 @@
+{
+    "projectName": "docs",
+    "services": {
+        "0": {
+            "applicationName": "client",
+            "applicationFramework": "react",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "no",
+            "clientFramework": "react",
+            "serviceDiscoveryType": "no",
+            "serverPort": "3000",
+            "withExample": "false",
+            "logManagementType": "no"
+        },
+        "1": {
+            "applicationName": "mydocs",
+            "applicationFramework": "docusaurus",
+            "applicationType": "gateway",
+            "packageName": "com.cmi.tic",
+            "authenticationType": "no",
+            "clientFramework": "no",
+            "serviceDiscoveryType": "no",
+            "serverPort": "5000",
+            "withExample": "false",
+            "logManagementType": "no"
+        }
+    },
+    "deployment": {
+        "cloudProvider": "aws",
+        "awsAccountId": "379605592402",
+        "awsRegion": "ap-south-1",
+        "deploymentType": "kubernetes",
+        "clusterName": "reminder",
+        "kubernetesNamespace": "k8s",
+        "ingressDomain": "shopt.gq",
+        "ingressType": "istio",
+        "kubernetesUseDynamicStorage": "true",
+        "kubernetesStorageClassName": "demosc",
+        "serviceDiscoveryType": "eureka",
+        "monitoring": "true",
+        "enableECK": "true",
+        "k8sWebUI": "true"
+    }
+}

@@ -27,6 +27,10 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
 
 
     for (let i = 0; i < applicationCount; i++) {
+        // Skip jdl config formation if applicationFramework is docusaurus
+        if(applications[i].applicationFramework !== undefined && applications[i].applicationFramework === "docusaurus"){
+            continue;
+        }
         var applicationError = new Map();
         var applicationErrorList = [];
         // Error handling
@@ -212,7 +216,10 @@ communication {
         // set apps folders 
         const appsFolders = [];
         for (let i = 0; i < applicationCount; i++) {
-            appsFolders.push(applications[i].applicationName.toLowerCase());
+            // Skip k8s config if applicationFramework is docusaurus
+            if (applications[i].applicationFramework.toLowerCase() !== "docusaurus") {
+                appsFolders.push(applications[i].applicationName.toLowerCase());
+            }
         }
 
         // set repository name based on cloud provider
