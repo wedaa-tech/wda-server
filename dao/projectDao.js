@@ -8,9 +8,9 @@ projectSchema.statics = {
         return project.save();
     },
 
-    get: async function () {
+    get: async function (query) {
         try {
-            const projects = await this.find().lean();
+            const projects = await this.find(query).lean();
 
             if (projects && projects.length > 0) {
                 const projectPromises = projects.map(async project => {
