@@ -28,7 +28,7 @@ app.use(session({
 // call the database connectivity function
 db();
 
-app.use(express.json()); // Body parser
+app.use(express.json({limit: '50mb'}));
 app.use(cors());
 
 
