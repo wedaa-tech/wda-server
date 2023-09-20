@@ -197,6 +197,9 @@ exports.generate = function (req, res) {
     body.projectId = body.projectName + "-" + fileName; // To over ride the frontend value (and to maintain unique folder name)
     const metadata = body.metadata;
     // preprocessing the request json 
+    if(body.metadata === undefined){
+      delete body.parentId; // dereferencing the parent id from blueprint if save Project check is disabled.
+    }
     var deployment = false;
     if(body.deployment !== undefined) {
         deployment = true;
