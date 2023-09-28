@@ -110,3 +110,34 @@ exports.updateProject = function (req, res) {
       return res.status(500).send({ message: "Error updating project" });
     });
   };
+
+
+ /**
+  * Delete the Specific project and its architectures with given Id
+  * @param {*} req 
+  * @param {*} res 
+  */
+ exports.delete= function (req, res) {
+    const userId = req.kauth.grant.access_token.content.sub;
+    projectDao.getByProjectId({ _id: req.params.id, user_id: userId})
+    .then(result => {
+      if (Array.isArray(result) && result.length === 1) {
+        projectDao.deleteById({ _id: req.params.id })
+          .then(result => {
+            console.error("Project deleted successfully");
+            return res.status(200).send({ message: "Project deleted successfully" });
+          })
+          .catch(error => {
+            console.error("Error while deleting Project:", error);
+            return res.status(500).send({ message: "Error while deleting Project" });
+          });
+      } else {
+        console.log("No Project is present with Id: "+ req.params.id); 
+        return res.status(204).end();
+      }
+    })
+    .catch(error => {
+      console.error("Error retrieving Project:", error);
+      return res.status(500).send({ message: "Error retrieving Project" });
+    });
+  };

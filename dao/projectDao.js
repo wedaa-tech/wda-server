@@ -10,7 +10,7 @@ projectSchema.statics = {
 
     get: async function (query) {
         try {
-            const projects = await this.find(query).lean();
+            const projects = await this.find({ ...query, deleted: false }).lean();
 
             if (projects && projects.length > 0) {
                 const projectPromises = projects.map(async project => {
@@ -35,7 +35,7 @@ projectSchema.statics = {
     },
 
     getByProjectId: function (query) {
-        return this.find(query)
+        return this.find({ ...query, deleted: false })
             .lean()
             .then(results => {
                 if (results && results.length > 0) {
@@ -53,6 +53,16 @@ projectSchema.statics = {
 
     update: function (query, updateData) {
         return this.findOneAndUpdate(query, { $set: updateData }, { new: true });
+    },
+
+    deleteById: async function (query) {
+        const updatedDoc = await this.findOneAndUpdate(
+            query, 
+            { $set: { deleted: true } }, 
+            { new: true }
+        );
+        blueprintModel.deleteByParentId({ parentId: query._id });
+        return updatedDoc;
     },
 
     delete: function (query) {
