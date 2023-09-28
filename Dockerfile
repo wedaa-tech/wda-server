@@ -28,6 +28,9 @@ RUN cd jhipster-blueprints/generator-jhipster-gomicro && npm i && npm link
 # Install react-blueprint
 RUN cd jhipster-blueprints/generator-jhipster-react && npm i && npm link 
 
+# Install angular-blueprint
+RUN cd jhipster-blueprints/generator-jhipster-angular && npm i && npm link 
+
 # Install docusaurus-generator
 RUN cd jhipster-blueprints/docusaurus-generator && npm i && npm link 
 
