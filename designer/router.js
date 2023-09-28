@@ -20,7 +20,7 @@ module.exports = function(router) {
     router.get('/projects', projectService.getProjects);
     router.get('/projects/:id', projectService.getProject);
     router.put('/projects/:id', projectService.updateProject);
-    // TODO: Add delete functionality for the project
+    router.delete('/projects/:id', projectService.delete);
 
     router.get('/projects/architectures/:parentId', projectService.getArchitectures);
 

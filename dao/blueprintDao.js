@@ -74,7 +74,14 @@ blueprintSchema.statics = {
         }, projection)
           .sort({ createdAt: 1 })
           .then(results => results.map(result => result.request_json.projectName));
-      }
+      },
+
+    deleteByParentId: function (query) {
+        return this.updateMany(
+            query,
+            { $set: { deleted: true } }
+        ).exec();
+    }
       
 }
 
