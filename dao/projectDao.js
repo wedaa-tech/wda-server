@@ -16,6 +16,7 @@ projectSchema.statics = {
                 const projectPromises = projects.map(async project => {
                     const blueprintCount = await blueprintModel.countDocuments({
                         parentId: project._id,
+                        deleted: false
                     });
                     return {
                         id: project._id,

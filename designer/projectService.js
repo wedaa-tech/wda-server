@@ -17,7 +17,7 @@ exports.saveProject = function (req, res) {
         })
         .catch(error => {
             console.error(error);
-            return res.status(500).send({ message: "Error saving project" });
+            return res.status(500).send({ message: "Error creating project" });
         });
 }
 
@@ -55,9 +55,8 @@ exports.getProject = function (req, res) {
                 console.log("Retrieved project with Id: " + uniqueResult.id);
                 return res.status(200).send(uniqueResult);
             } else {
-                return res.status(200).send({
-                    message:"No project available with the given Id!"
-                });
+                console.log("No project available with the given Id!");
+                return res.status(204).end();
             }
         })
         .catch(error => {
