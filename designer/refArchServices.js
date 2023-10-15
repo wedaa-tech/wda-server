@@ -51,7 +51,6 @@ exports.saveRefArch = function (req,res) {
    * @param {*} res 
    */
   exports.get = function (req, res) {
-    const userId = req.kauth.grant.access_token.content.sub;
     refArchitectureDao.get({})
     .then(result => {
       if (Array.isArray(result) && result.length === 1) {
