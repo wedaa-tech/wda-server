@@ -98,14 +98,17 @@ exports.verifyProject = function(req,res) {
 exports.getBlueprint = function (req, res) {
   blueprintDao.getByProjectId({project_id: req.params.project_id})
   .then(result => {
-    if (Array.isArray(result) && result.length === 1) {
+    if(Array.isArray(result) && result.length === 0){
+      console.log("No blueprint with project Id: "+ req.params.project_id ); 
+      return res.status(204).end();
+    } else if (Array.isArray(result) && result.length === 1) {
         var uniqueResult = result[0];
         console.log("Retrieved blueprint with project Id: "+ uniqueResult.project_id ); 
-        return res.status(200).send(uniqueResult);
-      } else {
+      return res.status(200).send(uniqueResult);
+    } else {
         console.log("Retrieved blueprint with project Id: "+ result.project_id); 
         return res.status(200).send({result});
-      }
+    }
   })
   .catch(error => {
     console.error("Error retrieving blueprint:", error);
@@ -152,7 +155,7 @@ exports.deleteBlueprint = function (req, res) {
         });
     } else {
       console.log("No blueprint is present with project Id: "+ req.params.project_id); 
-      return res.status(204);
+      return res.status(204).end();;
     }
   })
   .catch(error => {

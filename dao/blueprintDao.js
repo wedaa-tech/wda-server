@@ -13,7 +13,7 @@ blueprintSchema.statics = {
     },
 
     getByProjectId: function (query) {
-        return this.find(query);
+        return this.find({...query, deleted: false});
     },
 
     getByUserId: function (query) {

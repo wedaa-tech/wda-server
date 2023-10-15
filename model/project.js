@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var projectSchema = new Schema({
     name:{
         type: String,
-        unique: true,
+        unique: false,
         required: true
     },
     user_id: {
@@ -29,5 +29,8 @@ var projectSchema = new Schema({
 }, {
     timestamps: true
 });
+
+// Define a unique compound index that enforces uniqueness only for non-deleted documents
+projectSchema.index({ name: 1, deleted: 1 }, { unique: true, partialFilterExpression: { deleted: false } });
 
 module.exports = projectSchema;
