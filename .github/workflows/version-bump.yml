@@ -1,0 +1,31 @@
+name: Version update
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Setup GIT
+        run: |
+          git config --global user.email "engineering@wedaa.tech"
+          git config --global user.name "engineering-wedaa"
+
+      - name: Bump package version
+        run: npm version patch -m "Bump version to %s [skip ci]"
+
+      - name: Push vesrion bump to the current branch
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.ACCESS_TOKEN }}
+          branch: main # ${{ github.head_ref }}
+          force: true
+ 
