@@ -1,0 +1,59 @@
+name: Version update
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: '18.x'
+      #     registry-url: 'https://registry.npmjs.org'
+
+      # - name: Install dependencies
+      #   run: npm install
+
+      - name: Setup GIT
+        run: |
+          git config --global user.email "rakesh.c@wedaa.tech"
+          git config --global user.name "rakesh-wedaa"
+
+      - name: Bump package version
+        run: npm version patch -m "Bump version to %s [skip ci]"
+
+      # - name: Publish to NPM
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #   run: npm publish
+
+      - name: Push vesrion bump to the current branch
+        uses: ad-m/github-push-action@v0.6.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # branch: main
+          branch: ${{ github.head_ref }}
+          force: true
+
+      # - name: Create GitHub release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: env.RELEASE_VERSION
+      #     release_name: Release ${{ env.RELEASE_VERSION }}
+      #     body: |
+      #       Release ${{ github.ref }}
+      #     draft: false
+      #     prerelease: false
+
+      # - name: Output release URL
+      #   run: echo ${{ steps.create_release.outputs.url }}
