@@ -24,6 +24,6 @@ jobs:
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.ACCESS_TOKEN }}
-          branch: main # ${{ github.head_ref }}
+          branch: test # ${{ github.head_ref }}
           force: true
  
