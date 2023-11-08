@@ -14,6 +14,7 @@ const Keycloak = require('keycloak-connect');
 const keycloakConfig = require('./config/keycloak-config.js').keycloakConfig;
 var wda = require('./designer/controller.js');
 var refArchService = require('./designer/refArchServices.js');
+var wizardService = require('./designer/wizardService.js');
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
@@ -66,6 +67,7 @@ var unprotectedRouter = express.Router();
 unprotectedRouter.post('/generate', wda.generate);
 unprotectedRouter.get('/blueprints/:project_id',wda.getBlueprint);
 unprotectedRouter.get('/refArchs',refArchService.get);
+unprotectedRouter.get('/wizard-template', wizardService.getWizardTemplate);
 app.use(unprotectedRouter);
 
 
