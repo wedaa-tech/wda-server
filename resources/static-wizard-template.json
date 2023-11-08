@@ -1,0 +1,251 @@
+{
+    "nodes": {
+        "UI_1": {
+            "id": "UI_1",
+            "type": "ResizableNode",
+            "position": {
+                "x": 230,
+                "y": 110
+            },
+            "data": {
+                "clientFramework": "react",
+                "applicationFramework": "react",
+                "packageName": "ui",
+                "Id": "UI_1",
+                "label": "",
+                "applicationName": "webapp",
+                "serverPort": "4200",
+                "withExample": "false",
+                "applicationType": "gateway",
+                "theme": "",
+                "authenticationType": "no"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 230,
+                "y": 110
+            },
+            "dragging": true
+        },
+        "Service_1": {
+            "id": "Service_1",
+            "type": "ResizableNode",
+            "position": {
+                "x": 460,
+                "y": 60
+            },
+            "data": {
+                "applicationFramework": "gomicro",
+                "prodDatabaseType": "mongodb",
+                "Id": "Service_1",
+                "label": "",
+                "applicationName": "backendone",
+                "packageName": "com.example.backendone",
+                "serverPort": "8081",
+                "applicationType": "microservice",
+                "authenticationType": "no"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 460,
+                "y": 60
+            },
+            "dragging": true
+        },
+        "Service_2": {
+            "id": "Service_2",
+            "type": "ResizableNode",
+            "position": {
+                "x": 460,
+                "y": 180
+            },
+            "data": {
+                "applicationFramework": "gomicro",
+                "prodDatabaseType": "mongodb",
+                "Id": "Service_2",
+                "label": "",
+                "applicationName": "backendtwo",
+                "packageName": "com.example.backendtwo",
+                "serverPort": "8082",
+                "applicationType": "microservice",
+                "authenticationType": "no"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 460,
+                "y": 180
+            },
+            "dragging": true
+        },
+        "Database_1": {
+            "id": "Database_1",
+            "type": "selectorNode",
+            "position": {
+                "x": 660,
+                "y": 60
+            },
+            "data": {
+                "prodDatabaseType": "mongodb",
+                "isConnected": true
+            },
+            "style": {
+                "border": "1px solid black",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 660,
+                "y": 60
+            },
+            "dragging": true
+        },
+        "Database_2": {
+            "id": "Database_2",
+            "type": "selectorNode",
+            "position": {
+                "x": 660,
+                "y": 180
+            },
+            "data": {
+                "prodDatabaseType": "mongodb",
+                "isConnected": true
+            },
+            "style": {
+                "border": "1px solid black",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 660,
+                "y": 180
+            },
+            "dragging": true
+        },
+        "group_1": {
+            "id": "group_1",
+            "type": "GroupNode",
+            "position": {
+                "x": 210,
+                "y": 10
+            },
+            "data": {
+                "label": "application architecture",
+                "Id": "group_1",
+                "type": "Group",
+                "groupName": "application architecture"
+            },
+            "style": {
+                "border": "1px dashed",
+                "borderRadius": "15px",
+                "width": 610,
+                "height": 240,
+                "zIndex": -1
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 210,
+                "y": 20
+            }
+        }
+    },
+    "edges": {
+        "UI_1-Service_1": {
+            "id": "UI_1-Service_1",
+            "source": "UI_1",
+            "sourceHandle": "source.Right",
+            "target": "Service_1",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "#000",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {
+                "client": "webapp",
+                "server": "backendone",
+                "type": "synchronous",
+                "framework": "rest-api"
+            },
+            "style": {
+                "stroke": "black"
+            }
+        },
+        "UI_1-Service_2": {
+            "id": "UI_1-Service_2",
+            "source": "UI_1",
+            "sourceHandle": "source.Right",
+            "target": "Service_2",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "#000",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {
+                "client": "webapp",
+                "server": "backendtwo",
+                "type": "synchronous",
+                "framework": "rest-api"
+            },
+            "style": {
+                "stroke": "black"
+            }
+        },
+        "Service_2-Database_2": {
+            "id": "Service_2-Database_2",
+            "source": "Service_2",
+            "sourceHandle": "source.Right",
+            "target": "Database_2",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {},
+            "style": {
+                "stroke": "black"
+            }
+        },
+        "Service_1-Database_1": {
+            "id": "Service_1-Database_1",
+            "source": "Service_1",
+            "sourceHandle": "source.Right",
+            "target": "Database_1",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {},
+            "style": {
+                "stroke": "black"
+            }
+        }
+    }
+}
