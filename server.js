@@ -67,7 +67,7 @@ var unprotectedRouter = express.Router();
 unprotectedRouter.post('/generate', wda.generate);
 unprotectedRouter.get('/blueprints/:project_id',wda.getBlueprint);
 unprotectedRouter.get('/refArchs',refArchService.get);
-unprotectedRouter.get('/wizard-template', wizardService.getWizardTemplate);
+unprotectedRouter.post('/wizard-template', wizardService.getWizardTemplate);
 app.use(unprotectedRouter);
 
 
