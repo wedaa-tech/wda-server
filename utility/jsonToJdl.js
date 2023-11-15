@@ -1,9 +1,9 @@
 const blueprintDao = require('../dao/blueprintDao');
-const fs = require("fs");
-
+const refArchDao = require('../dao/refArchitectureDao');
+const fs = require('fs');
 
 exports.createJdlFromJson = (fileName, metadata, req, res) => {
-    console.log("processing json to jdl with the file name:", fileName);
+    console.log('processing json to jdl with the file name:', fileName);
 
     // read the JSON file
     const jsonData = JSON.parse(fs.readFileSync(fileName + '.json', 'utf8'));
@@ -18,39 +18,38 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
     var logManagementType = false;
     var serviceDiscoveryType = false;
 
-    var blueprints = ["go", "gomicro", "react"];
-    var clientFrameworks = ["react", "angular", "vue"];
-    var serviceDiscoveryTypes = ["eureka", "consul"]
-    var messageBrokers = ["rabbitmq", "kafka"];
-    var databaseTypes = ["postgresql", "mysql", "mongodb"];
-    var logManagementTypes = ["eck"];
-
+    var blueprints = ['go', 'gomicro', 'react'];
+    var clientFrameworks = ['react', 'angular', 'vue'];
+    var serviceDiscoveryTypes = ['eureka', 'consul'];
+    var messageBrokers = ['rabbitmq', 'kafka'];
+    var databaseTypes = ['postgresql', 'mysql', 'mongodb'];
+    var logManagementTypes = ['eck'];
 
     for (let i = 0; i < applicationCount; i++) {
         // Skip jdl config formation if applicationFramework is docusaurus
-        if(applications[i].applicationFramework !== undefined && applications[i].applicationFramework === "docusaurus"){
+        if (applications[i].applicationFramework !== undefined && applications[i].applicationFramework === 'docusaurus') {
             continue;
         }
         var applicationError = new Map();
         var applicationErrorList = [];
         // Error handling
-        if (applications[i].applicationName === undefined || applications[i].applicationName === "") {
-            applicationErrorList.push("Service Name cannot be empty");
+        if (applications[i].applicationName === undefined || applications[i].applicationName === '') {
+            applicationErrorList.push('Service Name cannot be empty');
         }
-        if (applications[i].applicationType === undefined || applications[i].applicationType === "") {
-            applicationErrorList.push("Service Type cannot be empty");
+        if (applications[i].applicationType === undefined || applications[i].applicationType === '') {
+            applicationErrorList.push('Service Type cannot be empty');
         }
-        if (applications[i].packageName === undefined || applications[i].packageName === "") {
-            applicationErrorList.push("Package Name cannot be empty");
+        if (applications[i].packageName === undefined || applications[i].packageName === '') {
+            applicationErrorList.push('Package Name cannot be empty');
         }
-        if (applications[i].authenticationType === undefined || applications[i].authenticationType === "") {
-            applicationErrorList.push("Authentication Type cannot be empty");
+        if (applications[i].authenticationType === undefined || applications[i].authenticationType === '') {
+            applicationErrorList.push('Authentication Type cannot be empty');
         }
         if (applications[i].prodDatabaseType !== undefined && !databaseTypes.includes(applications[i].prodDatabaseType)) {
-            applicationErrorList.push("Unknow Database Type, database must be among the following: " + databaseTypes);
+            applicationErrorList.push('Unknow Database Type, database must be among the following: ' + databaseTypes);
         }
-        if (applications[i].serverPort === undefined || applications[i].serverPort === "") {
-            applicationErrorList.push("Server Port cannot be empty");
+        if (applications[i].serverPort === undefined || applications[i].serverPort === '') {
+            applicationErrorList.push('Server Port cannot be empty');
         }
 
         // return error response
@@ -70,12 +69,20 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true;
         }
-        if (applications[i].applicationType !== undefined && applications[i].applicationType.toLowerCase() === "gateway" &&
-            applications[i].withExample !== undefined && applications[i].withExample === "true") {
+        if (
+            applications[i].applicationType !== undefined &&
+            applications[i].applicationType.toLowerCase() === 'gateway' &&
+            applications[i].withExample !== undefined &&
+            applications[i].withExample === 'true'
+        ) {
             withExample = true;
         }
-        if (applications[i].applicationType !== undefined && applications[i].applicationType.toLowerCase() === "gateway" &&
-            applications[i].clientFramework !== undefined && clientFrameworks.includes(applications[i].clientFramework)) {
+        if (
+            applications[i].applicationType !== undefined &&
+            applications[i].applicationType.toLowerCase() === 'gateway' &&
+            applications[i].clientFramework !== undefined &&
+            clientFrameworks.includes(applications[i].clientFramework)
+        ) {
             clientFramework = true;
         }
         if (applications[i].serviceDiscoveryType !== undefined && serviceDiscoveryTypes.includes(applications[i].serviceDiscoveryType)) {
@@ -88,14 +95,17 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
             messageBroker = true;
         }
         if (applications[i].prodDatabaseType === undefined) {
-            databaseType = "no";
+            databaseType = 'no';
         }
-        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === "mongodb") {
-            databaseType = "mongodb";
+        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
+            databaseType = 'mongodb';
         }
-        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() !== "mongodb"
-            && databaseTypes.includes(applications[i].prodDatabaseType)) {
-            databaseType = "sql";
+        if (
+            applications[i].prodDatabaseType !== undefined &&
+            applications[i].prodDatabaseType.toLowerCase() !== 'mongodb' &&
+            databaseTypes.includes(applications[i].prodDatabaseType)
+        ) {
+            databaseType = 'sql';
         }
 
         // Conversion of json to jdl (Application Options)
@@ -107,9 +117,15 @@ application {
         packageName ${applications[i].packageName.toLowerCase()}
         authenticationType ${applications[i].authenticationType.toLowerCase()}
         serverPort ${applications[i].serverPort}
-        ${databaseType === "no" ? 'databaseType no\n        prodDatabaseType no' : ''}
-        ${databaseType === "mongodb" ? 'databaseType mongodb' : ''}
-        ${databaseType === "sql" ? `databaseType sql\n        devDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}` : ''}
+        ${databaseType === 'no' ? 'databaseType no\n        prodDatabaseType no' : ''}
+        ${databaseType === 'mongodb' ? 'databaseType mongodb' : ''}
+        ${
+            databaseType === 'sql'
+                ? `databaseType sql\n        devDatabaseType ${applications[
+                      i
+                  ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
+                : ''
+        }
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : 'serviceDiscoveryType no'}
@@ -131,77 +147,86 @@ application {
     if (communications !== undefined) {
         const communicationCount = Object.keys(communications).length;
         for (let i = 0; i < communicationCount; i++) {
-            if (communications[i].client !== "" && communications[i].server !== "" && communicationBrokers.includes(communications[i].framework.toLowerCase())) {
+            if (
+                communications[i].client !== '' &&
+                communications[i].server !== '' &&
+                communicationBrokers.includes(communications[i].framework.toLowerCase())
+            ) {
                 const data = `
 communication {
     client "${communications[i].client.toLowerCase()}"
     server "${communications[i].server.toLowerCase()}"
-    ${communications[i].type.toLowerCase() === "asynchronous" ? `type "async"` : `type "sync"`}
+    ${communications[i].type.toLowerCase() === 'asynchronous' ? `type "async"` : `type "sync"`}
     framework "${communications[i].framework.toLowerCase()}"
 }
 
 `;
                 communicationData.push(data);
-            }
-            else{
-                console.log("communication framework is not supported, must below to one of the following: " + communicationBrokers);
-                return res.status(400).send("communication framework is not supported, must below to one of the following: " + communicationBrokers);
+            } else {
+                console.log('communication framework is not supported, must below to one of the following: ' + communicationBrokers);
+                return res
+                    .status(400)
+                    .send('communication framework is not supported, must below to one of the following: ' + communicationBrokers);
             }
         }
     }
 
-    // Deployment 
+    // Deployment
     const deployment = jsonData.deployment;
     var deploymentData;
     if (deployment !== undefined) {
-        var deploymentTypes = [ "kubernetes" ];
-        var cloudProviders = [ "aws", "azure" ];
-        var localProviders = [ "minikube" ];
+        var deploymentTypes = ['kubernetes'];
+        var cloudProviders = ['aws', 'azure'];
+        var localProviders = ['minikube'];
         // Error handling
         let deploymentError = [];
-        if (deployment.cloudProvider === undefined || deployment.cloudProvider === "") {
-            deploymentError.push("Cloud provider cannot be empty");
+        if (deployment.cloudProvider === undefined || deployment.cloudProvider === '') {
+            deploymentError.push('Cloud provider cannot be empty');
         }
         if (deployment.cloudProvider !== undefined) {
-            if (deployment.cloudProvider === "aws") {
-                if (deployment.awsAccountId === undefined || deployment.awsAccountId === "") {
-                    deploymentError.push("AWS account id cannot be empty");
+            if (deployment.cloudProvider === 'aws') {
+                if (deployment.awsAccountId === undefined || deployment.awsAccountId === '') {
+                    deploymentError.push('AWS account id cannot be empty');
                 }
-                if (deployment.awsRegion === undefined || deployment.awsRegion === "") {
-                    deploymentError.push("AWS region cannot be empty");
+                if (deployment.awsRegion === undefined || deployment.awsRegion === '') {
+                    deploymentError.push('AWS region cannot be empty');
                 }
-            } else if (deployment.cloudProvider === "azure") {
-                if (deployment.subscriptionId === undefined || deployment.subscriptionId === "") {
-                    deploymentError.push("Azure subscription id cannot be empty");
+            } else if (deployment.cloudProvider === 'azure') {
+                if (deployment.subscriptionId === undefined || deployment.subscriptionId === '') {
+                    deploymentError.push('Azure subscription id cannot be empty');
                 }
-                if (deployment.tenantId === undefined || deployment.tenantId === "") {
-                    deploymentError.push("Azure tenant id cannot be empty");
+                if (deployment.tenantId === undefined || deployment.tenantId === '') {
+                    deploymentError.push('Azure tenant id cannot be empty');
                 }
             }
         }
-        if(cloudProviders.includes(deployment.cloudProvider)){
-            if (deployment.deploymentType === undefined || deployment.deploymentType === "") {
-                deploymentError.push("Deployment Type cannot be empty");
+        if (cloudProviders.includes(deployment.cloudProvider)) {
+            if (deployment.deploymentType === undefined || deployment.deploymentType === '') {
+                deploymentError.push('Deployment Type cannot be empty');
             }
-            if (deployment.clusterName === undefined || deployment.clusterName === "") {
-                deploymentError.push("Cluster Name cannot be empty");
+            if (deployment.clusterName === undefined || deployment.clusterName === '') {
+                deploymentError.push('Cluster Name cannot be empty');
             }
-            if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === "") {
-                deploymentError.push("Kubernetes namespace cannot be empty");
+            if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === '') {
+                deploymentError.push('Kubernetes namespace cannot be empty');
             }
-            if (deployment.ingressType === undefined || deployment.ingressType === "") {
-                deploymentError.push("Ingress Type cannot be empty");
+            if (deployment.ingressType === undefined || deployment.ingressType === '') {
+                deploymentError.push('Ingress Type cannot be empty');
             }
-            if ((deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === true)
-                && (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === "")) {
-                deploymentError.push("Storage Class Name cannot be empty");
+            if (
+                deployment.kubernetesUseDynamicStorage !== undefined &&
+                deployment.kubernetesUseDynamicStorage === true &&
+                (deployment.kubernetesStorageClassName === undefined || deployment.kubernetesStorageClassName === '')
+            ) {
+                deploymentError.push('Storage Class Name cannot be empty');
             }
         } else if (localProviders.includes(deployment.cloudProvider)) {
-            if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === "") {
-                deploymentError.push("Kubernetes namespace cannot be empty");
+            if (deployment.kubernetesNamespace === undefined || deployment.kubernetesNamespace === '') {
+                deploymentError.push('Kubernetes namespace cannot be empty');
             }
-            if (deployment.dockerRepositoryName === undefined || deployment.dockerRepositoryName === "") {
-                deploymentError.push("docker repository cannot be empty");
+
+            if (deployment.dockerRepositoryName === undefined || deployment.dockerRepositoryName === '') {
+                deploymentError.push('docker repository cannot be empty');
             }
         }
 
@@ -213,55 +238,55 @@ communication {
 
         // preprocessing deployment block, before jdl generation
 
-        // set apps folders 
+        // set apps folders
         const appsFolders = [];
         for (let i = 0; i < applicationCount; i++) {
             // Skip k8s config if applicationFramework is docusaurus
-            if (applications[i].applicationFramework.toLowerCase() !== "docusaurus") {
+            if (applications[i].applicationFramework.toLowerCase() !== 'docusaurus') {
                 appsFolders.push(applications[i].applicationName.toLowerCase());
             }
         }
 
         // set repository name based on cloud provider
         var dockerRepositoryName;
-        if (deployment.cloudProvider === "aws") {
+        if (deployment.cloudProvider === 'aws') {
             dockerRepositoryName = `${deployment.awsAccountId}.dkr.ecr.${deployment.awsRegion}.amazonaws.com`;
-        } else if (deployment.cloudProvider === "azure") {
+        } else if (deployment.cloudProvider === 'azure') {
             dockerRepositoryName = `acr${deployment.projectName}.azurecr.io`;
-        } else if (deployment.cloudProvider === "minikube") {
+        } else if (deployment.cloudProvider === 'minikube') {
             dockerRepositoryName = deployment.dockerRepositoryName;
         }
 
         // set kubernetesServiceType to Ingress if ingressType is istio
         let ingressType = false;
-        if (deployment.ingressType === "istio" && deployment.ingressDomain !== undefined && deployment.ingressDomain !== "") {
+        if (deployment.ingressType === 'istio' && deployment.ingressDomain !== undefined && deployment.ingressDomain !== '') {
             ingressType = true;
         }
 
         // set serviceDiscoveryType if only present
         let serviceDiscoveryType = false;
-        if (deployment.serviceDiscoveryType !== undefined && deployment.serviceDiscoveryType !== "") {
+        if (deployment.serviceDiscoveryType !== undefined && deployment.serviceDiscoveryType !== '') {
             serviceDiscoveryType = true;
         }
 
         // set kubernetesUseDynamicStorage if only present
         let dynamicStorage = false;
-        if (deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === "true") {
+        if (deployment.kubernetesUseDynamicStorage !== undefined && deployment.kubernetesUseDynamicStorage === 'true') {
             dynamicStorage = true;
         }
 
-        // set deploymentType 
-        var deploymentType = "kubernetes";
+        // set deploymentType
+        var deploymentType = 'kubernetes';
         if (deployment.deploymentType !== undefined && deploymentTypes.includes(deployment.deploymentType.toLowerCase())) {
             deploymentType = deployment.deploymentType.toLowerCase();
-        } 
+        }
 
-        // set monitoring as istio for external-lb 
+        // set monitoring as istio for external-lb
         //TODO: should be changed to some other attribute, else monitoring with prometheus provided by jhipster won't work
-        var monitoring = "no";
-        if (deployment.monitoring !== undefined && deployment.monitoring !== "" && deployment.monitoring === "true") {
-            monitoring = "istio";
-        } 
+        var monitoring = 'no';
+        if (deployment.monitoring !== undefined && deployment.monitoring !== '' && deployment.monitoring === 'true') {
+            monitoring = 'istio';
+        }
 
         // Conversion of json to jdl (Deployment Options)
         deploymentData = `
@@ -273,11 +298,15 @@ deployment {
     ${serviceDiscoveryType ? `serviceDiscoveryType ${deployment.serviceDiscoveryType.toLowerCase()}` : `serviceDiscoveryType no`}
     ${ingressType ? `kubernetesServiceType Ingress` : `kubernetesServiceType LoadBalancer`}
     ${ingressType ? `istio true` : `istio false`}
-    ${ingressType ? `ingressDomain "${deployment.ingressDomain.toLowerCase()}"`: ``}
+    ${ingressType ? `ingressDomain "${deployment.ingressDomain.toLowerCase()}"` : ``}
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
-    ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"` : ''}
-    ${dynamicStorage && deployment.cloudProvider === "aws" ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
-    ${monitoring === "istio" ? `monitoring istio` : `monitoring no`}
+    ${
+        dynamicStorage && deployment.kubernetesStorageClassName !== undefined
+            ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
+            : ''
+    }
+    ${dynamicStorage && deployment.cloudProvider === 'aws' ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
+    ${monitoring === 'istio' ? `monitoring istio` : `monitoring no`}
 }
 
 `;
@@ -294,32 +323,52 @@ deployment {
     const combinedArrayData = Array.from(combinedData);
     const concatenatedJDL = combinedArrayData.join(' ');
 
-    // persist the blueprint to DB, if there is no error 
-    var blueprint = {
-        project_id: jsonData.projectId,
-        request_json: jsonData,
-        metadata: metadata,
-        user_id: req.kauth?.grant?.access_token?.content?.sub,
-        parentId: req.body?.parentId,
-        imageUrl: req.body?.imageUrl,
-        description: req.body?.description
-    };
-    blueprintDao.createOrUpdate({project_id: blueprint.project_id},blueprint)
-        .then(savedBlueprint => {
-            console.log("Blueprint was added successfully!");
-        })
-        .catch(error => {
-            console.error(error);
-        });
-
-    fs.writeFile(fileName + '.jdl', concatenatedJDL, (err) => {
+    // persist the blueprint to DB, if there is no error
+    if (req.body?.parentId === 'Admin') {
+        var architecture = {
+            architecture_id: jsonData.projectId,
+            name: jsonData.projectName,
+            request_json: jsonData,
+            metadata: metadata,
+            user_id: req.kauth?.grant?.access_token?.content?.sub,
+            type: 'APPLICATION',
+            imageUrl: req.body?.imageUrl,
+            description: req.body?.description,
+            published: req.body?.published || false,
+        };
+        refArchDao
+            .createOrUpdate({ architecture_id: architecture.architecture_id }, architecture)
+            .then(savedArchitecture => {
+                console.log(savedArchitecture);
+                console.log('Architecture was added successfully!');
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    } else {
+        var blueprint = {
+            project_id: jsonData.projectId,
+            request_json: jsonData,
+            metadata: metadata,
+            user_id: req.kauth?.grant?.access_token?.content?.sub,
+            parentId: req.body?.parentId,
+            imageUrl: req.body?.imageUrl,
+            description: req.body?.description,
+        };
+        blueprintDao
+            .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
+            .then(savedBlueprint => {
+                console.log('Blueprint was added successfully!');
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+    fs.writeFile(fileName + '.jdl', concatenatedJDL, err => {
         if (err) throw err;
         console.log('Json data written to JDL file');
-        fs.writeFile(`${jsonData.projectId}/blueprints/apps-blueprint.jdl`,
-            concatenatedJDL,
-            (err) => {
-                if (err) throw err;
-            }
-        );
+        fs.writeFile(`${jsonData.projectId}/blueprints/apps-blueprint.jdl`, concatenatedJDL, err => {
+            if (err) throw err;
+        });
     });
 };
