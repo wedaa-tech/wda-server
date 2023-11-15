@@ -261,7 +261,6 @@ exports.generate = function (req, res) {
             },
         );
     }, 5000);
-    console.log(res, 'pospadps');
 };
 
 /**
