@@ -33,6 +33,12 @@ db();
 app.use(express.json({limit: '50mb'}));
 app.use(cors());
 
+// Middleware to set Access-Control-Expose-Headers globally
+app.use((req, res, next) => {
+  res.header('Access-Control-Expose-Headers', '*');
+  next();
+});
+
 
 // Provide the session store to the Keycloak so that sessions
 // can be invalidated from the Keycloak console callback.
