@@ -14,7 +14,6 @@ module.exports = function (router) {
     router.post('/refArchs', refArchService.saveRefArch);
     router.delete('/refArchs/:id', refArchService.deleterefArchById);
     router.put('/refArchs/:id', refArchService.updateRefArchs);
-    router.get('/refArchs', refArchService.get);
     router.put('/publish/:id', refArchService.togglePublishedById);
 
     router.post('/projects', projectService.saveProject);
