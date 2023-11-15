@@ -2,10 +2,10 @@ const path = require('path');
 const fs = require('fs');
 
 /**
-  * Get wizard template based on input parameters
-  * @param {*} req 
-  * @param {*} res 
-  */
+ * Get wizard template based on input parameters
+ * @param {*} req
+ * @param {*} res
+ */
 exports.getWizardTemplate = function (req, res) {
     const requestBody = req.body;
     const missingParameters = [];
@@ -33,10 +33,10 @@ exports.getWizardTemplate = function (req, res) {
                 // Replace "mongodb" with requestBody.database, "react" with requestBody.frontend, and "spring" with requestBody.backend
                 const jsonString = JSON.stringify(jsonData);
                 const modifiedJsonString = jsonString
-                .replace(/"mongodb"/g, `"${requestBody.database}"`)
-                .replace(/"react"/g, `"${requestBody.frontend}"`)
-                .replace(/"gomicro"/g, `"${requestBody.backend}"`);
-      
+                    .replace(/"mongodb"/g, `"${requestBody.database}"`)
+                    .replace(/"react"/g, `"${requestBody.frontend}"`)
+                    .replace(/"gomicro"/g, `"${requestBody.backend}"`);
+
                 // Parse the modified JSON data
                 jsonData = JSON.parse(modifiedJsonString);
 

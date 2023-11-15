@@ -41,7 +41,7 @@
             "type": "synchronous",
             "framework": "rest-api"
         },
-         "1": {
+        "1": {
             "client": "client",
             "server": "gateway",
             "type": "synchronous",
