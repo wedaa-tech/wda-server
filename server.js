@@ -37,10 +37,9 @@ app.use(cors());
 
 // Middleware to set Access-Control-Expose-Headers globally
 app.use((req, res, next) => {
-  res.header('Access-Control-Expose-Headers', '*');
-  next();
+    res.header('Access-Control-Expose-Headers', '*');
+    next();
 });
-
 
 // Provide the session store to the Keycloak so that sessions
 // can be invalidated from the Keycloak console callback.
@@ -74,8 +73,8 @@ wdaRoutes(router);
 //initialise unprotected express router
 var unprotectedRouter = express.Router();
 unprotectedRouter.post('/generate', wda.generate);
-unprotectedRouter.get('/blueprints/:project_id',wda.getBlueprint);
-unprotectedRouter.get('/refArchs',refArchService.get);
+unprotectedRouter.get('/blueprints/:project_id', wda.getBlueprint);
+unprotectedRouter.get('/refArchs', refArchService.get);
 unprotectedRouter.post('/wizard-template', wizardService.getWizardTemplate);
 app.use(unprotectedRouter);
 
@@ -229,7 +228,6 @@ app.post('/generate', (req, res) => {
 
     // Child process uses the above generated json file to write the terrafrom files.
     generateTerrafromFiles(fileName, folderPath, res);
-
 });
 
 /**

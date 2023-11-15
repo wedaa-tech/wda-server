@@ -10,7 +10,7 @@
             "clientFramework": "React",
             "serviceDiscoveryType": "Eureka",
             "serverPort": "9000",
-            "entities": ["efg","abcd"]
+            "entities": ["efg", "abcd"]
         },
         "1": {
             "applicationName": "be1",
@@ -37,11 +37,10 @@
                         "tupleName": "something_2",
                         "tupleType": "String"
                     }
-                    
                 },
                 "entityName": "abcd"
             },
-            "1":{
+            "1": {
                 "entityTuples": {
                     "0": {
                         "tupleName": "something",
@@ -63,7 +62,7 @@
         "kubernetesStorageClassName": "demosc"
     },
     "wdi": {
-        "projectName": "flyerr", 
+        "projectName": "flyerr",
         "domain": "flyerr.com",
         "cloudProvider": "aws",
         "orchestration": "kubernetes",
@@ -74,10 +73,7 @@
         "clusterName": "demo-cluster",
         "ingress": "istio",
         "generateInfra": "",
-        "appFolders": [
-            "fe",
-            "be1"
-        ],
+        "appFolders": ["fe", "be1"],
         "monitoring": "true",
         "k8sWebUI": "true"
     },

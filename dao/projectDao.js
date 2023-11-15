@@ -16,7 +16,7 @@ projectSchema.statics = {
                 const projectPromises = projects.map(async project => {
                     const blueprintCount = await blueprintModel.countDocuments({
                         parentId: project._id,
-                        deleted: false
+                        deleted: false,
                     });
                     return {
                         id: project._id,
@@ -57,11 +57,7 @@ projectSchema.statics = {
     },
 
     deleteById: async function (query) {
-        const updatedDoc = await this.findOneAndUpdate(
-            query, 
-            { $set: { deleted: true } }, 
-            { new: true }
-        );
+        const updatedDoc = await this.findOneAndUpdate(query, { $set: { deleted: true } }, { new: true });
         blueprintModel.deleteByParentId({ parentId: query._id });
         return updatedDoc;
     },
