@@ -324,7 +324,7 @@ deployment {
     const concatenatedJDL = combinedArrayData.join(' ');
 
     // persist the blueprint to DB, if there is no error
-    if (req.body?.parentId === 'Admin') {
+    if (req.body?.parentId === 'admin') {
         var architecture = {
             architecture_id: jsonData.projectId,
             name: jsonData.projectName,
