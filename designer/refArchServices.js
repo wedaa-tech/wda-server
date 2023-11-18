@@ -16,6 +16,7 @@ exports.saveRefArch = function (req, res) {
     const metadata = body.metadata;
     if (body.metadata === undefined) {
         delete body.parentId; 
+    }
     var deployment = false;
     if (body.deployment !== undefined) {
         deployment = true;

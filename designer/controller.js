@@ -63,7 +63,7 @@ exports.saveAsDraft = function (req, res) {
         parentId: req.body?.parentId,
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
-        parentId: req.body?.parentId||'6544cc6eb0a196d64cf19b69', //dummy parentId value
+        parentId: req.body?.parentId||'default', //default parentId value for testing
     };
     blueprintDao
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
