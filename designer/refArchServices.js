@@ -1,4 +1,5 @@
 const refArchitectureDao = require('../dao/refArchitectureDao');
+const { nanoid } = require('nanoid');
 
 /**
  * save refArchitecture to the db
@@ -6,11 +7,35 @@ const refArchitectureDao = require('../dao/refArchitectureDao');
  * @param {*} res
  */
 exports.saveRefArch = function (req, res) {
-    const userId = req.kauth.grant.access_token.content.sub;
-    const refArchitecture = req.body;
-    refArchitecture.user_id = userId;
+    const body = req.body;
+    const userId = req.kauth?.grant?.access_token?.content?.sub;
+    console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
+
+    const fileName = nanoid(9);
+    if (!body.projectId) body.projectId = body.projectName + '-' + fileName; // To over ride the frontend value (and to maintain unique folder name)
+    const metadata = body.metadata;
+    if (body.metadata === undefined) {
+        delete body.parentId; 
+    var deployment = false;
+    if (body.deployment !== undefined) {
+        deployment = true;
+        body.deployment.projectName = body.projectName;
+    }
+
+    var architecture = {
+        architecture_id: body.projectId,
+        name: body.projectName,
+        request_json: { projectName: body.projectName },
+        metadata: metadata,
+        user_id: req.kauth?.grant?.access_token?.content?.sub,
+        type: 'APPLICATION',
+        imageUrl: req.body?.imageUrl,
+        description: req.body?.description,
+        published: req.body?.published || false,
+    };
+
     refArchitectureDao
-        .create(refArchitecture)
+        .createOrUpdate({ architecture_id: architecture.architecture_id }, architecture)
         .then(savedArchitecture => {
             console.log('Architecture was added successfully!');
             return res.status(200).send({ message: 'Architecture was added successfully!' });
@@ -172,7 +197,7 @@ exports.togglePublishedById = function (req, res) {
                 refArchitectureDao
                     .update({ architecture_id: req.params.id }, { published: updatedPublishedValue })
                     .then(updatedResult => {
-                        console.log(`Published value for Architecture with name ${req.params.name} is updated to ${updatedPublishedValue}`);
+                        console.log(`Published value for Architecture with Id ${req.params.id} is updated to ${updatedPublishedValue}`);
                         return res.status(200).send({ message: `Published value updated successfully to ${updatedPublishedValue}` });
                     })
                     .catch(error => {

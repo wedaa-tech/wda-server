@@ -40,17 +40,39 @@ exports.updateBlueprint = function (req, res) {
  * @param {*} res
  */
 exports.saveAsDraft = function (req, res) {
-    const userId = req.kauth.grant.access_token.content.sub;
-    const blueprint = req.body;
+    const body = req.body;
+    const userId = req.kauth?.grant?.access_token?.content?.sub;
+    console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
+    const fileName = nanoid(9);
+    if (!body.projectId) body.projectId = body.projectName + '-' + fileName; 
+    const metadata = body.metadata;
+    if (body.metadata === undefined) {
+        delete body.parentId; 
+    }
+    var deployment = false;
+    if (body.deployment !== undefined) {
+        deployment = true;
+        body.deployment.projectName = body.projectName;
+    }
+
+    var blueprint = {
+        project_id: body.projectId,
+        request_json: { projectName: body.projectName },
+        metadata: body.metadata,
+        user_id: req.kauth?.grant?.access_token?.content?.sub,
+        parentId: req.body?.parentId,
+        imageUrl: req.body?.imageUrl,
+        description: req.body?.description,
+        parentId: req.body?.parentId||'6544cc6eb0a196d64cf19b69', //dummy parentId value
+    };
     blueprintDao
-        .create(blueprint)
+        .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
         .then(savedBlueprint => {
             console.log('Blueprint was added successfully!');
             return res.sendStatus(200);
         })
         .catch(error => {
             console.error(error);
-            parentId;
             return res.status(500).send({ message: 'Error saving blueprint' });
         });
 };
