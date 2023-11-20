@@ -44,17 +44,9 @@ exports.saveAsDraft = function (req, res) {
     const userId = req.kauth?.grant?.access_token?.content?.sub;
     console.log('Saving project: ' + body.projectName + ', for user: ' + userId);
     const fileName = nanoid(9);
-    if (!body.projectId) body.projectId = body.projectName + '-' + fileName;
-    const metadata = body.metadata;
-    if (body.metadata === undefined) {
-        delete body.parentId;
+    if (!body.projectId) {
+        body.projectId = body.projectName + '-' + fileName;
     }
-    var deployment = false;
-    if (body.deployment !== undefined) {
-        deployment = true;
-        body.deployment.projectName = body.projectName;
-    }
-
     var blueprint = {
         project_id: body.projectId,
         request_json: { projectName: body.projectName },
@@ -68,7 +60,7 @@ exports.saveAsDraft = function (req, res) {
     blueprintDao
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
         .then(savedBlueprint => {
-            console.log('Blueprint was added successfully!');
+            console.log('Blueprint saved successfully!');
             return res.sendStatus(200);
         })
         .catch(error => {
