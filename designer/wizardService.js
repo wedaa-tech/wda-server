@@ -53,7 +53,7 @@ exports.getWizardTemplate = function (req, res) {
                             .replace(/"gomicro"/g, `"${requestBody.backend}"`);
                         // Replace "react" with requestBody.frontend, if the scope is fullStack
                         if (requestBody.AT === "fullStack") {
-                            modifiedJsonString = jsonString
+                            modifiedJsonString = modifiedJsonString
                                 .replace(/"react"/g, `"${requestBody.frontend}"`);
                         }
                         const globalService = [];
@@ -90,42 +90,6 @@ exports.getWizardTemplate = function (req, res) {
                                     .replace(/"selectorNode3"/g, `"selectorNode6"`)
                             }
                         }
-                        // Parse the modified JSON data
-                        jsonData = JSON.parse(modifiedJsonString);
-                        // Send the JSON data as a response
-                        res.json(jsonData);
-                    }
-                });
-            } else {
-                // If one or more required parameters are missing, return an error response
-                res.status(400).json({ error: `Missing parameters: ${missingParameters.join(', ')}` });
-            }
-        } else if (requestBody.AT === "spa") {
-            const requiredParameters = ['frontend', 'authentication'];
-            const missingParameters = [];
-            // Check for missing parameters
-            requiredParameters.forEach(param => {
-                if (!requestBody[param]) {
-                    missingParameters.push(param);
-                }
-            });
-            if (missingParameters.length === 0) {
-                // All required parameters are present, proceed with reading the JSON file
-                var filePath = path.join(__dirname, '..', 'resources/wizard/spa', `00.json`);
-                fs.readFile(filePath, 'utf8', (err, data) => {
-                    if (err) {
-                        console.error(err);
-                        res.status(500).send('Error reading JSON file.');
-                    } else {
-                        // Parse the JSON data
-                        var jsonData = JSON.parse(data);
-                        if (requestBody.authentication === "skip") {
-                            delete jsonData.nodes.authenticationType;
-                            delete jsonData.edges;
-                        }
-                        const jsonString = JSON.stringify(jsonData);
-                        let modifiedJsonString = jsonString
-                            .replace(/"react"/g, `"${requestBody.frontend}"`);
                         // Parse the modified JSON data
                         jsonData = JSON.parse(modifiedJsonString);
                         // Send the JSON data as a response
