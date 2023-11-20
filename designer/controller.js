@@ -44,10 +44,10 @@ exports.saveAsDraft = function (req, res) {
     const userId = req.kauth?.grant?.access_token?.content?.sub;
     console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
     const fileName = nanoid(9);
-    if (!body.projectId) body.projectId = body.projectName + '-' + fileName; 
+    if (!body.projectId) body.projectId = body.projectName + '-' + fileName;
     const metadata = body.metadata;
     if (body.metadata === undefined) {
-        delete body.parentId; 
+        delete body.parentId;
     }
     var deployment = false;
     if (body.deployment !== undefined) {
@@ -63,7 +63,7 @@ exports.saveAsDraft = function (req, res) {
         parentId: req.body?.parentId,
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
-        parentId: req.body?.parentId||'default', //default parentId value for testing
+        parentId: req.body?.parentId,
     };
     blueprintDao
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
