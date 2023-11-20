@@ -9,13 +9,13 @@ const { nanoid } = require('nanoid');
 exports.saveRefArch = function (req, res) {
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
-    console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
+    console.log('Saving project: ' + body.projectName + ', for user: ' + userId);
 
     const fileName = nanoid(9);
-    if (!body.projectId) body.projectId = body.projectName + '-' + fileName; // To over ride the frontend value (and to maintain unique folder name)
+    if (!body.projectId) body.projectId = body.projectName + '-' + fileName;
     const metadata = body.metadata;
     if (body.metadata === undefined) {
-        delete body.parentId; 
+        delete body.parentId;
     }
     var deployment = false;
     if (body.deployment !== undefined) {
@@ -59,10 +59,10 @@ exports.getRefArchById = function (req, res) {
         .then(result => {
             if (Array.isArray(result) && result.length === 1) {
                 var uniqueResult = result[0];
-                console.log('Retrieved architecture with architecture Id: ' + uniqueResult._id);
+                console.log('Retrieved architecture with architecture Id: ' + uniqueResult.architecture_id);
                 return res.status(200).send(uniqueResult);
             } else {
-                console.log('Retrieved architecture with project Id: ' + result._id);
+                console.log('Retrieved architecture with project Id: ' + result.architecture_id);
                 return res.status(200).send({ result });
             }
         })
@@ -109,10 +109,10 @@ exports.updateRefArchs = function (req, res) {
                 return res.status(500).send({ message: 'No Data present with the given Id:' + req.params.id });
             } else if (Array.isArray(result) && result.length === 1) {
                 var uniqueResult = result[0];
-                console.log('Updated architecture with Id: ' + uniqueResult._id + ', for the user: ' + userId);
+                console.log('Updated architecture with Id: ' + uniqueResult.architecture_id + ', for the user: ' + userId);
                 return res.status(200).send(uniqueResult);
             } else {
-                console.log('Updated architecture with Id: ' + result._id + ', for the user: ' + userId);
+                console.log('Updated architecture with Id: ' + result.architecture_id + ', for the user: ' + userId);
                 return res.status(200).send({ result });
             }
         })

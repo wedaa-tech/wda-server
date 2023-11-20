@@ -42,7 +42,7 @@ exports.updateBlueprint = function (req, res) {
 exports.saveAsDraft = function (req, res) {
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
-    console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
+    console.log('Saving project: ' + body.projectName + ', for user: ' + userId);
     const fileName = nanoid(9);
     if (!body.projectId) body.projectId = body.projectName + '-' + fileName;
     const metadata = body.metadata;
