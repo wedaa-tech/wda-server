@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 
 var refArchSchema = new Schema(
     {
-        architecture_id: {
+        id: {
             type: String,
             unique: true,
             required: true,

@@ -326,7 +326,7 @@ deployment {
     // persist the blueprint to DB, if there is no error
     if (req.body?.parentId === 'admin') {
         var architecture = {
-            architecture_id: jsonData.projectId,
+            id: jsonData.projectId,
             name: jsonData.projectName,
             request_json: jsonData,
             metadata: metadata,
@@ -337,7 +337,7 @@ deployment {
             published: req.body?.published || false,
         };
         refArchDao
-            .createOrUpdate({ architecture_id: architecture.architecture_id }, architecture)
+            .createOrUpdate({ id: architecture.id }, architecture)
             .then(savedArchitecture => {
                 console.log(savedArchitecture);
                 console.log('Architecture was added successfully!');

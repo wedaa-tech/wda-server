@@ -20,6 +20,7 @@ blueprintSchema.statics = {
             _id: 1,
             project_id: 1,
             projectName: '$request_json.projectName',
+            draft: '$request_json.services',
             parentId: 1,
             metadata: 1,
             imageUrl: 1,

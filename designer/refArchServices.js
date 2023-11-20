@@ -1,4 +1,5 @@
 const refArchitectureDao = require('../dao/refArchitectureDao');
+const { nanoid } = require('nanoid');
 
 /**
  * save refArchitecture to the db
@@ -6,14 +7,29 @@ const refArchitectureDao = require('../dao/refArchitectureDao');
  * @param {*} res
  */
 exports.saveRefArch = function (req, res) {
-    const userId = req.kauth.grant.access_token.content.sub;
-    const refArchitecture = req.body;
-    refArchitecture.user_id = userId;
+    const body = req.body;
+    const fileName = nanoid(9);
+    if (!body.projectId) {
+        body.projectId = body.projectName + '-' + fileName;
+    }
+
+    var architecture = {
+        id: body.projectId,
+        name: body.projectName,
+        request_json: { projectName: body.projectName },
+        metadata: metadata,
+        user_id: req.kauth?.grant?.access_token?.content?.sub,
+        type: req.body?.type || 'APPLICATION',
+        imageUrl: req.body?.imageUrl,
+        description: req.body?.description,
+        published: req.body?.published || false,
+    };
+
     refArchitectureDao
-        .create(refArchitecture)
+        .createOrUpdate({ id: architecture.id }, architecture)
         .then(savedArchitecture => {
-            console.log('Architecture was added successfully!');
-            return res.status(200).send({ message: 'Architecture was added successfully!' });
+            console.log('Architecture saved successfully!');
+            return res.status(200).send({ message: 'Architecture saved successfully!' });
         })
         .catch(error => {
             console.error(error);
@@ -29,14 +45,14 @@ exports.saveRefArch = function (req, res) {
 exports.getRefArchById = function (req, res) {
     const userId = req.kauth.grant.access_token.content.sub;
     refArchitectureDao
-        .get({ architecture_id: req.params.id })
+        .get({ id: req.params.id })
         .then(result => {
             if (Array.isArray(result) && result.length === 1) {
                 var uniqueResult = result[0];
-                console.log('Retrieved architecture with architecture Id: ' + uniqueResult._id);
+                console.log('Retrieved architecture with architecture Id: ' + uniqueResult.id);
                 return res.status(200).send(uniqueResult);
             } else {
-                console.log('Retrieved architecture with project Id: ' + result._id);
+                console.log('Retrieved architecture with project Id: ' + result.id);
                 return res.status(200).send({ result });
             }
         })
@@ -76,17 +92,17 @@ exports.updateRefArchs = function (req, res) {
     const updatedData = req.body;
 
     refArchitectureDao
-        .update({ architecture_id: req.params.id }, updatedData)
+        .update({ id: req.params.id }, updatedData)
         .then(result => {
             if (result == null) {
                 console.log('No Data present with the given Id:' + req.params.id);
                 return res.status(500).send({ message: 'No Data present with the given Id:' + req.params.id });
             } else if (Array.isArray(result) && result.length === 1) {
                 var uniqueResult = result[0];
-                console.log('Updated architecture with Id: ' + uniqueResult._id + ', for the user: ' + userId);
+                console.log('Updated architecture with Id: ' + uniqueResult.id + ', for the user: ' + userId);
                 return res.status(200).send(uniqueResult);
             } else {
-                console.log('Updated architecture with Id: ' + result._id + ', for the user: ' + userId);
+                console.log('Updated architecture with Id: ' + result.id + ', for the user: ' + userId);
                 return res.status(200).send({ result });
             }
         })
@@ -133,11 +149,11 @@ exports.delete = function (req, res) {
  */
 exports.deleterefArchById = function (req, res) {
     refArchitectureDao
-        .get({ architecture_id: req.params.id })
+        .get({ id: req.params.id })
         .then(result => {
             if (Array.isArray(result) && result.length === 1) {
                 refArchitectureDao
-                    .delete({ architecture_id: req.params.id })
+                    .delete({ id: req.params.id })
                     .then(result => {
                         return res.status(200).send({ message: 'Reference Architecture deleted successfully' });
                     })
@@ -163,16 +179,16 @@ exports.deleterefArchById = function (req, res) {
  */
 exports.togglePublishedById = function (req, res) {
     refArchitectureDao
-        .get({ architecture_id: req.params.id })
+        .get({ id: req.params.id })
         .then(result => {
             if (Array.isArray(result) && result.length === 1) {
                 const architecture = result[0];
                 const updatedPublishedValue = !architecture.published;
 
                 refArchitectureDao
-                    .update({ architecture_id: req.params.id }, { published: updatedPublishedValue })
+                    .update({ id: req.params.id }, { published: updatedPublishedValue })
                     .then(updatedResult => {
-                        console.log(`Published value for Architecture with name ${req.params.name} is updated to ${updatedPublishedValue}`);
+                        console.log(`Published value for Architecture with Id ${req.params.id} is updated to ${updatedPublishedValue}`);
                         return res.status(200).send({ message: `Published value updated successfully to ${updatedPublishedValue}` });
                     })
                     .catch(error => {
