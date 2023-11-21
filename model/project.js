@@ -33,7 +33,7 @@ var projectSchema = new Schema(
     },
 );
 
-// Define a unique compound index that enforces uniqueness only for non-deleted documents
-projectSchema.index({ name: 1, deleted: 1 }, { unique: true, partialFilterExpression: { deleted: false } });
+// Update the compound index to include both name and user_id, enforcing uniqueness only for non-deleted documents
+projectSchema.index({ name: 1, user_id: 1, deleted: 1 }, { unique: true, partialFilterExpression: { deleted: false } });
 
 module.exports = projectSchema;
