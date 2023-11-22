@@ -1,6 +1,6 @@
 {
     "name": "server",
-    "version": "0.0.13",
+    "version": "0.0.14",
     "description": "wdi/wda server code ",
     "main": "server.js",
     "type": "commonjs",
