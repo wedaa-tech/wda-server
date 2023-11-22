@@ -207,7 +207,12 @@ exports.generate = function (req, res) {
     console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
 
     const fileName = nanoid(9);
-    if (!body.projectId) body.projectId = body.projectName + '-' + fileName; // To over ride the frontend value (and to maintain unique folder name)
+    // To over ride the frontend value (and to maintain unique folder name)
+    if (!body.projectId) {
+        // Remove spaces and convert to lowercase for body.projectName
+        body.projectId = (body.projectName).replace(/\s/g, '').toLowerCase();
+        body.projectId = (body.projectId + '-' + fileName);
+    }
     const metadata = body.metadata;
     // preprocessing the request json
     if (body.metadata === undefined) {
