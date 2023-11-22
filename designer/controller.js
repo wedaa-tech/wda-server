@@ -207,7 +207,10 @@ exports.generate = function (req, res) {
     console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
 
     const fileName = nanoid(9);
-    if (!body.projectId) body.projectId = body.projectName + '-' + fileName; // To over ride the frontend value (and to maintain unique folder name)
+    // To over ride the frontend value (and to maintain unique folder name)
+    if (!body.projectId) {
+        body.projectId = (body.projectName + '-' + fileName).replace(/\s/g, '');
+    }
     const metadata = body.metadata;
     // preprocessing the request json
     if (body.metadata === undefined) {
