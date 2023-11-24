@@ -1,6 +1,7 @@
 var blueprintService = require('./controller');
 var refArchService = require('./refArchServices');
 var projectService = require('./projectService');
+var feedbackService = require('./feedbackService');
 
 module.exports = function (router) {
     router.get('/blueprints', blueprintService.getBlueprints);
@@ -23,4 +24,5 @@ module.exports = function (router) {
     router.delete('/projects/:id', projectService.delete);
 
     router.get('/projects/architectures/:parentId', projectService.getArchitectures);
+    router.get('/feedback', feedbackService.getFeedbacks);
 };
