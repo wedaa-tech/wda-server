@@ -156,9 +156,9 @@ exports.getWizardTemplate = function (req, res) {
                         // Parse the JSON data
                         var jsonData = JSON.parse(data);
                         const jsonString = JSON.stringify(jsonData);
-                        let modifiedJsonString;
+                        let modifiedJsonString = jsonString;
                         if (requestBody.docusaurus === "default") {
-                            modifiedJsonString = jsonString
+                            modifiedJsonString = modifiedJsonString
                                 .replace(/"personalprofile"/g, `"documentation"`)
                                 .replace(/"profile"/g, `"default"`)
                                 .replace(/"Profile"/g, `"Docs"`);
