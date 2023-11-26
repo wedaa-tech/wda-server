@@ -41,6 +41,10 @@ RUN chown -R wdi:wdi /usr/src/app
 
 USER wdi
 
+ENV NEW_RELIC_NO_CONFIG_FILE=true \
+NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true \
+NEW_RELIC_LOG=stdout
+
 # Expose the port on which the app will listen
 EXPOSE 3001
 
