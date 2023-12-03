@@ -37,7 +37,7 @@ blueprintSchema.statics = {
                 deleted: false,
             },
             projection,
-        ).sort({ createdAt: 1 });
+        ).sort({ updatedAt: -1 });
     },
 
     createOrUpdate: function (query, data) {
