@@ -48,7 +48,7 @@ var refArchSchema = new Schema(
             unique: false,
             required: true,
         },
-        validate: {
+        validationStatus: {
             type: String,
             enum: ['VALIDATED', 'DRAFT'],
             default: 'DRAFT',

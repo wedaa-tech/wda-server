@@ -42,7 +42,7 @@ var blueprintSchema = new Schema(
             unique: false,
             required: false,
         },
-        validate: {
+        validationStatus: {
             type: String,
             enum: ['VALIDATED', 'DRAFT'],
             default: 'DRAFT',

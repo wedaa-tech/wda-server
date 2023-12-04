@@ -55,7 +55,7 @@ exports.saveAsDraft = function (req, res) {
             services: body.services,
             communications: body.communications,
             parentId: body.parentId,
-            validate: body.validate,
+            validationStatus: body.validationStatus,
             imageUrl: body.imageUrl,
         },
         metadata: body.metadata,
@@ -64,7 +64,7 @@ exports.saveAsDraft = function (req, res) {
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
         parentId: req.body?.parentId,
-        validate: req.body?.validate,
+        validationStatus: req.body?.validationStatus,
     };
     blueprintDao
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
