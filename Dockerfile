@@ -4,7 +4,7 @@ FROM node:18.13.0
 WORKDIR /usr/src/app
 
 # Install Yeoman
-RUN npm install -g yo
+RUN npm install -g yo@4.3.1
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
