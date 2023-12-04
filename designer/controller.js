@@ -49,19 +49,28 @@ exports.saveAsDraft = function (req, res) {
     }
     var blueprint = {
         project_id: body.projectId,
-        request_json: { projectName: body.projectName },
+        request_json: {
+            projectId: body.projectId,
+            projectName: body.projectName,
+            services: body.services,
+            communications: body.communications,
+            parentId: body.parentId,
+            validate: body.validate,
+            imageUrl: body.imageUrl,
+        },
         metadata: body.metadata,
         user_id: req.kauth?.grant?.access_token?.content?.sub,
         parentId: req.body?.parentId,
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
         parentId: req.body?.parentId,
+        validate: req.body?.validate,
     };
     blueprintDao
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
         .then(savedBlueprint => {
             console.log('Blueprint saved successfully!');
-            return res.sendStatus(200);
+            return res.status(200).json({ projectId: blueprint.project_id });
         })
         .catch(error => {
             console.error(error);
@@ -210,8 +219,8 @@ exports.generate = function (req, res) {
     // To over ride the frontend value (and to maintain unique folder name)
     if (!body.projectId) {
         // Remove spaces and convert to lowercase for body.projectName
-        body.projectId = (body.projectName).replace(/\s/g, '').toLowerCase();
-        body.projectId = (body.projectId + '-' + fileName);
+        body.projectId = body.projectName.replace(/\s/g, '').toLowerCase();
+        body.projectId = body.projectId + '-' + fileName;
     }
     const metadata = body.metadata;
     // preprocessing the request json
