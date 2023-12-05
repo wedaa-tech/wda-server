@@ -27,6 +27,7 @@ blueprintSchema.statics = {
             description: 1,
             createdAt: 1,
             updatedAt: 1,
+            validationStatus: 1,
         };
 
         return this.find(

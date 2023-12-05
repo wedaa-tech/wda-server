@@ -333,6 +333,7 @@ deployment {
             imageUrl: req.body?.imageUrl,
             description: req.body?.description,
             published: req.body?.published || false,
+            validationStatus: req.body.validationStatus,
         };
         refArchDao
             .createOrUpdate({ id: architecture.id }, architecture)
@@ -352,6 +353,7 @@ deployment {
             parentId: req.body?.parentId,
             imageUrl: req.body?.imageUrl,
             description: req.body?.description,
+            validationStatus: req.body.validationStatus,
         };
         blueprintDao
             .createOrUpdate({ project_id: blueprint.project_id }, blueprint)

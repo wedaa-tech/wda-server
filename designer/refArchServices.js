@@ -16,20 +16,28 @@ exports.saveRefArch = function (req, res) {
     var architecture = {
         id: body.projectId,
         name: body.projectName,
-        request_json: { projectName: body.projectName },
-        metadata: metadata,
+        request_json: {
+            projectId: body.projectId,
+            projectName: body.projectName,
+            services: body.services,
+            communications: body.communications,
+            parentId: body.parentId,
+            validationStatus: body.validationStatus,
+            imageUrl: body.imageUrl,
+        },
+        metadata: body.metadata,
         user_id: req.kauth?.grant?.access_token?.content?.sub,
         type: req.body?.type || 'APPLICATION',
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
         published: req.body?.published || false,
+        validationStatus: req.body.validationStatus,
     };
-
     refArchitectureDao
         .createOrUpdate({ id: architecture.id }, architecture)
         .then(savedArchitecture => {
             console.log('Architecture saved successfully!');
-            return res.status(200).send({ message: 'Architecture saved successfully!' });
+            return res.status(200).json({ projectId: architecture.id });
         })
         .catch(error => {
             console.error(error);
