@@ -1,5 +1,5 @@
 const refArchitectureDao = require('../dao/refArchitectureDao');
-const { nanoid } = require('nanoid');
+const utility = require('../utility/core');
 
 /**
  * save refArchitecture to the db
@@ -8,11 +8,9 @@ const { nanoid } = require('nanoid');
  */
 exports.saveRefArch = function (req, res) {
     const body = req.body;
-    const fileName = nanoid(9);
     if (!body.projectId) {
-        body.projectId = body.projectName + '-' + fileName;
+        body.projectId = utility.generateProjectId(req.body.projectName);
     }
-
     var architecture = {
         id: body.projectId,
         name: body.projectName,
