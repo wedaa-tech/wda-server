@@ -43,9 +43,8 @@ exports.saveAsDraft = function (req, res) {
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
     console.log('Saving project: ' + body.projectName + ', for user: ' + userId);
-    const fileName = nanoid(9);
     if (!body.projectId) {
-        body.projectId = body.projectName + '-' + fileName;
+        body.projectId = utility.generateProjectId(body.projectName);
     }
     var blueprint = {
         project_id: body.projectId,
@@ -219,8 +218,7 @@ exports.generate = function (req, res) {
     // To over ride the frontend value (and to maintain unique folder name)
     if (!body.projectId) {
         // Remove spaces and convert to lowercase for body.projectName
-        body.projectId = body.projectName.replace(/\s/g, '').toLowerCase();
-        body.projectId = body.projectId + '-' + fileName;
+        body.projectId = utility.generateProjectId(body.projectName, fileName);
     }
     const metadata = body.metadata;
     // preprocessing the request json
