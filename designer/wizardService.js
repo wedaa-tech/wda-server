@@ -8,9 +8,9 @@ const fs = require('fs');
  */
 exports.getWizardTemplate = function (req, res) {
     const requestBody = req.body;
-    const scope = ["fullStack", "headless", "spa", "personalWebsite"];
+    const scope = ['fullStack', 'headless', 'spa', 'personalWebsite'];
     if (scope.includes(requestBody.AT)) {
-        if (requestBody.AT === "fullStack" || requestBody.AT === "headless") {
+        if (requestBody.AT === 'fullStack' || requestBody.AT === 'headless') {
             const requiredParameters = ['backend', 'database', 'authentication', 'serviceDiscovery', 'logManagement'];
             const missingParameters = [];
             // Check for missing parameters
@@ -19,20 +19,25 @@ exports.getWizardTemplate = function (req, res) {
                     missingParameters.push(param);
                 }
             });
-            if (requestBody.AT === "fullStack" && !requestBody.frontend) {
-                missingParameters.push("frontend");
+            if (requestBody.AT === 'fullStack' && !requestBody.frontend) {
+                missingParameters.push('frontend');
             }
 
             if (missingParameters.length === 0) {
                 let globalServiceCount = 0;
                 // Check for "skip" values and decrement globalServiceCount accordingly
                 ['authentication', 'serviceDiscovery', 'logManagement'].forEach(param => {
-                    if (requestBody[param] !== "skip") {
+                    if (requestBody[param] !== 'skip') {
                         globalServiceCount++;
                     }
                 });
                 // All required parameters are present, proceed with reading the JSON file
-                var filePath = path.join(__dirname, '..', 'resources/wizard/fullstack', `${globalServiceCount.toString().padStart(2, '0')}.json`);
+                var filePath = path.join(
+                    __dirname,
+                    '..',
+                    'resources/wizard/fullstack',
+                    `${globalServiceCount.toString().padStart(2, '0')}.json`,
+                );
                 fs.readFile(filePath, 'utf8', (err, data) => {
                     if (err) {
                         console.error(err);
@@ -41,10 +46,12 @@ exports.getWizardTemplate = function (req, res) {
                         // Parse the JSON data
                         var jsonData = JSON.parse(data);
                         // Remove the "UI" nodes from the json object, if scope is headless
-                        if (requestBody.AT === "headless") {
+                        if (requestBody.AT === 'headless') {
                             delete jsonData.nodes.UI_1;
-                            delete jsonData.nodes['UI_1-Service_3'];
-                            delete jsonData.nodes['UI_1-Service_4'];
+                            delete jsonData.edges['UI_1-Service_1'];
+                            delete jsonData.edges['UI_1-Service_2'];
+                            delete jsonData.edges['UI_1-Service_3'];
+                            delete jsonData.edges['UI_1-Service_4'];
                         }
                         // Replace "mongodb" with requestBody.database, "react" with requestBody.frontend, and "spring" with requestBody.backend
                         const jsonString = JSON.stringify(jsonData);
@@ -52,14 +59,13 @@ exports.getWizardTemplate = function (req, res) {
                             .replace(/"mongodb"/g, `"${requestBody.database}"`)
                             .replace(/"gomicro"/g, `"${requestBody.backend}"`);
                         // Replace "react" with requestBody.frontend, if the scope is fullStack
-                        if (requestBody.AT === "fullStack") {
-                            modifiedJsonString = modifiedJsonString
-                                .replace(/"react"/g, `"${requestBody.frontend}"`);
+                        if (requestBody.AT === 'fullStack') {
+                            modifiedJsonString = modifiedJsonString.replace(/"react"/g, `"${requestBody.frontend}"`);
                         }
                         const globalService = [];
                         // Check for "skip" values and decrement globalServiceCount accordingly
                         ['authentication', 'serviceDiscovery', 'logManagement'].forEach(param => {
-                            if (requestBody[param] !== "skip") {
+                            if (requestBody[param] !== 'skip') {
                                 globalService.push(param);
                             }
                         });
@@ -68,26 +74,26 @@ exports.getWizardTemplate = function (req, res) {
                                 modifiedJsonString = modifiedJsonString
                                     .replace(/"authenticationType"/g, `"logManagementType"`)
                                     .replace(/"oauth2"/g, `"eck"`)
-                                    .replace(/"selectorNode3"/g, `"selectorNode6"`)
+                                    .replace(/"selectorNode3"/g, `"selectorNode6"`);
                             }
                             if (globalService.includes('serviceDiscoveryType')) {
                                 modifiedJsonString = modifiedJsonString
                                     .replace(/"authenticationType"/g, `"serviceDiscoveryType"`)
                                     .replace(/"oauth2"/g, `"eureka"`)
-                                    .replace(/"selectorNode3"/g, `"selectorNode1"`)
+                                    .replace(/"selectorNode3"/g, `"selectorNode1"`);
                             }
                         } else if (globalServiceCount === 2) {
                             if (globalService.includes('logManagement') && globalService.includes('authentication')) {
                                 modifiedJsonString = modifiedJsonString
                                     .replace(/"serviceDiscoveryType"/g, `"logManagementType"`)
                                     .replace(/"eureka"/g, `"eck"`)
-                                    .replace(/"selectorNode1"/g, `"selectorNode6"`)
+                                    .replace(/"selectorNode1"/g, `"selectorNode6"`);
                             }
                             if (globalService.includes('logManagement') && globalService.includes('serviceDiscovery')) {
                                 modifiedJsonString = modifiedJsonString
                                     .replace(/"authenticationType"/g, `"logManagementType"`)
                                     .replace(/"oauth2"/g, `"eck"`)
-                                    .replace(/"selectorNode3"/g, `"selectorNode6"`)
+                                    .replace(/"selectorNode3"/g, `"selectorNode6"`);
                             }
                         }
                         // Parse the modified JSON data
@@ -100,7 +106,7 @@ exports.getWizardTemplate = function (req, res) {
                 // If one or more required parameters are missing, return an error response
                 res.status(400).json({ error: `Missing parameters: ${missingParameters.join(', ')}` });
             }
-        } else if (requestBody.AT === "spa") {
+        } else if (requestBody.AT === 'spa') {
             const requiredParameters = ['frontend', 'authentication'];
             const missingParameters = [];
             // Check for missing parameters
@@ -119,13 +125,12 @@ exports.getWizardTemplate = function (req, res) {
                     } else {
                         // Parse the JSON data
                         var jsonData = JSON.parse(data);
-                        if (requestBody.authentication === "skip") {
+                        if (requestBody.authentication === 'skip') {
                             delete jsonData.nodes.authenticationType;
                             delete jsonData.edges;
                         }
                         const jsonString = JSON.stringify(jsonData);
-                        let modifiedJsonString = jsonString
-                            .replace(/"react"/g, `"${requestBody.frontend}"`);
+                        let modifiedJsonString = jsonString.replace(/"react"/g, `"${requestBody.frontend}"`);
                         // Parse the modified JSON data
                         jsonData = JSON.parse(modifiedJsonString);
                         // Send the JSON data as a response
@@ -136,7 +141,7 @@ exports.getWizardTemplate = function (req, res) {
                 // If one or more required parameters are missing, return an error response
                 res.status(400).json({ error: `Missing parameters: ${missingParameters.join(', ')}` });
             }
-        } else if (requestBody.AT === "personalWebsite") {
+        } else if (requestBody.AT === 'personalWebsite') {
             const requiredParameters = ['docusaurus'];
             const missingParameters = [];
             // Check for missing parameters
@@ -157,7 +162,7 @@ exports.getWizardTemplate = function (req, res) {
                         var jsonData = JSON.parse(data);
                         const jsonString = JSON.stringify(jsonData);
                         let modifiedJsonString = jsonString;
-                        if (requestBody.docusaurus === "default") {
+                        if (requestBody.docusaurus === 'default') {
                             modifiedJsonString = modifiedJsonString
                                 .replace(/"personalprofile"/g, `"documentation"`)
                                 .replace(/"profile"/g, `"default"`)
