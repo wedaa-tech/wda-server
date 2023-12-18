@@ -162,6 +162,10 @@ exports.infraJsonGenerator = body => {
         type: serviceData.applicationType,
     }));
 
+    const auth = Object.values(applications).some(serviceData => serviceData.authenticationType === 'oauth2')
+    ? 'true'
+    : 'false';
+    
     var infraJson = {
         projectId: body.projectId,
         projectName: body.projectName,
@@ -177,6 +181,7 @@ exports.infraJsonGenerator = body => {
         generateInfra: 'true',
         appFolders: appFolders,
         appConfigs: appConfigs,
+        auth: auth,
     };
     infraJson.monitoring = deployment?.monitoring ?? infraJson.monitoring;
     infraJson.enableECK = deployment?.enableECK ?? infraJson.enableECK;
@@ -200,6 +205,7 @@ exports.infraJsonGenerator = body => {
         dockerRepositoryName: deployment.dockerRepositoryName,
         monitoring: 'false',
         enableECK: 'false',
+        auth: auth,
     };
     infraJsonForLocalDeployment.monitoring = deployment?.monitoring ?? infraJsonForLocalDeployment.monitoring;
     infraJsonForLocalDeployment.enableECK = deployment?.enableECK ?? infraJsonForLocalDeployment.enableECK;
