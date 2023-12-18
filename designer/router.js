@@ -2,6 +2,7 @@ var blueprintService = require('./controller');
 var refArchService = require('./refArchServices');
 var projectService = require('./projectService');
 var feedbackService = require('./feedbackService');
+var tipsService = require('./tipsService');
 
 module.exports = function (router) {
     router.get('/blueprints', blueprintService.getBlueprints);
@@ -25,4 +26,6 @@ module.exports = function (router) {
 
     router.get('/projects/architectures/:parentId', projectService.getArchitectures);
     router.get('/feedback', feedbackService.getFeedbacks);
+
+    router.post('/tips', tipsService.saveTip);
 };
