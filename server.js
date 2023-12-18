@@ -9,14 +9,11 @@ const cors = require('cors');
 const exec = require('child_process').exec;
 const jdlConverter = require('./jsonToJdl.js');
 const wdaRoutes = require('./designer/router.js');
+const publicRouter = require("./router/public.js");
 const db = require('./config/database');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 const keycloakConfig = require('./config/keycloak-config.js').keycloakConfig;
-var wda = require('./designer/controller.js');
-var refArchService = require('./designer/refArchServices.js');
-var wizardService = require('./designer/wizardService.js');
-var feedbackService = require('./designer/feedbackService.js');
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
@@ -63,23 +60,18 @@ app.use(
     }),
 );
 
-//initialise protected express router
+// Initialise protected express router
 var router = express.Router();
+// Initialise unprotected express router
+var public = express.Router();
 
 // use express router
 app.use('/api', keycloak.protect(), router);
+app.use(public);
 
 //call wda routing
 wdaRoutes(router);
-
-//initialise unprotected express router
-var unprotectedRouter = express.Router();
-unprotectedRouter.post('/generate', wda.generate);
-unprotectedRouter.get('/blueprints/:project_id', wda.getBlueprint);
-unprotectedRouter.get('/refArchs', refArchService.get);
-unprotectedRouter.post('/wizard-template', wizardService.getWizardTemplate);
-unprotectedRouter.post('/feedback', feedbackService.saveFeedback);
-app.use(unprotectedRouter);
+publicRouter(public);
 
 /**
  * Post call for JHipster Yeoman Generator
