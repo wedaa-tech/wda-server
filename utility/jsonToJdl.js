@@ -51,6 +51,9 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
         if (applications[i].serverPort === undefined || applications[i].serverPort === '') {
             applicationErrorList.push('Server Port cannot be empty');
         }
+        if (applications[i].prodDatabaseType !== undefined && (applications[i].databasePort  === undefined || applications[i].databasePort === '')) {
+            applicationErrorList.push('Database Port cannot be empty');
+        }
 
         // return error response
         if (applicationErrorList.length > 0) {
@@ -125,6 +128,7 @@ application {
                 ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
                 : ''
             }
+        ${databaseType !== 'no' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : 'serviceDiscoveryType no'}
