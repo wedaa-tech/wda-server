@@ -10,6 +10,7 @@
             "data": {
                 "applicationFramework": "gomicro",
                 "prodDatabaseType": "mongodb",
+                "databasePort": "27017",
                 "Id": "Service_2",
                 "label": "",
                 "applicationName": "backendone",
@@ -41,6 +42,7 @@
             "data": {
                 "applicationFramework": "gomicro",
                 "prodDatabaseType": "mongodb",
+                "databasePort": "27018",
                 "Id": "Service_3",
                 "label": "",
                 "applicationName": "backendtwo",
@@ -104,6 +106,7 @@
             },
             "data": {
                 "prodDatabaseType": "mongodb",
+                "databasePort": "27017",
                 "isConnected": true
             },
             "style": {
@@ -123,6 +126,7 @@
             },
             "data": {
                 "prodDatabaseType": "mongodb",
+                "databasePort": "27018",
                 "isConnected": true
             },
             "style": {
