@@ -41,8 +41,12 @@ blueprintSchema.statics = {
     },
 
     createOrUpdate: function (query, data) {
-        return this.findOneAndUpdate(query, { $set: data }, { upsert: true });
+        return this.findOneAndUpdate(query, { $set: data }, { upsert: true, new: true })
+            .then((doc) => {
+                return doc._id;
+            });
     },
+    
 
     update: function (query, updateData) {
         return this.findOneAndUpdate(query, { $set: updateData }, { new: true });
