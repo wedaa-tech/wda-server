@@ -17,5 +17,5 @@ module.exports = function (router) {
 
     router.get('/tips', tipsService.getTips);
 
-    router.get('/dynamic-template', dynamicTemplate.getDynamicTemplate);
+    router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
 };
