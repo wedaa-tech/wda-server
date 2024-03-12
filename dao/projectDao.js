@@ -52,6 +52,20 @@ projectSchema.statics = {
             });
     },
 
+    getProjectIdByName: async function (query) {
+        try {
+            const project = await this.findOne({
+                name: query.name,
+                user_id: query.user_id,
+                deleted: false, // Ensure the project is not deleted
+            });
+
+            return project ? project._id : null;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     update: function (query, updateData) {
         return this.findOneAndUpdate(query, { $set: updateData }, { new: true });
     },

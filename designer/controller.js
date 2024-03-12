@@ -62,7 +62,6 @@ exports.saveAsDraft = function (req, res) {
         parentId: req.body?.parentId,
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
-        parentId: req.body?.parentId,
         validationStatus: req.body?.validationStatus,
     };
     blueprintDao

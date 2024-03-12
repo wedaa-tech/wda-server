@@ -3,6 +3,9 @@ var refArchService = require('./refArchServices');
 var projectService = require('./projectService');
 var feedbackService = require('./feedbackService');
 var tipsService = require('./tipsService');
+var requirementService = require('./requirementService');
+var dynamicTemplate = require('../designer/dynamicTemplateService.js');
+
 
 module.exports = function (router) {
     router.get('/blueprints', blueprintService.getBlueprints);
@@ -28,4 +31,9 @@ module.exports = function (router) {
     router.get('/feedback', feedbackService.getFeedbacks);
 
     router.post('/tips', tipsService.saveTip);
+
+    router.post('/requirements', requirementService.saveRequirement);
+    router.put('/requirements/:id', requirementService.updateRequirement);
+
+    router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
 };

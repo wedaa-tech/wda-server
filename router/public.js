@@ -16,6 +16,4 @@ module.exports = function (router) {
     router.post('/feedback', feedbackService.saveFeedback);
 
     router.get('/tips', tipsService.getTips);
-
-    router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
 };

@@ -1,6 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const { time } = require('console');
+const utility = require('../utility/core');
+const blueprintDao = require('../dao/blueprintDao');
+const projectDao = require('../dao/projectDao');
 
 
 const serviceBase = {
@@ -15,6 +18,8 @@ const serviceBase = {
  */
 exports.getDynamicTemplate = function (req, res) {
     // TODO: logic to validate the incoming request json
+
+    const userId = req.kauth?.grant?.access_token?.content?.sub;
 
     const dynamicTemplateRequest = req.body
 
@@ -183,8 +188,15 @@ exports.getDynamicTemplate = function (req, res) {
     serviceBase.nodes = dynamicNodes;
     serviceBase.edges = dynamicEdges;
 
-
-    return res.json(serviceBase);
+    // add blueprint as draft
+    addAsDraft(projectTitle, description, userId, serviceBase)
+        .then(blueprint => {
+            return res.json(blueprint);
+        })
+        .catch(error => {
+            console.error('Error:', error.message);
+            return res.status(500).json({ error: 'Error adding blueprint as draft' });
+        });
 }
 
 // TODO: addCommonServices --> chnage to dynamic generation function
@@ -306,4 +318,40 @@ function addClientNodes(dynamicNodes, clientFramework, clientPort, serviceCount)
 
 }
 
+/**
+ * 
+ * @param {*} title 
+ * @param {*} description 
+ * @param {*} userId 
+ * @param {*} metadata 
+ * @returns 
+ */
+async function addAsDraft(title, description, userId, metadata) {
+    try {
+        const projectId = utility.generateProjectId(title);
 
+        // get the default parentId for the user
+        let parentId = await projectDao.getProjectIdByName({ name: "default", user_id: userId });
+
+        if (parentId) {
+            console.log('Retrieved default projectId for the user!', parentId);
+        } else {
+            console.log('Project not found.');
+        }
+
+        var blueprint = {
+            project_id: projectId,
+            metadata: metadata,
+            user_id: userId,
+            parentId: parentId,
+            description: description
+        };
+
+        const savedBlueprint = await blueprintDao.createOrUpdate({ project_id: projectId }, blueprint);
+        console.log('Blueprint Added as Draft!');
+        return savedBlueprint;
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error saving blueprint as draft');
+    }
+}
