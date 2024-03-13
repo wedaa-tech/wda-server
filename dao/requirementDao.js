@@ -4,7 +4,9 @@ const requirementSchema = require('../model/requirement');
 requirementSchema.statics = {
     create: function (data) {
         var requirement = new this(data);
-        return requirement.save();
+        return requirement.save().then(savedRequirement => {
+            return savedRequirement; 
+        });
     },
 
     get: function (query) {
