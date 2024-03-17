@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+require('dotenv').config();
 const { time } = require('console');
 const utility = require('../utility/core');
 const blueprintDao = require('../dao/blueprintDao');
@@ -16,10 +17,11 @@ const serviceBase = {
  * @param {*} req
  * @param {*} res
  */
-exports.getDynamicTemplate = function (req, res) {
+exports.getDynamicTemplate = async function (req, res) {
     // TODO: logic to validate the incoming request json
 
     const userId = req.kauth?.grant?.access_token?.content?.sub;
+    const accessToken = req.kauth?.grant?.access_token?.token;
 
     const dynamicTemplateRequest = req.body
 
@@ -48,6 +50,9 @@ exports.getDynamicTemplate = function (req, res) {
     let clientPort = 4200;
     let mongoDatabasePort = 27017;
     let postgresqlDatabasePort = 5432;
+
+    // add dbml to service
+    await addDBMLScriptToService(accessToken, services);
 
     // Add UI blocks
     addClientNodes(dynamicNodes, clientFramework, clientPort, serviceCount);
@@ -80,6 +85,7 @@ exports.getDynamicTemplate = function (req, res) {
                 "packageName": `${rootPackageName}.${services[i].name.replace(/\s/g, '').toLowerCase()}`,
                 "serverPort": servicePort.toString(),
                 "description": services[i].description,
+                dbmlData: services[i].dbml,
                 "applicationType": "microservice",
                 "authenticationType": "oauth2",
                 "serviceDiscoveryType": "eureka",
@@ -191,7 +197,10 @@ exports.getDynamicTemplate = function (req, res) {
     // add blueprint as draft
     addAsDraft(projectTitle, description, userId, serviceBase)
         .then(blueprint => {
-            return res.json(blueprint);
+            // return res.json(blueprint);
+            const blueprintId = blueprint.project_id;
+            const defaultProjectId = blueprint.parentId;
+            return res.json({ blueprintId, defaultProjectId });
         })
         .catch(error => {
             console.error('Error:', error.message);
@@ -353,5 +362,53 @@ async function addAsDraft(title, description, userId, metadata) {
     } catch (error) {
         console.error(error);
         throw new Error('Error saving blueprint as draft');
+    }
+}
+
+async function addDBMLScriptToService(accessToken, services) {
+    try {
+        // Start timestamp
+        console.log('Starting all fetch calls:', new Date());
+
+        // Create an array to store promises for each fetch call
+        const fetchPromises = services.map(service => {
+            // Log the start time of each fetch call
+            console.log(`Starting fetch call for ${service.name}:`, new Date());
+
+            return fetch(process.env.AI_CORE_URL + '/dbml', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({
+                    name: service.name,
+                    description: service.description
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to add DBML script to service');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Extract the dbml part and assign it to service.dbml
+                    service.dbml = data.dbml;
+                    console.log('DBML script added successfully for', service.name);
+                })
+                .catch(error => {
+                    console.error('Error adding DBML script to service:', error);
+                });
+        });
+
+        // Wait for all fetch calls to finish
+        await Promise.all(fetchPromises);
+
+        // All fetch calls have finished
+        console.log('All fetch calls completed:', new Date());
+        console.log('All DBML scripts added successfully');
+    } catch (error) {
+        console.error('Error adding DBML scripts:', error);
     }
 }
