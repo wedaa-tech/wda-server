@@ -95,7 +95,8 @@ exports.getDynamicTemplate = async function (req, res) {
                 "border": "1px solid black",
                 "width": "120px",
                 "height": "40px",
-                "borderRadius": "15px"
+                "borderRadius": "15px",
+                "fontSize":"12px"
             },
             "selected": false,
             "positionAbsolute": {
@@ -314,7 +315,8 @@ function addClientNodes(dynamicNodes, clientFramework, clientPort, serviceCount)
                 "border": "1px solid black",
                 "width": "120px",
                 "height": "40px",
-                "borderRadius": "15px"
+                "borderRadius": "15px",
+                "fontSize":"12px"
             },
             "selected": false,
             "positionAbsolute": {
