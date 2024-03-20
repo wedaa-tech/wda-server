@@ -46,6 +46,7 @@ blueprintSchema.statics = {
                 return blueprint;
             });
     },
+    
 
     update: function (query, updateData) {
         return this.findOneAndUpdate(query, { $set: updateData }, { new: true });
