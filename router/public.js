@@ -3,7 +3,6 @@ var refArchService = require('../designer/refArchServices');
 var wizardService = require('../designer/wizardService.js');
 var feedbackService = require('../designer/feedbackService');
 var tipsService = require('../designer/tipsService');
-var dynamicTemplate = require('../designer/dynamicTemplateService.js');
 
 module.exports = function (router) {
     router.post('/generate', wda.generate);
