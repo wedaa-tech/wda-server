@@ -1,0 +1,101 @@
+{
+    "group_1": {
+        "id": "group_1",
+        "type": "GroupNode",
+        "position": {
+            "x": 210,
+            "y": -100
+        },
+        "data": {
+            "label": "common services",
+            "Id": "group_1",
+            "type": "Group",
+            "groupName": "common services"
+        },
+        "style": {
+            "border": "1px dashed",
+            "borderRadius": "15px",
+            "width": 610,
+            "height": 100,
+            "zIndex": -1
+        },
+        "selected": false,
+        "positionAbsolute": {
+            "x": 210,
+            "y": -100
+        },
+        "dragging": true
+    },
+    "authenticationType": {
+        "id": "authenticationType",
+        "type": "selectorNode3",
+        "position": {
+            "x": 240,
+            "y": -60
+        },
+        "data": {
+            "authenticationType": "oauth2"
+        },
+        "style": {
+            "border": "1px solid ",
+            "padding": "4px 4px",
+            "width": "120px",
+            "height": "40px",
+            "borderRadius": "15px"
+        },
+        "selected": false,
+        "positionAbsolute": {
+            "x": 240,
+            "y": -60
+        },
+        "dragging": true
+    },
+    "serviceDiscoveryType": {
+        "id": "serviceDiscoveryType",
+        "type": "selectorNode1",
+        "position": {
+            "x": 450,
+            "y": -60
+        },
+        "data": {
+            "serviceDiscoveryType": "eureka"
+        },
+        "style": {
+            "border": "1px solid ",
+            "padding": "4px 4px",
+            "width": "120px",
+            "height": "40px",
+            "borderRadius": "15px"
+        },
+        "selected": false,
+        "positionAbsolute": {
+            "x": 450,
+            "y": -60
+        },
+        "dragging": true
+    },
+    "logManagement": {
+        "id": "logManagement",
+        "type": "selectorNode6",
+        "position": {
+            "x": 660,
+            "y": -60
+        },
+        "data": {
+            "logManagementType": "eck"
+        },
+        "style": {
+            "border": "1px solid ",
+            "padding": "4px 4px",
+            "width": "120px",
+            "height": "40px",
+            "borderRadius": "15px"
+        },
+        "selected": false,
+        "positionAbsolute": {
+            "x": 660,
+            "y": -60
+        },
+        "dragging": true
+    }
+}
