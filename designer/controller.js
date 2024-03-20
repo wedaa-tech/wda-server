@@ -3,6 +3,7 @@ const utility = require('../utility/core');
 const jdlConverter = require('../utility/jsonToJdl');
 const exec = require('child_process').exec;
 const blueprintDao = require('../dao/blueprintDao');
+const weaveAIGeneratedCodeIntoExisting = require('../weaver/codeWeaver');
 
 /**
  * Update specific blueprint with given project Id
@@ -273,8 +274,16 @@ exports.generate = function (req, res) {
                 console.log('Architecture Generation completed successfully.....');
 
                 const folderPath = `./${body.projectId}`;
-                // check if application documentation is enabled
                 var services = body.services;
+
+                // Stitching AI code starts from here
+                console.log('****************************************************');
+                console.log('AI CODE WEAVING STARTS....');
+                weaveAIGeneratedCodeIntoExisting(folderPath, services);
+                console.log('AI CODE WEAVING ENDS......');
+                console.log('****************************************************');
+
+                // check if application documentation is enabled
                 var docsDetails = Object.values(services).find(service => service.applicationFramework === 'docusaurus');
                 var documentGenerator = !!docsDetails;
                 if (documentGenerator) {

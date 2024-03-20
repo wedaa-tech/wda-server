@@ -1,6 +1,5 @@
 const path = require('path');
 const fs = require('fs');
-require('dotenv').config();
 const { time } = require('console');
 const utility = require('../utility/core');
 const blueprintDao = require('../dao/blueprintDao');
