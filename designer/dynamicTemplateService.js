@@ -355,7 +355,10 @@ async function addAsDraft(title, description, userId, metadata) {
             metadata: metadata,
             user_id: userId,
             parentId: parentId,
-            description: description
+            description: description,
+            request_json: {
+                projectName:title
+            }
         };
 
         const savedBlueprint = await blueprintDao.createOrUpdate({ project_id: projectId }, blueprint);
