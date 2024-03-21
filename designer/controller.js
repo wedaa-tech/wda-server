@@ -212,6 +212,7 @@ exports.getProjectNames = function (req, res) {
 exports.generate = async function (req, res) {
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
+    const accessToken = req.kauth?.grant?.access_token?.token;
     console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
 
     const fileName = nanoid(9);
@@ -278,16 +279,16 @@ exports.generate = async function (req, res) {
 
                 // Stitching AI code starts from here
                 console.log('****************************************************');
-                console.log('AI CODE WEAVING STARTS....');
-                // weave(folderPath, services);
-                await weave(folderPath, services)
-                    .then(() => {
-                        console.log('AI CODE WEAVING ENDS......');
-                    })
-                    .catch(error => {
-                        console.error('Error weaving:', error);
-                    });
-               
+                try {
+                    console.log('AI CODE WEAVING STARTS');
+                    await weave(folderPath, services, accessToken);
+                    console.log('AI CODE WEAVING ENDS');
+                } catch (error) {
+                    // if there is an error in AI CODE WEAVING, Code zip will not be generated
+                    console.error('Error while weaving[propagated error]:', error);
+                    utility.removeDump(folderPath);
+                    return res.status(500).send({ error: 'Execution stopped' });
+                }
                 console.log('****************************************************');
 
                 // check if application documentation is enabled
