@@ -3,7 +3,7 @@ const utility = require('../utility/core');
 const jdlConverter = require('../utility/jsonToJdl');
 const exec = require('child_process').exec;
 const blueprintDao = require('../dao/blueprintDao');
-const weaveAIGeneratedCodeIntoExisting = require('../weaver/codeWeaver');
+const weave = require('../weaver/codeWeaver');
 
 /**
  * Update specific blueprint with given project Id
@@ -209,7 +209,7 @@ exports.getProjectNames = function (req, res) {
  * @param {*} req
  * @param {*} res
  */
-exports.generate = function (req, res) {
+exports.generate = async function (req, res) {
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
     console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
@@ -258,7 +258,7 @@ exports.generate = function (req, res) {
         console.log('Generating Architecture files...');
         exec(
             `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies --force ${minikube}`,
-            function (error, stdout, stderr) {
+            async function (error, stdout, stderr) {
                 if (stdout !== '') {
                     console.log('---------stdout: ---------\n' + stdout);
                 }
@@ -279,8 +279,15 @@ exports.generate = function (req, res) {
                 // Stitching AI code starts from here
                 console.log('****************************************************');
                 console.log('AI CODE WEAVING STARTS....');
-                weaveAIGeneratedCodeIntoExisting(folderPath, services);
-                console.log('AI CODE WEAVING ENDS......');
+                // weave(folderPath, services);
+                await weave(folderPath, services)
+                    .then(() => {
+                        console.log('AI CODE WEAVING ENDS......');
+                    })
+                    .catch(error => {
+                        console.error('Error weaving:', error);
+                    });
+               
                 console.log('****************************************************');
 
                 // check if application documentation is enabled
