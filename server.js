@@ -364,9 +364,12 @@ const generateBlueprint = (folderPath, fileName, res) => {
     });
 };
 
-app.listen(3001, () => {
+var server = app.listen(3001, () => {
     console.log('⚡: Server listening on port 3001');
 });
+
+// Set timeout for 5 mins
+server.setTimeout(300000);
 
 // signal interrupt
 process.on('SIGINT', () => {
