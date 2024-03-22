@@ -1,6 +1,7 @@
 require('newrelic');
 require('dotenv').config();
 const express = require('express');
+const http = require('http');
 const app = express();
 const fs = require('fs');
 const path = require('path');
@@ -364,12 +365,15 @@ const generateBlueprint = (folderPath, fileName, res) => {
     });
 };
 
-var server = app.listen(3001, () => {
+const server = http.createServer(app);
+// Set timeout for 5 mins
+server.setTimeout(300000);
+
+server.listen(3001, () => {
     console.log('⚡: Server listening on port 3001');
 });
 
-// Set timeout for 5 mins
-server.setTimeout(300000);
+
 
 // signal interrupt
 process.on('SIGINT', () => {
