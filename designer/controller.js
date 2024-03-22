@@ -3,6 +3,7 @@ const utility = require('../utility/core');
 const jdlConverter = require('../utility/jsonToJdl');
 const exec = require('child_process').exec;
 const blueprintDao = require('../dao/blueprintDao');
+const weave = require('../weaver/codeWeaver');
 
 /**
  * Update specific blueprint with given project Id
@@ -208,9 +209,10 @@ exports.getProjectNames = function (req, res) {
  * @param {*} req
  * @param {*} res
  */
-exports.generate = function (req, res) {
+exports.generate = async function (req, res) {
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
+    const accessToken = req.kauth?.grant?.access_token?.token;
     console.log('Generating project: ' + body.projectName + ', for user: ' + userId);
 
     const fileName = nanoid(9);
@@ -257,7 +259,7 @@ exports.generate = function (req, res) {
         console.log('Generating Architecture files...');
         exec(
             `cd ${body.projectId} && jhipster jdl ../${fileName}.jdl --skip-install --skip-git --no-insight --skip-jhipster-dependencies --force ${minikube}`,
-            function (error, stdout, stderr) {
+            async function (error, stdout, stderr) {
                 if (stdout !== '') {
                     console.log('---------stdout: ---------\n' + stdout);
                 }
@@ -273,8 +275,23 @@ exports.generate = function (req, res) {
                 console.log('Architecture Generation completed successfully.....');
 
                 const folderPath = `./${body.projectId}`;
-                // check if application documentation is enabled
                 var services = body.services;
+
+                // Stitching AI code starts from here
+                console.log('****************************************************');
+                try {
+                    console.log('AI CODE WEAVING STARTS');
+                    await weave(folderPath, services, accessToken);
+                    console.log('AI CODE WEAVING ENDS');
+                } catch (error) {
+                    // if there is an error in AI CODE WEAVING, Code zip will not be generated
+                    console.error('Error while weaving[propagated error]:', error);
+                    utility.removeDump(folderPath);
+                    return res.status(500).send({ error: 'Execution stopped' });
+                }
+                console.log('****************************************************');
+
+                // check if application documentation is enabled
                 var docsDetails = Object.values(services).find(service => service.applicationFramework === 'docusaurus');
                 var documentGenerator = !!docsDetails;
                 if (documentGenerator) {

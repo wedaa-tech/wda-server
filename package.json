@@ -22,7 +22,8 @@
         "keycloak-connect": "^21.1.1",
         "mongoose": "^7.2.1",
         "nanoid": "^3.3.4",
-        "newrelic": "latest"
+        "newrelic": "latest",
+        "sync-fetch": "^0.5.2"
     },
     "devDependencies": {
         "prettier": "^3.0.3",
