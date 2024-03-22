@@ -93,7 +93,7 @@ async function includeServiceCode(folderPath, content) {
                 generateServiceCode({ packageName: content.packageName, modelClass: eachmodelData.entity }, content.accessToken)
                     .then(response => {
                         if (response) {
-                            // Write entity files for each response
+                            // Write repository, service and controller classes
                             for (const eachResponse of response) {
                                 const PACKAGE_NAME = eachResponse.package.replace(/\./g, '/');
                                 const serviceDirectoryPath = path.join(folderPath, content.applicationName, JAVA, PACKAGE_NAME);
