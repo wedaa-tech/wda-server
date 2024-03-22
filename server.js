@@ -1,7 +1,7 @@
 require('newrelic');
 require('dotenv').config();
 const express = require('express');
-const http = require('http');
+var timeout = require('connect-timeout'); 
 const app = express();
 const fs = require('fs');
 const path = require('path');
@@ -20,6 +20,8 @@ const keycloakConfig = require('./config/keycloak-config.js').keycloakConfig;
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
 const memoryStore = new session.MemoryStore();
+
+app.use(timeout(300000));
 
 app.use(
     session({
@@ -365,11 +367,8 @@ const generateBlueprint = (folderPath, fileName, res) => {
     });
 };
 
-const server = http.createServer(app);
-// Set timeout for 5 mins
-server.setTimeout(300000);
 
-server.listen(3001, () => {
+app.listen(3001, () => {
     console.log('⚡: Server listening on port 3001');
 });
 
