@@ -130,7 +130,11 @@ async function weave(folderPath, services, accessToken) {
 
     Object.keys(services).forEach((key) => {
         const service = services[key];
-        if (service.applicationFramework === "spring" && service.prodDatabaseType === "postgresql") {
+        if (service.applicationFramework === "spring" &&
+            service.prodDatabaseType === "postgresql" &&
+            service.hasOwnProperty("dbmlData") &&
+            service.dbmlData !== null &&
+            service.dbmlData !== "") {
             const liquibaseRequest = {
                 applicationName: service.applicationName,
                 dbmlData: service.dbmlData,
