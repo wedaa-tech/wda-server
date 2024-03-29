@@ -1,5 +1,6 @@
 require('newrelic');
 require('dotenv').config();
+require('log-timestamp');
 const express = require('express');
 var timeout = require('connect-timeout'); 
 const app = express();
