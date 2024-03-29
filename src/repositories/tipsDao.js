@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const tipsSchema = require('../model/tips');
+const tipsSchema = require('../models/tips');
 
 tipsSchema.statics = {
     create: function (data) {

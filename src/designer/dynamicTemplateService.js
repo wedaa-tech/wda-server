@@ -1,9 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 const { time } = require('console');
-const utility = require('../utility/core');
-const blueprintDao = require('../dao/blueprintDao');
-const projectDao = require('../dao/projectDao');
+const utils = require('../utils/core');
+const blueprintDao = require('../repositories/blueprintDao');
+const projectDao = require('../repositories/projectDao');
 
 
 const serviceBase = {
@@ -338,7 +338,7 @@ function addClientNodes(dynamicNodes, clientFramework, clientPort, serviceCount)
  */
 async function addAsDraft(title, description, userId, metadata) {
     try {
-        const projectId = utility.generateProjectId(title);
+        const projectId = utils.generateProjectId(title);
 
         // get the default parentId for the user
         let parentId = await projectDao.getProjectIdByName({ name: "default", user_id: userId });

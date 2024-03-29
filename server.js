@@ -9,9 +9,9 @@ const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 
 const wdaRoutes = require('./src/designer/router.js');
-const publicRouter = require("./src/router/public.js");
-const db = require('./src/config/database');
-const keycloakConfig = require('./src/config/keycloak-config.js').keycloakConfig;
+const publicRouter = require("./src/routes/public.js");
+const db = require('./src/configs/database');
+const keycloakConfig = require('./src/configs/keycloak-config.js').keycloakConfig;
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.

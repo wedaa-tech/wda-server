@@ -1,5 +1,5 @@
-const refArchitectureDao = require('../dao/refArchitectureDao');
-const utility = require('../utility/core');
+const refArchitectureDao = require('../repositories/refArchitectureDao');
+const utils = require('../utils/core');
 
 /**
  * save refArchitecture to the db
@@ -9,7 +9,7 @@ const utility = require('../utility/core');
 exports.saveRefArch = function (req, res) {
     const body = req.body;
     if (!body.projectId) {
-        body.projectId = utility.generateProjectId(req.body.projectName);
+        body.projectId = utils.generateProjectId(req.body.projectName);
     }
     var architecture = {
         id: body.projectId,

@@ -1,8 +1,8 @@
 var wda = require('../designer/controller.js');
-var refArchService = require('../designer/refArchServices');
+var refArchService = require('../designer/refArchServices.js');
 var wizardService = require('../designer/wizardService.js');
-var feedbackService = require('../designer/feedbackService');
-var tipsService = require('../designer/tipsService');
+var feedbackService = require('../designer/feedbackService.js');
+var tipsService = require('../designer/tipsService.js');
 
 module.exports = function (router) {
     router.post('/generate', wda.generate);

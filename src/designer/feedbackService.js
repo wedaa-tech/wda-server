@@ -1,4 +1,4 @@
-const feedbackDao = require('../dao/feedbackDao');
+const feedbackDao = require('../repositories/feedbackDao');
 
 /**
  * save feedback to the db

@@ -1,8 +1,8 @@
 const { nanoid } = require('nanoid');
-const utility = require('../utility/core');
-const jdlConverter = require('../utility/jsonToJdl');
+const utils = require('../utils/core');
+const jdlConverter = require('../utils/jsonToJdl');
 const exec = require('child_process').exec;
-const blueprintDao = require('../dao/blueprintDao');
+const blueprintDao = require('../repositories/blueprintDao');
 const weave = require('../weaver/codeWeaver');
 
 /**
@@ -45,7 +45,7 @@ exports.saveAsDraft = function (req, res) {
     const userId = req.kauth?.grant?.access_token?.content?.sub;
     console.log('Saving project: ' + body.projectName + ', for user: ' + userId);
     if (!body.projectId) {
-        body.projectId = utility.generateProjectId(body.projectName);
+        body.projectId = utils.generateProjectId(body.projectName);
     }
     var blueprint = {
         project_id: body.projectId,
@@ -219,7 +219,7 @@ exports.generate = async function (req, res) {
     // To over ride the frontend value (and to maintain unique folder name)
     if (!body.projectId) {
         // Remove spaces and convert to lowercase for body.projectName
-        body.projectId = utility.generateProjectId(body.projectName, fileName);
+        body.projectId = utils.generateProjectId(body.projectName, fileName);
     }
     const metadata = body.metadata;
     // preprocessing the request json
@@ -233,13 +233,13 @@ exports.generate = async function (req, res) {
     }
 
     // Generates the Dir for Blueprints
-    utility.generateBlueprint(body.projectId, res);
+    utils.generateBlueprint(body.projectId, res);
 
     // Delete the "metadata" attribute from the JSON data
     delete body.metadata;
 
     // Validate & Create a json file for the jhipster generator
-    utility.createJsonFile(fileName, body);
+    utils.createJsonFile(fileName, body);
 
     // JSON to JDL, with 5 sec wait for the json to get generated
     setTimeout(function () {
@@ -286,7 +286,7 @@ exports.generate = async function (req, res) {
                 } catch (error) {
                     // if there is an error in AI CODE WEAVING, Code zip will not be generated
                     console.error('Error while weaving[propagated error]:', error);
-                    utility.removeDump(folderPath);
+                    utils.removeDump(folderPath);
                     return res.status(500).send({ error: 'Execution stopped' });
                 }
                 console.log('****************************************************');
@@ -327,7 +327,7 @@ const generateTerraformFiles = (fileName, folderPath, res) => {
         }
 
         // Generation of Infrastructure zip file with in the callback function of child process.
-        utility.generateZip(folderPath, res);
+        utils.generateZip(folderPath, res);
     });
 };
 
@@ -370,15 +370,15 @@ const triggerTerraformGenerator = (folderPath, deployment, body, res) => {
     if (deployment) {
         console.log('Generating Infrastructure files...');
         const jsonFileForTerraform = nanoid(9);
-        var infraJson = utility.infraJsonGenerator(body);
+        var infraJson = utils.infraJsonGenerator(body);
         // Generate json file for infraJson, if deployment is true
-        utility.createJsonFile(jsonFileForTerraform, infraJson);
+        utils.createJsonFile(jsonFileForTerraform, infraJson);
         //Invoke tf-wdi generator
         generateTerraformFiles(jsonFileForTerraform, folderPath, res);
         console.log('Zipping Architecture/Infrastructure files completed successfully.....');
     } else {
         // Generation of Architecture zip, with in the call back function of child process.
-        utility.generateZip(folderPath, res);
+        utils.generateZip(folderPath, res);
         console.log('Zipping Architecture files completed successfully.....');
     }
 };

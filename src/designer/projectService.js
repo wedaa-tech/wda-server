@@ -1,5 +1,5 @@
-const projectDao = require('../dao/projectDao');
-const blueprintDao = require('../dao/blueprintDao');
+const projectDao = require('../repositories/projectDao');
+const blueprintDao = require('../repositories/blueprintDao');
 
 /**
  * save project to the db

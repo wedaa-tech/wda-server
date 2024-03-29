@@ -1,4 +1,4 @@
-const tipsDao = require('../dao/tipsDao');
+const tipsDao = require('../repositories/tipsDao');
 
 /**
  * save tip to the db  [user with ADMIN role]

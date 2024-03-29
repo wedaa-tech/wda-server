@@ -1,5 +1,5 @@
-const blueprintDao = require('../dao/blueprintDao');
-const refArchDao = require('../dao/refArchitectureDao');
+const blueprintDao = require('../repositories/blueprintDao');
+const refArchDao = require('../repositories/refArchitectureDao');
 const fs = require('fs');
 
 exports.createJdlFromJson = (fileName, metadata, req, res) => {

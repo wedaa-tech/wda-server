@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const feedbackSchema = require('../model/feedback');
+const feedbackSchema = require('../models/feedback');
 
 feedbackSchema.statics = {
     create: function (data) {

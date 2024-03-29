@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-const refArchitectureSchema = require('../model/refArchitecture');
+const refArchitectureSchema = require('../models/refArchitecture');
 
 refArchitectureSchema.statics = {
     create: function (data) {
