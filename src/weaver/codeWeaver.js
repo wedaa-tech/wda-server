@@ -20,9 +20,9 @@ function writeFile(filePath, data) {
         }
 
         // Write the content to the file
-        console.log(new Date(), "File writing started");
+        console.log(new Date(), 'File writing started');
         fs.writeFileSync(filePath, data);
-        console.log(new Date(), "File written | filePath:", path.join(path.dirname(filePath)));
+        console.log(new Date(), 'File written | filePath:', path.join(path.dirname(filePath)));
     } catch (err) {
         throw err;
     }
@@ -31,7 +31,7 @@ function writeFile(filePath, data) {
 async function includeLiquibase(folderPath, content) {
     try {
         // Call the Liquibase API to generate the DBML data
-        console.log(new Date(), "Processing liquibase |", "serviceName:", content.applicationName);
+        console.log(new Date(), 'Processing liquibase |', 'serviceName:', content.applicationName);
         const response = await generateLiquibase({ dbml: content.dbmlData }, content.accessToken);
 
         // Check if response is present
@@ -40,7 +40,7 @@ async function includeLiquibase(folderPath, content) {
             const serviceDirectoryPath = path.join(folderPath, content.applicationName, LIQUIBASE_CHANGELOG);
             const filePath = path.join(serviceDirectoryPath, `${content.applicationName}_initial_schema.xml`);
             writeFile(filePath, response.liquibase);
-            console.log(new Date(), "Liquibase file written | serviceName:", content.applicationName);
+            console.log(new Date(), 'Liquibase file written | serviceName:', content.applicationName);
         } else {
             console.error('Error: No response from Liquibase API');
             throw new Error('No response from Liquibase API');
@@ -54,7 +54,7 @@ async function includeLiquibase(folderPath, content) {
 async function includeEntities(folderPath, content) {
     try {
         // Call the Entities API to generate the entity files
-        console.log(new Date(), "Processing entities  |", "serviceName:", content.applicationName);
+        console.log(new Date(), 'Processing entities  |', 'serviceName:', content.applicationName);
         const response = await generateEntities({ packageName: content.packageName, dbml: content.dbmlData }, content.accessToken);
 
         // Check if response is present
@@ -66,7 +66,7 @@ async function includeEntities(folderPath, content) {
                 const filePath = path.join(serviceDirectoryPath, `${eachResponse.name}.java`);
                 writeFile(filePath, eachResponse.entity);
             });
-            console.log(new Date(), "All Entity files written | serviceName:", content.applicationName);
+            console.log(new Date(), 'All Entity files written | serviceName:', content.applicationName);
             return response;
         } else {
             console.error('Error: No response from Entities API');
@@ -87,7 +87,14 @@ async function includeServiceCode(folderPath, content) {
         const serviceCodePromises = [];
 
         for (const eachmodelData of modelDataList) {
-            console.log(new Date(), "Processing service-code |", "serviceName:", content.applicationName, " | modelName:", eachmodelData.name);
+            console.log(
+                new Date(),
+                'Processing service-code |',
+                'serviceName:',
+                content.applicationName,
+                ' | modelName:',
+                eachmodelData.name,
+            );
             // Push the promise for each generateServiceCode call to the array
             serviceCodePromises.push(
                 generateServiceCode({ packageName: content.packageName, modelClass: eachmodelData.entity }, content.accessToken)
@@ -100,7 +107,7 @@ async function includeServiceCode(folderPath, content) {
                                 const filePath = path.join(serviceDirectoryPath, `${eachResponse.name}.java`);
                                 writeFile(filePath, eachResponse.code);
                             }
-                            console.log(new Date(), "All Service Code files written | serviceName:", content.applicationName);
+                            console.log(new Date(), 'All Service Code files written | serviceName:', content.applicationName);
                         } else {
                             console.error('Error: No response from Service Code API');
                             throw new Error('No response from Service Code API');
@@ -109,7 +116,7 @@ async function includeServiceCode(folderPath, content) {
                     .catch(error => {
                         console.error('Error calling generateServiceCode()', error);
                         throw error;
-                    })
+                    }),
             );
         }
         // Wait for all promises to resolve
@@ -120,21 +127,21 @@ async function includeServiceCode(folderPath, content) {
     }
 }
 
-
-
 async function weave(folderPath, services, accessToken) {
-    console.log("####################################################");
+    console.log('####################################################');
 
     const includeLiquibasePromises = [];
     const includeEntitiesPromises = [];
 
-    Object.keys(services).forEach((key) => {
+    Object.keys(services).forEach(key => {
         const service = services[key];
-        if (service.applicationFramework === "spring" &&
-            service.prodDatabaseType === "postgresql" &&
-            service.hasOwnProperty("dbmlData") &&
+        if (
+            service.applicationFramework === 'spring' &&
+            service.prodDatabaseType === 'postgresql' &&
+            service.hasOwnProperty('dbmlData') &&
             service.dbmlData !== null &&
-            service.dbmlData !== "") {
+            service.dbmlData !== ''
+        ) {
             const liquibaseRequest = {
                 applicationName: service.applicationName,
                 dbmlData: service.dbmlData,
@@ -158,29 +165,26 @@ async function weave(folderPath, services, accessToken) {
             };
             includeEntitiesPromises.push(entitiesPromiseObject);
         }
-
     });
 
     // waiting for the liquibase file to be written
     await Promise.all(includeLiquibasePromises);
 
     // waiting for the entities files to be written, then generate the service code.
-    await Promise.all(includeEntitiesPromises.map(promiseObj => promiseObj.promise))
-        .then(async (entitiesResponses) => {
-            for (let index = 0; index < entitiesResponses.length; index++) {
-                const response = entitiesResponses[index];
-                const serviceCodeRequest = {
-                    applicationName: includeEntitiesPromises[index].applicationName,
-                    packageName: includeEntitiesPromises[index].packageName,
-                    modelDataList: response,
-                    accessToken: accessToken,
-                };
-                await includeServiceCode(folderPath, serviceCodeRequest);
-            }
-        });
+    await Promise.all(includeEntitiesPromises.map(promiseObj => promiseObj.promise)).then(async entitiesResponses => {
+        for (let index = 0; index < entitiesResponses.length; index++) {
+            const response = entitiesResponses[index];
+            const serviceCodeRequest = {
+                applicationName: includeEntitiesPromises[index].applicationName,
+                packageName: includeEntitiesPromises[index].packageName,
+                modelDataList: response,
+                accessToken: accessToken,
+            };
+            await includeServiceCode(folderPath, serviceCodeRequest);
+        }
+    });
 
-    console.log("####################################################");
+    console.log('####################################################');
 }
-
 
 module.exports = weave;

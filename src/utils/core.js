@@ -162,9 +162,7 @@ exports.infraJsonGenerator = body => {
         type: serviceData.applicationType,
     }));
 
-    const auth = Object.values(applications).some(serviceData => serviceData.authenticationType === 'oauth2')
-        ? 'true'
-        : 'false';
+    const auth = Object.values(applications).some(serviceData => serviceData.authenticationType === 'oauth2') ? 'true' : 'false';
 
     var infraJson = {
         projectId: body.projectId,
@@ -220,8 +218,7 @@ exports.generateProjectId = (projectName, fileName) => {
     return projectId;
 };
 
-
-exports.removeDump = (folderPath) => {
+exports.removeDump = folderPath => {
     // Remove the folder once the archive is complete.
     fs.rm(folderPath, { recursive: true }, err => {
         if (err) {
@@ -252,5 +249,4 @@ exports.removeDump = (folderPath) => {
             });
         }
     });
-
-}
+};

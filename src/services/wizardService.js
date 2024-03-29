@@ -59,10 +59,8 @@ exports.getWizardTemplate = function (req, res) {
                             .replace(/"mongodb"/g, `"${requestBody.database}"`)
                             .replace(/"gomicro"/g, `"${requestBody.backend}"`);
                         // Replace databasePort value
-                        if(requestBody.database === "postgresql"){
-                            modifiedJsonString = modifiedJsonString
-                            .replace(/"27017"/g, `"5432"`)
-                            .replace(/"27018"/g, `"5433"`);
+                        if (requestBody.database === 'postgresql') {
+                            modifiedJsonString = modifiedJsonString.replace(/"27017"/g, `"5432"`).replace(/"27018"/g, `"5433"`);
                         }
                         // Replace "react" with requestBody.frontend, if the scope is fullStack
                         if (requestBody.AT === 'fullStack') {

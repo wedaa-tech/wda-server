@@ -16,10 +16,9 @@ refArchitectureSchema.statics = {
     },
 
     createOrUpdate: function (query, data) {
-        return this.findOneAndUpdate(query, { $set: data }, { upsert: true, new: true })
-            .then((doc) => {
-                return doc._id;
-            });
+        return this.findOneAndUpdate(query, { $set: data }, { upsert: true, new: true }).then(doc => {
+            return doc._id;
+        });
     },
 
     delete: function (query) {

@@ -35,7 +35,7 @@ exports.saveRefArch = function (req, res) {
         .createOrUpdate({ id: architecture.id }, architecture)
         .then(savedArchitecture => {
             console.log('Architecture saved successfully!');
-            return res.status(200).json({ projectId: architecture.id,_id:savedArchitecture._id });
+            return res.status(200).json({ projectId: architecture.id, _id: savedArchitecture._id });
         })
         .catch(error => {
             console.error(error);

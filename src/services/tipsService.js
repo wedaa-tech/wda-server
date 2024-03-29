@@ -8,7 +8,7 @@ const tipsDao = require('../repositories/tipsDao');
 exports.saveTip = function (req, res) {
     const roles = req?.kauth?.grant?.access_token?.content?.realm_access?.roles;
     // Check if the "ADMIN" role is present in the roles array
-    if (roles && roles.includes("ADMIN")) {
+    if (roles && roles.includes('ADMIN')) {
         const userId = req?.kauth?.grant?.access_token?.content?.sub;
         const tip = req.body;
         tip.user_id = userId;
@@ -16,9 +16,7 @@ exports.saveTip = function (req, res) {
             .create(tip)
             .then(savedTip => {
                 console.log('Tip was added successfully!');
-                return res
-                    .status(200)
-                    .send(savedTip);
+                return res.status(200).send(savedTip);
             })
             .catch(error => {
                 console.error(error);
@@ -41,12 +39,11 @@ exports.getTips = function (req, res) {
         .then(result => {
             if (Array.isArray(result)) {
                 console.log('Retrieved all tips');
-                return res.status(200).send( result );
+                return res.status(200).send(result);
             }
         })
         .catch(error => {
             console.error('Error retrieving tips:', error);
             return res.status(500).send({ message: 'Error retrieving tips' });
         });
-    
 };

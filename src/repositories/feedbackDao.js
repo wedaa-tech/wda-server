@@ -9,7 +9,7 @@ feedbackSchema.statics = {
 
     get: function (query) {
         return this.find(query);
-    }
+    },
 };
 
 var feedbackModel = mongoose.model('feedback', feedbackSchema);

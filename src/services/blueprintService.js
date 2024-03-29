@@ -64,7 +64,7 @@ exports.saveAsDraft = function (req, res) {
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
         .then(savedBlueprint => {
             console.log('Blueprint saved successfully!');
-            return res.status(200).json({ projectId: blueprint.project_id,_id: savedBlueprint._id });
+            return res.status(200).json({ projectId: blueprint.project_id, _id: savedBlueprint._id });
         })
         .catch(error => {
             console.error(error);

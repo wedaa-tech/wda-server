@@ -4,7 +4,6 @@ const jdlConverter = require('../utils/jsonToJdl');
 const exec = require('child_process').exec;
 const weave = require('../weaver/codeWeaver');
 
-
 /**
  * generates services/infrastructure code from blueprint
  * @param {*} req

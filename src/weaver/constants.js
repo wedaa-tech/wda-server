@@ -14,5 +14,5 @@ module.exports = {
     SRC_MAIN,
     JAVA,
     RESOURCES,
-    LIQUIBASE_CHANGELOG
+    LIQUIBASE_CHANGELOG,
 };

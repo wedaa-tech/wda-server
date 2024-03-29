@@ -13,9 +13,7 @@ exports.saveFeedback = function (req, res) {
         .create(feedback)
         .then(savedFeedback => {
             console.log('Feedback was added successfully!');
-            return res
-                .status(200)
-                .send({ message: 'Feedback was added successfully!', user: userId });
+            return res.status(200).send({ message: 'Feedback was added successfully!', user: userId });
         })
         .catch(error => {
             console.error(error);
@@ -31,7 +29,7 @@ exports.saveFeedback = function (req, res) {
 exports.getFeedbacks = function (req, res) {
     const roles = req?.kauth?.grant?.access_token?.content?.realm_access?.roles;
     // Check if the "ADMIN" role is present in the roles array
-    if (roles && roles.includes("ADMIN")) {
+    if (roles && roles.includes('ADMIN')) {
         feedbackDao
             .get()
             .then(result => {

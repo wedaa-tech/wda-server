@@ -29,7 +29,7 @@ var feedbackSchema = new Schema(
             required: true,
             min: 1,
             max: 5,
-        }
+        },
     },
     {
         timestamps: true,

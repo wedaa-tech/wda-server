@@ -2,14 +2,14 @@ require('newrelic');
 require('dotenv').config();
 require('log-timestamp');
 const express = require('express');
-var timeout = require('connect-timeout'); 
+var timeout = require('connect-timeout');
 const app = express();
 const cors = require('cors');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 
 const privateRouter = require('./src/routes/private.route.js');
-const publicRouter = require("./src/routes/public.route.js");
+const publicRouter = require('./src/routes/public.route.js');
 const db = require('./src/configs/database');
 const keycloakConfig = require('./src/configs/keycloak-config.js').keycloakConfig;
 

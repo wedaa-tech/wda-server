@@ -51,7 +51,10 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
         if (applications[i].serverPort === undefined || applications[i].serverPort === '') {
             applicationErrorList.push('Server Port cannot be empty');
         }
-        if (applications[i].prodDatabaseType !== undefined && (applications[i].databasePort  === undefined || applications[i].databasePort === '')) {
+        if (
+            applications[i].prodDatabaseType !== undefined &&
+            (applications[i].databasePort === undefined || applications[i].databasePort === '')
+        ) {
             applicationErrorList.push('Database Port cannot be empty');
         }
 
@@ -122,12 +125,13 @@ application {
         serverPort ${applications[i].serverPort}
         ${databaseType === 'no' ? 'databaseType no\n        prodDatabaseType no' : ''}
         ${databaseType === 'mongodb' ? 'databaseType mongodb' : ''}
-        ${databaseType === 'sql'
+        ${
+            databaseType === 'sql'
                 ? `databaseType sql\n        devDatabaseType ${applications[
-                    i
-                ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
+                      i
+                  ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
                 : ''
-            }
+        }
         ${databaseType !== 'no' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
@@ -303,10 +307,11 @@ deployment {
     ${ingressType ? `istio true` : `istio false`}
     ${ingressType ? `ingressDomain "${deployment.ingressDomain.toLowerCase()}"` : ``}
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
-    ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined
-                ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
-                : ''
-            }
+    ${
+        dynamicStorage && deployment.kubernetesStorageClassName !== undefined
+            ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
+            : ''
+    }
     ${dynamicStorage && deployment.cloudProvider === 'aws' ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
     ${monitoring === 'istio' ? `monitoring istio` : `monitoring no`}
 }

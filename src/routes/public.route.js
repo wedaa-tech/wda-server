@@ -7,7 +7,7 @@ var tipsService = require('../services/tipsService.js');
 
 module.exports = function (router) {
     router.post('/generate', core.generate);
-    
+
     router.get('/blueprints/:project_id', blueprintService.getBlueprint);
 
     router.get('/refArchs', refArchService.get);

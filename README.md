@@ -3,9 +3,11 @@
 Backend Engine for Wedaa!
 
 ## Dependencies
+
 Before running the application, you must run the following:
-- Database[mongodb]
-- keycloak
+
+-   Database[mongodb]
+-   keycloak
 
 Run keycloak as docker instance:
 
@@ -14,6 +16,7 @@ npm run docker:keycloak:up
 ```
 
 Run mongodb as docker instance:
+
 ```
 npm run docker:db:up
 ```
@@ -23,7 +26,9 @@ npm run docker:db:up
 ```
 node server.js
 ```
+
 or
+
 ```
 npm start
 ```
