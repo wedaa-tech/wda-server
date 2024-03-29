@@ -5,12 +5,13 @@ const express = require('express');
 var timeout = require('connect-timeout'); 
 const app = express();
 const cors = require('cors');
-const wdaRoutes = require('./designer/router.js');
-const publicRouter = require("./router/public.js");
-const db = require('./config/database');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
-const keycloakConfig = require('./config/keycloak-config.js').keycloakConfig;
+
+const wdaRoutes = require('./src/designer/router.js');
+const publicRouter = require("./src/router/public.js");
+const db = require('./src/config/database');
+const keycloakConfig = require('./src/config/keycloak-config.js').keycloakConfig;
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
