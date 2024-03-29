@@ -8,7 +8,7 @@ const cors = require('cors');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 
-const wdaRoutes = require('./src/routes/private.route.js');
+const privateRouter = require('./src/routes/private.route.js');
 const publicRouter = require("./src/routes/public.route.js");
 const db = require('./src/configs/database');
 const keycloakConfig = require('./src/configs/keycloak-config.js').keycloakConfig;
@@ -61,16 +61,16 @@ app.use(
 );
 
 // Initialise protected express router
-var router = express.Router();
+var private = express.Router();
 // Initialise unprotected express router
 var public = express.Router();
 
 // use express router
-app.use('/api', keycloak.protect(), router);
+app.use('/api', keycloak.protect(), private);
 app.use(public);
 
 //call wda routing
-wdaRoutes(router);
+privateRouter(private);
 publicRouter(public);
 
 /**
