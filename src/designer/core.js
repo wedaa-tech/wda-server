@@ -78,18 +78,18 @@ exports.generate = async function (req, res) {
                 var services = body.services;
 
                 // Stitching AI code starts from here
-                console.log('****************************************************');
-                try {
-                    console.log('AI CODE WEAVING STARTS');
-                    await weave(folderPath, services, accessToken);
-                    console.log('AI CODE WEAVING ENDS');
-                } catch (error) {
-                    // if there is an error in AI CODE WEAVING, Code zip will not be generated
-                    console.error('Error while weaving[propagated error]:', error);
-                    utils.removeDump(folderPath);
-                    return res.status(500).send({ error: 'Execution stopped' });
-                }
-                console.log('****************************************************');
+                // console.log('****************************************************');
+                // try {
+                //     console.log('AI CODE WEAVING STARTS');
+                //     await weave(folderPath, services, accessToken);
+                //     console.log('AI CODE WEAVING ENDS');
+                // } catch (error) {
+                //     // if there is an error in AI CODE WEAVING, Code zip will not be generated
+                //     console.error('Error while weaving[propagated error]:', error);
+                //     utils.removeDump(folderPath);
+                //     return res.status(500).send({ error: 'Execution stopped' });
+                // }
+                // console.log('****************************************************');
 
                 // check if application documentation is enabled
                 var docsDetails = Object.values(services).find(service => service.applicationFramework === 'docusaurus');
