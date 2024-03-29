@@ -8,8 +8,8 @@ const cors = require('cors');
 const session = require('express-session');
 const Keycloak = require('keycloak-connect');
 
-const wdaRoutes = require('./src/designer/router.js');
-const publicRouter = require("./src/routes/public.js");
+const wdaRoutes = require('./src/routes/private.route.js');
+const publicRouter = require("./src/routes/public.route.js");
 const db = require('./src/configs/database');
 const keycloakConfig = require('./src/configs/keycloak-config.js').keycloakConfig;
 

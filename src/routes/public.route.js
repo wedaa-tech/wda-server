@@ -6,6 +6,7 @@ var tipsService = require('../designer/tipsService.js');
 
 module.exports = function (router) {
     router.post('/generate', wda.generate);
+    
     router.get('/blueprints/:project_id', wda.getBlueprint);
 
     router.get('/refArchs', refArchService.get);
