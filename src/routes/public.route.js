@@ -1,13 +1,14 @@
-var wda = require('../designer/controller.js');
-var refArchService = require('../designer/refArchServices.js');
-var wizardService = require('../designer/wizardService.js');
-var feedbackService = require('../designer/feedbackService.js');
-var tipsService = require('../designer/tipsService.js');
+var core = require('../designer/core.js');
+var blueprintService = require('../services/blueprintService');
+var refArchService = require('../services/refArchServices.js');
+var wizardService = require('../services/wizardService.js');
+var feedbackService = require('../services/feedbackService.js');
+var tipsService = require('../services/tipsService.js');
 
 module.exports = function (router) {
-    router.post('/generate', wda.generate);
+    router.post('/generate', core.generate);
     
-    router.get('/blueprints/:project_id', wda.getBlueprint);
+    router.get('/blueprints/:project_id', blueprintService.getBlueprint);
 
     router.get('/refArchs', refArchService.get);
 

@@ -1,4 +1,4 @@
-var blueprintService = require('../../designer/controller');
+var blueprintService = require('../../services/blueprintService');
 
 module.exports = function (router) {
     router.get('/blueprints', blueprintService.getBlueprints);

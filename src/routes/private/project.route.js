@@ -1,4 +1,4 @@
-var projectService = require('../../designer/projectService');
+var projectService = require('../../services/projectService');
 
 module.exports = function (router) {
     router.post('/projects', projectService.saveProject);

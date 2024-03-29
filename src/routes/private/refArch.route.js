@@ -1,4 +1,4 @@
-var refArchService = require('../../designer/refArchServices');
+var refArchService = require('../../services/refArchServices');
 
 module.exports = function (router) {
     // TODO: Implement Role based Access!

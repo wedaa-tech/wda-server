@@ -2,9 +2,9 @@ var blueprintRoutes = require('./private/blueprint.route.js');
 var refArchitectureRoutes = require('./private/refArch.route.js');
 var projectRoutes = require('./private/project.route.js');
 
-var feedbackService = require('../designer/feedbackService.js');
-var tipsService = require('../designer/tipsService.js');
-var dynamicTemplate = require('../designer/dynamicTemplateService.js');
+var feedbackService = require('../services/feedbackService.js');
+var tipsService = require('../services/tipsService.js');
+var dynamicTemplate = require('../services/dynamicTemplateService.js');
 
 module.exports = function (router) {
     blueprintRoutes(router);
