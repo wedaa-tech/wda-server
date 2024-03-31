@@ -1,0 +1,77 @@
+{
+    "nodes": {
+        "UI_2": {
+            "id": "UI_2",
+            "type": "ResizableNode",
+            "position": {
+                "x": 260,
+                "y": 170
+            },
+            "data": {
+                "clientFramework": "react",
+                "applicationFramework": "react",
+                "packageName": "ui",
+                "Id": "UI_2",
+                "label": "",
+                "applicationName": "webapp",
+                "serverPort": "4200",
+                "withExample": "false",
+                "applicationType": "gateway",
+                "theme": "",
+                "authenticationType": "oauth2"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 260,
+                "y": 170
+            },
+            "dragging": true
+        },
+        "authenticationType": {
+            "id": "authenticationType",
+            "type": "selectorNode3",
+            "position": {
+                "x": 260,
+                "y": 10
+            },
+            "data": {
+                "authenticationType": "oauth2"
+            },
+            "style": {
+                "border": "1px solid ",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 260,
+                "y": 10
+            },
+            "dragging": true
+        }
+    },
+    "edges": {
+        "UI_2-authenticationType": {
+            "id": "UI_2-authenticationType",
+            "source": "UI_2",
+            "sourceHandle": "source.Top",
+            "target": "authenticationType",
+            "targetHandle": "target.Bottom",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {},
+            "className": "success"
+        }
+    }
+}

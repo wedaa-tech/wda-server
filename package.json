@@ -1,16 +1,20 @@
 {
     "name": "server",
     "version": "0.0.33",
-    "description": "wdi/wda server code ",
+    "description": "Wedaa Backend Engine",
     "main": "server.js",
     "type": "commonjs",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node server.js",
         "prettier:check": "prettier . --check",
-        "prettier:format": "prettier . --write"
+        "prettier:format": "prettier . --write",
+        "docker:db:up": "docker compose -f docker/mongodb.yml up -d",
+        "docker:db:down": "docker compose -f docker/mongodb.yml down",
+        "docker:keycloak:up": "docker compose -f docker/keycloak.yml up -d",
+        "docker:keycloak:down": "docker compose -f docker/keycloak.yml down"
     },
-    "author": "TIC",
+    "author": "WeDAA",
     "license": "ISC",
     "dependencies": {
         "archiver": "^5.3.1",
@@ -21,6 +25,7 @@
         "express": "^4.18.2",
         "express-session": "^1.17.3",
         "keycloak-connect": "^21.1.1",
+        "log-timestamp": "^0.3.0",
         "mongoose": "^7.2.1",
         "nanoid": "^3.3.4",
         "newrelic": "latest",

@@ -1,0 +1,350 @@
+{
+    "nodes": {
+        "UI_1": {
+            "id": "UI_1",
+            "type": "ResizableNode",
+            "position": {
+                "x": 230,
+                "y": 110
+            },
+            "data": {
+                "clientFramework": "react",
+                "applicationFramework": "react",
+                "packageName": "ui",
+                "Id": "UI_1",
+                "label": "",
+                "applicationName": "webapp",
+                "serverPort": "4200",
+                "withExample": "false",
+                "applicationType": "gateway",
+                "theme": "",
+                "authenticationType": "oauth2"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 230,
+                "y": 110
+            },
+            "dragging": true
+        },
+        "group_1": {
+            "id": "group_1",
+            "type": "GroupNode",
+            "position": {
+                "x": 210,
+                "y": 10
+            },
+            "data": {
+                "label": "application architecture",
+                "Id": "group_1",
+                "type": "Group",
+                "groupName": "application architecture"
+            },
+            "style": {
+                "border": "1px dashed",
+                "borderRadius": "15px",
+                "width": 610,
+                "height": 240,
+                "zIndex": -1
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 210,
+                "y": 20
+            }
+        },
+        "Service_3": {
+            "id": "Service_3",
+            "type": "ResizableNode",
+            "position": {
+                "x": 450,
+                "y": 70
+            },
+            "data": {
+                "applicationFramework": "gomicro",
+                "prodDatabaseType": "mongodb",
+                "databasePort": "27017",
+                "Id": "Service_3",
+                "label": "",
+                "applicationName": "backendone",
+                "packageName": "com.example.backendone",
+                "serverPort": "9020",
+                "applicationType": "microservice",
+                "serviceDiscoveryType": "eureka",
+                "authenticationType": "oauth2",
+                "logManagementType": "eck"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 450,
+                "y": 70
+            },
+            "dragging": true
+        },
+        "Service_4": {
+            "id": "Service_4",
+            "type": "ResizableNode",
+            "position": {
+                "x": 450,
+                "y": 170
+            },
+            "data": {
+                "applicationFramework": "gomicro",
+                "prodDatabaseType": "mongodb",
+                "databasePort": "27018",
+                "Id": "Service_4",
+                "label": "",
+                "applicationName": "backendtwo",
+                "packageName": "com.example.backendtwo",
+                "serverPort": "9021",
+                "applicationType": "microservice",
+                "serviceDiscoveryType": "eureka",
+                "authenticationType": "oauth2",
+                "logManagementType": "eck"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 450,
+                "y": 170
+            },
+            "dragging": true
+        },
+        "Database_3": {
+            "id": "Database_3",
+            "type": "selectorNode",
+            "position": {
+                "x": 640,
+                "y": 70
+            },
+            "data": {
+                "prodDatabaseType": "mongodb",
+                "databasePort": "27017",
+                "isConnected": true
+            },
+            "style": {
+                "border": "1px solid black",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 640,
+                "y": 70
+            },
+            "dragging": true
+        },
+        "Database_4": {
+            "id": "Database_4",
+            "type": "selectorNode",
+            "position": {
+                "x": 640,
+                "y": 170
+            },
+            "data": {
+                "prodDatabaseType": "mongodb",
+                "databasePort": "27018",
+                "isConnected": true
+            },
+            "style": {
+                "border": "1px solid black",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 640,
+                "y": 170
+            },
+            "dragging": true
+        },
+        "group_2": {
+            "id": "group_2",
+            "type": "GroupNode",
+            "position": {
+                "x": 210,
+                "y": -100
+            },
+            "data": {
+                "label": "common services",
+                "Id": "group_2",
+                "type": "Group",
+                "groupName": "common services"
+            },
+            "style": {
+                "border": "1px dashed",
+                "borderRadius": "15px",
+                "width": 610,
+                "height": 100,
+                "zIndex": -1
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 210,
+                "y": -100
+            },
+            "dragging": true
+        },
+        "authenticationType": {
+            "id": "authenticationType",
+            "type": "selectorNode3",
+            "position": {
+                "x": 240,
+                "y": -60
+            },
+            "data": {
+                "authenticationType": "oauth2"
+            },
+            "style": {
+                "border": "1px solid ",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 240,
+                "y": -60
+            },
+            "dragging": true
+        },
+        "serviceDiscoveryType": {
+            "id": "serviceDiscoveryType",
+            "type": "selectorNode1",
+            "position": {
+                "x": 450,
+                "y": -60
+            },
+            "data": {
+                "serviceDiscoveryType": "eureka"
+            },
+            "style": {
+                "border": "1px solid ",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 450,
+                "y": -60
+            },
+            "dragging": true
+        },
+        "logManagement": {
+            "id": "logManagement",
+            "type": "selectorNode6",
+            "position": {
+                "x": 660,
+                "y": -60
+            },
+            "data": {
+                "logManagementType": "eck"
+            },
+            "style": {
+                "border": "1px solid ",
+                "padding": "4px 4px",
+                "width": "120px",
+                "height": "40px",
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 660,
+                "y": -60
+            },
+            "dragging": true
+        }
+    },
+    "edges": {
+        "UI_1-Service_3": {
+            "id": "UI_1-Service_3",
+            "source": "UI_1",
+            "sourceHandle": "source.Right",
+            "target": "Service_3",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {
+                "client": "webapp",
+                "server": "backendone",
+                "type": "synchronous",
+                "framework": "rest-api"
+            },
+            "className": "success"
+        },
+        "UI_1-Service_4": {
+            "id": "UI_1-Service_4",
+            "source": "UI_1",
+            "sourceHandle": "source.Right",
+            "target": "Service_4",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {
+                "client": "webapp",
+                "server": "backendtwo",
+                "type": "synchronous",
+                "framework": "rest-api"
+            },
+            "className": "success"
+        },
+        "Service_4-Database_4": {
+            "id": "Service_4-Database_4",
+            "source": "Service_4",
+            "sourceHandle": "source.Right",
+            "target": "Database_4",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {},
+            "className": "success"
+        },
+        "Service_3-Database_3": {
+            "id": "Service_3-Database_3",
+            "source": "Service_3",
+            "sourceHandle": "source.Right",
+            "target": "Database_3",
+            "targetHandle": "target.Left",
+            "markerEnd": {
+                "color": "black",
+                "type": "arrowclosed"
+            },
+            "type": "smoothstep",
+            "data": {},
+            "className": "success"
+        }
+    }
+}

@@ -1,0 +1,38 @@
+{
+    "nodes": {
+        "UI_1": {
+            "id": "UI_1",
+            "type": "ResizableNode",
+            "position": {
+                "x": 460,
+                "y": 200
+            },
+            "data": {
+                "clientFramework": "no",
+                "applicationFramework": "docusaurus",
+                "packageName": "docs",
+                "Id": "UI_1",
+                "label": "Profile",
+                "applicationName": "personalprofile",
+                "serverPort": "5000",
+                "withExample": "false",
+                "applicationType": "gateway",
+                "theme": "profile",
+                "authenticationType": "no"
+            },
+            "style": {
+                "border": "1px solid black",
+                "width": 180,
+                "height": 54,
+                "borderRadius": "15px"
+            },
+            "selected": false,
+            "positionAbsolute": {
+                "x": 460,
+                "y": 200
+            },
+            "dragging": true
+        }
+    },
+    "edges": {}
+}
