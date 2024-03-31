@@ -9,10 +9,10 @@
         "start": "node server.js",
         "prettier:check": "prettier . --check",
         "prettier:format": "prettier . --write",
-        "docker:db:up": "docker compose -f src/resources/docker/mongodb.yml up -d",
-        "docker:db:down": "docker compose -f src/resources/docker/mongodb.yml down",
-        "docker:keycloak:up": "docker compose -f src/resources/docker/keycloak.yml up -d",
-        "docker:keycloak:down": "docker compose -f src/resources/docker/keycloak.yml down"
+        "docker:db:up": "docker compose -f docker/mongodb.yml up -d",
+        "docker:db:down": "docker compose -f docker/mongodb.yml down",
+        "docker:keycloak:up": "docker compose -f docker/keycloak.yml up -d",
+        "docker:keycloak:down": "docker compose -f docker/keycloak.yml down"
     },
     "author": "WeDAA",
     "license": "ISC",

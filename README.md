@@ -1,21 +1,21 @@
 # wda-server
 
-Backend Engine for Wedaa!
+Backend Engine for WeDAA!
 
 ## Dependencies
 
-Before running the application, you must run the following:
+This backend service needs below components to function properly:
 
--   Database[mongodb]
--   keycloak
+-   MongoDB
+-   Keycloak
 
-Run keycloak as docker instance:
+Run Keycloak as docker instance:
 
 ```
 npm run docker:keycloak:up
 ```
 
-Run mongodb as docker instance:
+Run MongoDB as docker instance:
 
 ```
 npm run docker:db:up
