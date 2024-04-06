@@ -1,4 +1,5 @@
 const blueprintDao = require('../repositories/blueprintDao');
+const utils = require('../utils/core');
 
 /**
  * Update specific blueprint with given project Id
@@ -198,3 +199,49 @@ exports.getProjectNames = function (req, res) {
             return res.status(500).send({ message: 'Error retrieving projects' });
         });
 };
+
+/**
+ * Saves a blueprint based on the provided request data.
+ * @param {*} req - The request object containing blueprint data.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the blueprintId and parentId.
+ */
+exports.saveBlueprint = function (req) {
+    // Extract request body and user ID
+    const body = req.body;
+    const userId = req.kauth?.grant?.access_token?.content?.sub;
+    console.log('Saving blueprint: ' + body.projectName + ', for user: ' + userId);
+    // Generate blueprint ID if not provided [blueprintId alias for projectId]
+    if (!body.projectId) {
+        body.projectId = utils.generateProjectId(body.projectName);
+    }
+    // Construct blueprint object
+    var blueprint = {
+        project_id: body.projectId,
+        request_json: {
+            projectId: body.projectId,
+            projectName: body.projectName,
+            services: body.services,
+            communications: body.communications,
+            parentId: body.parentId,
+            validationStatus: body.validationStatus,
+            imageUrl: body.imageUrl,
+            deployment: body.deployment
+        },
+        metadata: body.metadata,
+        user_id: req.kauth?.grant?.access_token?.content?.sub,
+        parentId: req.body?.parentId,
+        imageUrl: req.body?.imageUrl,
+        description: req.body?.description,
+        validationStatus: req.body?.validationStatus,
+    };
+    // Save blueprint to the database
+    return blueprintDao
+        .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
+        .then(savedBlueprint => {
+            console.log('Blueprint saved successfully!');
+            return { blueprintId: savedBlueprint.project_id, parentId: blueprint.parentId };
+        })
+        .catch(error => {
+            console.error("Error saving blueprint", error);
+        });
+}

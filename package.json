@@ -17,6 +17,7 @@
     "author": "WeDAA",
     "license": "ISC",
     "dependencies": {
+        "amqplib": "^0.10.3",
         "archiver": "^5.3.1",
         "chalk": "^4.1.2",
         "connect-timeout": "^1.9.0",

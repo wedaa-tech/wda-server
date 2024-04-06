@@ -12,6 +12,8 @@ const privateRouter = require('./src/routes/private.route.js');
 const publicRouter = require('./src/routes/public.route.js');
 const db = require('./src/configs/database');
 const keycloakConfig = require('./src/configs/keycloak-config.js').keycloakConfig;
+const { consume } = require('./src/configs/rabbitmq/consumer.js');
+const { CODE_GENERATION } = require('./src/configs/rabbitmq/constants.js');
 
 // Create a session-store to be used by both the express-session
 // middleware and the keycloak middleware.
@@ -79,6 +81,9 @@ publicRouter(public);
 app.get('/health', (req, res) => {
     return res.status(200).send({ message: 'OK' });
 });
+
+// Start receiving from the CODE_GENERATION Queue 
+consume(CODE_GENERATION);
 
 app.listen(3001, () => {
     console.log('⚡: Server listening on port 3001');
