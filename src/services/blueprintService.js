@@ -225,7 +225,7 @@ exports.saveBlueprint = function (req) {
             parentId: body.parentId,
             validationStatus: body.validationStatus,
             imageUrl: body.imageUrl,
-            deployment: body.deployment
+            deployment: body.deployment,
         },
         metadata: body.metadata,
         user_id: req.kauth?.grant?.access_token?.content?.sub,
@@ -242,6 +242,6 @@ exports.saveBlueprint = function (req) {
             return { blueprintId: savedBlueprint.project_id, parentId: blueprint.parentId };
         })
         .catch(error => {
-            console.error("Error saving blueprint", error);
+            console.error('Error saving blueprint', error);
         });
-}
+};

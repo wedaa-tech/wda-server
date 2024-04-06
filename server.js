@@ -82,7 +82,7 @@ app.get('/health', (req, res) => {
     return res.status(200).send({ message: 'OK' });
 });
 
-// Start receiving from the CODE_GENERATION Queue 
+// Start receiving from the CODE_GENERATION Queue
 consume(CODE_GENERATION);
 
 app.listen(3001, () => {

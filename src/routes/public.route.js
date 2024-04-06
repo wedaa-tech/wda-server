@@ -5,7 +5,6 @@ var feedbackService = require('../services/feedbackService.js');
 var tipsService = require('../services/tipsService.js');
 
 module.exports = function (router) {
-
     router.get('/blueprints/:project_id', blueprintService.getBlueprint);
 
     router.get('/refArchs', refArchService.get);

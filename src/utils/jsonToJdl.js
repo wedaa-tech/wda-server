@@ -181,7 +181,7 @@ communication {
     // Deployment
     const deployment = jsonData.deployment;
     var deploymentData;
-    if (deployment !== undefined && deployment!== null) {
+    if (deployment !== undefined && deployment !== null) {
         var deploymentTypes = ['kubernetes'];
         var cloudProviders = ['aws', 'azure'];
         var localProviders = ['minikube'];

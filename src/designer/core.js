@@ -10,24 +10,22 @@ const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const blueprintDao = require('../repositories/blueprintDao');
 
-
-
-
 /**
  * Generates a prototype based on the provided blueprint.
  * This method retrieves the saved blueprint from the database.
  * @param {Object} blueprint - The blueprint object containing project details.
  */
-exports.prototype = async  function (blueprint) {
-    await blueprintDao.getByProjectId({ project_id: blueprint.blueprintId })
+exports.prototype = async function (blueprint) {
+    await blueprintDao
+        .getByProjectId({ project_id: blueprint.blueprintId })
         .then(result => {
             blueprint = result;
         })
         .catch(error => {
-            console.error("Error retrieving saved blueprint:", error);
+            console.error('Error retrieving saved blueprint:', error);
         });
 
-    // TODO: check if the response can be changed to single object instead of list 
+    // TODO: check if the response can be changed to single object instead of list
     const body = blueprint[0].request_json;
     const userId = blueprint[0].user_id;
     const fileName = body.projectId;
@@ -50,7 +48,7 @@ exports.prototype = async  function (blueprint) {
     // JSON to JDL, with 5 sec wait for the json to get generated
     setTimeout(function () {
         console.log('Waiting 5 sec for the jdl to be generated');
-        const response =  jdlConverter.createJdlFromJson(fileName);
+        const response = jdlConverter.createJdlFromJson(fileName);
         // check if the error response object exists before returning it
         if (response) {
             return response;
@@ -110,7 +108,7 @@ exports.prototype = async  function (blueprint) {
             },
         );
     }, 5000);
-}
+};
 
 /**
  * Sends the latest ZIP file located in a specific folder to the client for download.
@@ -144,14 +142,13 @@ exports.download = function (req, res) {
 
         // Stream the file to the response
         const fileStream = fs.createReadStream(latestZip);
-        fileStream.on('error', (error) => {
+        fileStream.on('error', error => {
             console.error('Error streaming file:', error);
             res.status(500).json({ error: 'Internal Server Error' });
         });
         fileStream.pipe(res);
     });
 };
-
 
 /**
  * Create's a blueprint and send's a message to a message queue[rabbitmq].

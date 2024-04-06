@@ -97,18 +97,22 @@ exports.generateZip = (folderPath, userId) => {
     // Get the current date and time
     const currentDate = new Date();
     // Format the date as MM-DD-YYYY-HHMMSS
-    const formattedDate = currentDate.toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-    }).replace(/\//g, '-'); // Replace slashes with dashes
+    const formattedDate = currentDate
+        .toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+        })
+        .replace(/\//g, '-'); // Replace slashes with dashes
 
-    const formattedTime = currentDate.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false // Ensure 24-hour format
-    }).replace(/[:]/g, ''); // Remove colons
+    const formattedTime = currentDate
+        .toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false, // Ensure 24-hour format
+        })
+        .replace(/[:]/g, ''); // Remove colons
 
     // Combine date and time
     const formattedTimestamp = `${formattedDate}-${formattedTime}`;
