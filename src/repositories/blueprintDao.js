@@ -11,33 +11,114 @@ blueprintSchema.statics = {
         return this.find(query);
     },
 
-    getByProjectId: function (query) {
-        return this.find({ ...query, deleted: false });
-    },
+    // getByProjectId: function (query) {
+    //     return this.find({ ...query, deleted: false });
+    // },
 
-    getByUserId: function (query) {
-        const projection = {
-            _id: 1,
-            project_id: 1,
-            projectName: '$request_json.projectName',
-            draft: '$request_json.services',
-            parentId: 1,
-            metadata: 1,
-            imageUrl: 1,
-            description: 1,
-            createdAt: 1,
-            updatedAt: 1,
-            validationStatus: 1,
-        };
-
-        return this.find(
+    getByProjectId: async function (query) {
+        const blueprints = await this.aggregate([
+            // Match the specific blueprint based on project_id and not deleted
+            { $match: { ...query, deleted: false } },
+            // Lookup the latest code generation for the matched blueprint
             {
-                ...query,
-                metadata: { $ne: null },
-                deleted: false,
+                $lookup: {
+                    from: "code_generations",
+                    let: { blueprintId: "$project_id" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$blueprintId", "$$blueprintId"] } } },
+                        { $sort: { createdAt: -1 } }, // Sort code generations by createdAt in descending order
+                        { $limit: 1 } // Get only the latest code generation
+                    ],
+                    as: "latestCodeGeneration"
+                }
             },
-            projection,
-        ).sort({ updatedAt: -1 });
+            // Project fields to include
+            {
+                $project: {
+                    _id: 1,
+                    project_id: 1,
+                    request_json: 1,
+                    metadata: 1,
+                    user_id: 1,
+                    deleted: 1,
+                    parentId: 1,
+                    imageUrl: 1,
+                    description: 1,
+                    validationStatus: 1,
+                    version: 1,
+                    latestCodeGenerationStatus: { $arrayElemAt: ["$latestCodeGeneration.status", 0] } // Extract status from the latestCodeGeneration array
+                }
+            }
+        ]);
+
+        return blueprints;
+    },
+    
+
+    // getByUserId: function (query) {
+    //     const projection = {
+    //         _id: 1,
+    //         project_id: 1,
+    //         projectName: '$request_json.projectName',
+    //         draft: '$request_json.services',
+    //         parentId: 1,
+    //         metadata: 1,
+    //         imageUrl: 1,
+    //         description: 1,
+    //         createdAt: 1,
+    //         updatedAt: 1,
+    //         validationStatus: 1,
+    //     };
+
+    //     return this.find(
+    //         {
+    //             ...query,
+    //             metadata: { $ne: null },
+    //             deleted: false,
+    //         },
+    //         projection,
+    //     ).sort({ updatedAt: -1 });
+    // },
+    getByUserId: async function (query) {
+        const pipeline = [
+            // Match blueprints based on the query and not deleted
+            { $match: { ...query, metadata: { $ne: null }, deleted: false } },
+            // Lookup the latest code generation for each matched blueprint
+            {
+                $lookup: {
+                    from: "code_generations",
+                    let: { blueprintId: "$project_id" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$blueprintId", "$$blueprintId"] } } },
+                        { $sort: { createdAt: -1 } }, // Sort code generations by createdAt in descending order
+                        { $limit: 1 } // Get only the latest code generation
+                    ],
+                    as: "latestCodeGeneration"
+                }
+            },
+            // Project fields to include
+            {
+                $project: {
+                    _id: 1,
+                    project_id: 1,
+                    projectName: '$request_json.projectName',
+                    draft: '$request_json.services',
+                    parentId: 1,
+                    metadata: 1,
+                    imageUrl: 1,
+                    description: 1,
+                    createdAt: 1,
+                    updatedAt: 1,
+                    validationStatus: 1,
+                    latestCodeGenerationStatus: { $arrayElemAt: ["$latestCodeGeneration.status", 0] } // Extract status from the latestCodeGeneration array
+                }
+            },
+            // Sort by updatedAt in descending order
+            { $sort: { updatedAt: -1 } }
+        ];
+
+        const result = await this.aggregate(pipeline);
+        return result;
     },
 
     createOrUpdate: function (query, data) {

@@ -6,6 +6,7 @@ var core = require('../designer/core.js');
 var feedbackService = require('../services/feedbackService.js');
 var tipsService = require('../services/tipsService.js');
 var dynamicTemplate = require('../services/dynamicTemplateService.js');
+var codeGeneration = require('../services/codeGenerationService.js');
 
 module.exports = function (router) {
     blueprintRoutes(router);
@@ -18,4 +19,6 @@ module.exports = function (router) {
     router.get('/feedback', feedbackService.getFeedbacks);
     router.post('/tips', tipsService.saveTip);
     router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
+
+    router.get('/code-generation-status',codeGeneration.getCodeGenerationStatus )
 };

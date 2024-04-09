@@ -5,30 +5,34 @@ const utils = require('../utils/core');
 const jdlConverter = require('../utils/jsonToJdl');
 const exec = require('child_process').exec;
 const weave = require('../weaver/codeWeaver');
-const { saveBlueprint } = require('../services/blueprintService');
+const { saveBlueprint, getBlueprintById } = require('../services/blueprintService');
 const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
-const blueprintDao = require('../repositories/blueprintDao');
+const { saveCodeGeneration, updateCodeGeneration } = require('../services/codeGenerationService');
 
 /**
- * Generates a prototype based on the provided blueprint.
+ * Generates a prototype based on the provided blueprint Info.
  * This method retrieves the saved blueprint from the database.
- * @param {Object} blueprint - The blueprint object containing project details.
+ * @param {Object} blueprint - The blueprint object containing prototype details.
  */
-exports.prototype = async function (blueprint) {
-    await blueprintDao
-        .getByProjectId({ project_id: blueprint.blueprintId })
-        .then(result => {
-            blueprint = result;
-        })
-        .catch(error => {
-            console.error('Error retrieving saved blueprint:', error);
-        });
+exports.prototype = async function (blueprintInfo) {
+    // update the code_generation to IN-PROGRESS
+    const codeGenerationId = blueprintInfo.codeGenerationId;
+    var codeGeneration = {status: 'IN-PROGRESS'};
+    await updateCodeGeneration(codeGenerationId, codeGeneration);
 
-    // TODO: check if the response can be changed to single object instead of list
-    const body = blueprint[0].request_json;
-    const userId = blueprint[0].user_id;
+    // get blueprint to process the prototype
+    const blueprint = await getBlueprintById(blueprintInfo.blueprintId);
+
+    const body = blueprint.request_json;
+    const userId = blueprint.user_id;
     const fileName = body.projectId;
+
+    // Form a context object which will contain the information to be passed to generate zip & update code_generation
+    var context = {
+        userId: userId,
+        codeGenerationId: codeGenerationId,
+    }
 
     console.log('Generating prototype: ' + body.projectName + ', for user: ' + userId);
 
@@ -101,9 +105,9 @@ exports.prototype = async function (blueprint) {
                 var documentGenerator = !!docsDetails;
                 if (documentGenerator) {
                     console.log('Generating Docusaurus files...');
-                    generateDocusaurusFiles(fileName, folderPath, deployment, body, userId);
+                    generateDocusaurusFiles(fileName, folderPath, deployment, body, context);
                 } else {
-                    triggerTerraformGenerator(folderPath, deployment, body, userId);
+                    triggerTerraformGenerator(folderPath, deployment, body, context);
                 }
             },
         );
@@ -159,10 +163,16 @@ exports.download = function (req, res) {
 exports.generate = async function (req, res) {
     try {
         const blueprint = await saveBlueprint(req);
+        var codeGeneration = {
+            blueprintId: blueprint.blueprintId,
+            blueprintVersion: blueprint.version,
+        }
+        const codeGenerationId = await saveCodeGeneration(codeGeneration);
+        blueprint.codeGenerationId = codeGenerationId;
         // TODO: Handle send with in try/catch
         // Send a message to the message queue for code generation
         send(CODE_GENERATION, blueprint);
-        return res.status(200).json({ blueprintId: blueprint.blueprintId, projectId: blueprint.parentId });
+        return res.status(200).json({ blueprintId: blueprint.blueprintId, parentId: blueprint.parentId });
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Error generating blueprint' });
@@ -172,11 +182,11 @@ exports.generate = async function (req, res) {
 /**
  * Child process to generate the Infrastructure files
  *
- * @param {string} fileName : random string with 9 characters
+ * @param {string} fileName   : random string with 9 characters
  * @param {string} folderPath : combination of the projectName + fileName
- * @param {string} userId
+ * @param {string} context    : contains userId, codeGenerationId
  */
-const generateTerraformFiles = (fileName, folderPath, userId) => {
+const generateTerraformFiles = (fileName, folderPath, context) => {
     exec(`yo tf-wdi --file ./${fileName}.json`, function (error, stdout, stderr) {
         if (stdout !== '') {
             console.log('---------stdout: ---------\n' + stdout);
@@ -191,7 +201,7 @@ const generateTerraformFiles = (fileName, folderPath, userId) => {
         }
 
         // Generation of Infrastructure zip file with in the callback function of child process.
-        utils.generateZip(folderPath, userId);
+        utils.generateZip(folderPath, context);
     });
 };
 
@@ -202,9 +212,9 @@ const generateTerraformFiles = (fileName, folderPath, userId) => {
  * @param {*} folderPath : combination of filename and project name
  * @param {*} deployment : deployment check boolean
  * @param {*} body       : request body
- * @param {string} userId
+ * @param {*} context    : contains userId, codeGenerationId
  */
-const generateDocusaurusFiles = (fileName, folderPath, deployment, body, userId) => {
+const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context) => {
     exec(`cd ${folderPath} && yo docusaurus --file ../${fileName}-docusaurus.json`, function (error, stdout, stderr) {
         if (stdout !== '') {
             console.log('---------stdout: ---------\n' + stdout);
@@ -217,7 +227,7 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, userId)
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
         }
-        triggerTerraformGenerator(folderPath, deployment, body, userId);
+        triggerTerraformGenerator(folderPath, deployment, body, context);
     });
 };
 
@@ -227,9 +237,9 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, userId)
  * @param {*} folderPath : combination of filename and project name
  * @param {*} deployment : deployment check boolean
  * @param {*} body       : request body
- * @param {string} userId
+ * @param {*} context    : contains userId, codeGenerationId
  */
-const triggerTerraformGenerator = (folderPath, deployment, body, userId) => {
+const triggerTerraformGenerator = (folderPath, deployment, body, context) => {
     // If deployment is true, then generate Terraform files as well and then generate the zip archive.
     if (deployment) {
         console.log('Generating Infrastructure files...');
@@ -238,11 +248,11 @@ const triggerTerraformGenerator = (folderPath, deployment, body, userId) => {
         // Generate json file for infraJson, if deployment is true
         utils.createJsonFile(jsonFileForTerraform, infraJson);
         //Invoke tf-wdi generator
-        generateTerraformFiles(jsonFileForTerraform, folderPath, userId);
+        generateTerraformFiles(jsonFileForTerraform, folderPath, context);
         console.log('Zipping Architecture/Infrastructure files completed successfully.....');
     } else {
         // Generation of Architecture zip, with in the call back function of child process.
-        utils.generateZip(folderPath, userId);
+        utils.generateZip(folderPath, context);
         console.log('Zipping Architecture files completed successfully.....');
     }
 };

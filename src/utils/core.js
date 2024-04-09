@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 const { nanoid } = require('nanoid');
+const { updateCodeGeneration } = require('../services/codeGenerationService');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -73,9 +74,13 @@ exports.generateBlueprint = (folderPath, res) => {
  * The generated ZIP file is saved inside a directory corresponding to the user ID.
  *
  * @param {string} folderPath - The path to the folder whose contents will be archived.
- * @param {string} userId - The ID of the user for whom the ZIP file will be generated.
+ * @param {*} context 
  */
-exports.generateZip = (folderPath, userId) => {
+exports.generateZip = (folderPath, context) => {
+    // unmarshalling context object
+    const userId = context.userId;
+    const codeGenerationId = context.codeGenerationId;
+
     var blueprintId = folderPath;
     // extracting the blueprintId from the folder path
     blueprintId = blueprintId.substring(2);
@@ -159,6 +164,10 @@ exports.generateZip = (folderPath, userId) => {
                     });
                 }
             });
+
+            // Update the code_generation collection as COMPLETED [ASYNC]
+            var codeGeneration = {status: 'COMPLETED'};
+            updateCodeGeneration(codeGenerationId, codeGeneration);
         })
         .catch(err => {
             console.error(err);

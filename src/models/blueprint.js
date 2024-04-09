@@ -48,6 +48,9 @@ var blueprintSchema = new Schema(
             default: 'DRAFT',
             required: true,
         },
+        version:{
+            type: Number,
+        }
     },
     {
         timestamps: true,
