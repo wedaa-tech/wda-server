@@ -243,7 +243,7 @@ const triggerTerraformGenerator = (folderPath, deployment, body, context) => {
     // If deployment is true, then generate Terraform files as well and then generate the zip archive.
     if (deployment) {
         console.log('Generating Infrastructure files...');
-        const jsonFileForTerraform = nanoid(9);
+        const jsonFileForTerraform = folderPath.slice(-9);
         var infraJson = utils.infraJsonGenerator(body);
         // Generate json file for infraJson, if deployment is true
         utils.createJsonFile(jsonFileForTerraform, infraJson);

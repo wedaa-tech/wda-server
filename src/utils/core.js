@@ -149,8 +149,10 @@ exports.generateZip = (folderPath, context) => {
                 if (err) {
                     console.error(err);
                 } else {
+                    // Extracting last 9 latter[random string] from the blueprintId
+                    randomString  = blueprintId.slice(-9);
                     files.forEach(file => {
-                        if (file.endsWith('.json') || file.endsWith('.jdl')) {
+                        if (file.endsWith(`${randomString}.json`) || file.endsWith(`${randomString}.jdl`)) {
                             if (!excludedFiles.includes(file)) {
                                 fs.unlink(`${process.cwd()}/${file}`, err => {
                                     if (err) {
