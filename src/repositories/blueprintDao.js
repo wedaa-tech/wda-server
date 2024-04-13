@@ -23,9 +23,13 @@ blueprintSchema.statics = {
             {
                 $lookup: {
                     from: "code_generations",
-                    let: { blueprintId: "$project_id" },
+                    let: { 
+                        blueprintId: "$project_id",
+                        blueprintVersion: "$version"
+                     },
                     pipeline: [
                         { $match: { $expr: { $eq: ["$blueprintId", "$$blueprintId"] } } },
+                        { $match: { $expr: { $eq: ["$blueprintVersion", "$$blueprintVersion"] } } },
                         { $sort: { createdAt: -1 } }, // Sort code generations by createdAt in descending order
                         { $limit: 1 } // Get only the latest code generation
                     ],
@@ -87,9 +91,13 @@ blueprintSchema.statics = {
             {
                 $lookup: {
                     from: "code_generations",
-                    let: { blueprintId: "$project_id" },
+                    let: { 
+                        blueprintId: "$project_id",
+                        blueprintVersion: "$version"
+                     },
                     pipeline: [
                         { $match: { $expr: { $eq: ["$blueprintId", "$$blueprintId"] } } },
+                        { $match: { $expr: { $eq: ["$blueprintVersion", "$$blueprintVersion"] } } },
                         { $sort: { createdAt: -1 } }, // Sort code generations by createdAt in descending order
                         { $limit: 1 } // Get only the latest code generation
                     ],
