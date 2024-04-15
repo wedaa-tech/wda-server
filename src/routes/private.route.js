@@ -15,10 +15,10 @@ module.exports = function (router) {
 
     // Common private routes
     router.post('/generate', core.generate);
-    router.post('/download/:blueprintId', core.download);
+    router.get('/download/:blueprintId', core.download);
     router.get('/feedback', feedbackService.getFeedbacks);
     router.post('/tips', tipsService.saveTip);
     router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
 
-    router.get('/code-generation-status',codeGeneration.getCodeGenerationStatus )
+    router.post('/code-generation-status',codeGeneration.getCodeGenerationStatus )
 };

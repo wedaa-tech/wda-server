@@ -1,3 +1,4 @@
+const { request } = require('express');
 const codeGenerationDao = require('../repositories/codeGenerationDao');
 
 exports.saveCodeGeneration = function (codeGeneration) {
@@ -19,7 +20,9 @@ exports.updateCodeGeneration = function (codeGenerationId, codeGeneration) {
 exports.getCodeGenerationStatus = async function (req, res) {
     try {
         const userId = req.kauth.grant.access_token.content.sub;
-        const blueprintIds = req.body;
+        const requestBody = req.body;
+        const blueprintIds = requestBody.blueprintIds;
+
         const statusList = await codeGenerationDao.getStatusForBlueprints(blueprintIds);
         res.json(statusList);
     } catch (error) {
