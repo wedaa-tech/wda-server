@@ -18,6 +18,7 @@ const { saveCodeGeneration, updateCodeGeneration } = require('../services/codeGe
 exports.prototype = async function (blueprintInfo) {
     // update the code_generation to IN-PROGRESS
     const codeGenerationId = blueprintInfo.codeGenerationId;
+    const accessToken = blueprintInfo.accessToken;
     var codeGeneration = {status: 'IN-PROGRESS'};
     await updateCodeGeneration(codeGenerationId, codeGeneration);
 
@@ -162,13 +163,16 @@ exports.download = function (req, res) {
  */
 exports.generate = async function (req, res) {
     try {
+        const accessToken = req.kauth?.grant?.access_token?.token;
         const blueprint = await saveBlueprint(req);
         var codeGeneration = {
             blueprintId: blueprint.blueprintId,
             blueprintVersion: blueprint.version,
         }
         const codeGenerationId = await saveCodeGeneration(codeGeneration);
+        // passing codeGenerationId & accessToken to message broker
         blueprint.codeGenerationId = codeGenerationId;
+        blueprint.accessToken = accessToken;
         // TODO: Handle send with in try/catch
         // Send a message to the message queue for code generation
         send(CODE_GENERATION, blueprint);
