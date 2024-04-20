@@ -22,7 +22,6 @@ async function checkFlagsEnabled(flags) {
     } else if (typeof flags === 'string') {
         return allFlags.isFeatureEnabled(flags);
     }
-    console.log(flagsResult);
     return flagsResult;
 }
 
