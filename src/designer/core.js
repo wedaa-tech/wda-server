@@ -9,6 +9,7 @@ const { saveBlueprint, getBlueprintById } = require('../services/blueprintServic
 const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const { saveCodeGeneration, updateCodeGeneration } = require('../services/codeGenerationService');
+const { checkFlagsEnabled } = require('../configs/feature-flag.js');
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -19,7 +20,7 @@ exports.prototype = async function (blueprintInfo) {
     // update the code_generation to IN-PROGRESS
     const codeGenerationId = blueprintInfo.codeGenerationId;
     const accessToken = blueprintInfo.accessToken;
-    var codeGeneration = {status: 'IN-PROGRESS'};
+    var codeGeneration = { status: 'IN-PROGRESS' };
     await updateCodeGeneration(codeGenerationId, codeGeneration);
 
     // get blueprint to process the prototype
@@ -86,19 +87,22 @@ exports.prototype = async function (blueprintInfo) {
                 const folderPath = `./${body.projectId}`;
                 var services = body.services;
 
-                // // Stitching AI code starts from here
-                // console.log('****************************************************');
-                // try {
-                //     console.log('AI CODE WEAVING STARTS');
-                //     await weave(folderPath, services, accessToken);
-                //     console.log('AI CODE WEAVING ENDS');
-                // } catch (error) {
-                //     // if there is an error in AI CODE WEAVING, Code zip will not be generated
-                //     console.error('Error while weaving[propagated error]:', error);
-                //     utils.removeDump(folderPath);
-                //     return res.status(500).send({ error: 'Execution stopped' });
-                // }
-                // console.log('****************************************************');
+                // Stitching AI code starts from here
+                aiEnabled = await checkFlagsEnabled('ai_wizard');
+                if (aiEnabled) {
+                    console.log('****************************************************');
+                    try {
+                        console.log('AI CODE WEAVING STARTS');
+                        await weave(folderPath, services, accessToken);
+                        console.log('AI CODE WEAVING ENDS');
+                    } catch (error) {
+                        // if there is an error in AI CODE WEAVING, Code zip will not be generated
+                        console.error('Error while weaving[propagated error]:', error);
+                        utils.removeDump(folderPath);
+                        return res.status(500).send({ error: 'Execution stopped' });
+                    }
+                    console.log('****************************************************');
+                }
 
                 // check if application documentation is enabled
                 var docsDetails = Object.values(services).find(service => service.applicationFramework === 'docusaurus');
