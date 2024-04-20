@@ -39,7 +39,7 @@ exports.prototype = async function (blueprintInfo) {
 
     // boolean check to trigger Infrastructure file generation
     var deployment = false;
-    if (body.deployment !== null) {
+    if (body.deployment !== undefined && body.deployment !== null) {
         deployment = true;
         body.deployment.projectName = body.projectName;
     }
@@ -60,7 +60,7 @@ exports.prototype = async function (blueprintInfo) {
         }
         // Check if deployment type is minikube
         var minikube = '';
-        if (body.deployment !== null && body.deployment.cloudProvider !== null && body.deployment.cloudProvider === 'minikube') {
+        if (body.deployment !== undefined && body.deployment !== null && body.deployment.cloudProvider !== undefined && body.deployment.cloudProvider !== null && body.deployment.cloudProvider === 'minikube') {
             minikube = '--minikube';
         }
 
@@ -86,7 +86,6 @@ exports.prototype = async function (blueprintInfo) {
                 const folderPath = `./${body.projectId}`;
                 var services = body.services;
 
-                // // TODO:- Would require to get the token for AI API calls
                 // // Stitching AI code starts from here
                 // console.log('****************************************************');
                 // try {

@@ -350,6 +350,7 @@ async function addAsDraft(title, description, userId, metadata) {
             request_json: {
                 projectName: title,
             },
+            version: 1, // version is set to 1, when the prototype is generated via AI-Wizard
         };
 
         const savedBlueprint = await blueprintDao.createOrUpdate({ project_id: projectId }, blueprint);
