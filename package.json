@@ -12,7 +12,9 @@
         "docker:db:up": "docker compose -f docker/mongodb.yml up -d",
         "docker:db:down": "docker compose -f docker/mongodb.yml down",
         "docker:keycloak:up": "docker compose -f docker/keycloak.yml up -d",
-        "docker:keycloak:down": "docker compose -f docker/keycloak.yml down"
+        "docker:keycloak:down": "docker compose -f docker/keycloak.yml down",
+        "docker:rabbitmq:up": "docker compose -f docker/rabbitmq.yml up -d",
+        "docker:rabbitmq:down": "docker compose -f docker/rabbitmq.yml down"
     },
     "author": "WeDAA",
     "license": "ISC",
