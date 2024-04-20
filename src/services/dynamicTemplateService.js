@@ -50,7 +50,7 @@ exports.getDynamicTemplate = async function (req, res) {
     let postgresqlDatabasePort = 5432;
 
     // add dbml to service
-    // await addDBMLScriptToService(accessToken, services);
+    await addDBMLScriptToService(accessToken, services);
 
     // Add UI blocks
     addClientNodes(dynamicNodes, clientFramework, clientPort, serviceCount);
@@ -83,7 +83,7 @@ exports.getDynamicTemplate = async function (req, res) {
                 packageName: `${rootPackageName}.${services[i].name.replace(/\s/g, '').toLowerCase()}`,
                 serverPort: servicePort.toString(),
                 description: services[i].description,
-                // dbmlData: services[i].dbml,
+                dbmlData: services[i].dbml,
                 applicationType: 'microservice',
                 authenticationType: 'oauth2',
                 serviceDiscoveryType: 'eureka',
