@@ -330,50 +330,6 @@ deployment {
     const combinedArrayData = Array.from(combinedData);
     const concatenatedJDL = combinedArrayData.join(' ');
 
-    // persist the blueprint to DB, if there is no error
-    // if (req.body?.parentId === 'admin') {
-    //     var architecture = {
-    //         id: jsonData.projectId,
-    //         name: jsonData.projectName,
-    //         request_json: jsonData,
-    //         metadata: metadata,
-    //         user_id: req.kauth?.grant?.access_token?.content?.sub,
-    //         type: 'APPLICATION',
-    //         imageUrl: req.body?.imageUrl,
-    //         description: req.body?.description,
-    //         published: req.body?.published || false,
-    //         validationStatus: req.body.validationStatus,
-    //     };
-    //     refArchDao
-    //         .createOrUpdate({ id: architecture.id }, architecture)
-    //         .then(savedArchitecture => {
-    //             console.log(savedArchitecture);
-    //             console.log('Architecture was added successfully!');
-    //         })
-    //         .catch(error => {
-    //             console.error(error);
-    //         });
-    // } else {
-    //     var blueprint = {
-    //         project_id: jsonData.projectId,
-    //         request_json: jsonData,
-    //         metadata: metadata,
-    //         user_id: req.kauth?.grant?.access_token?.content?.sub,
-    //         parentId: req.body?.parentId,
-    //         imageUrl: req.body?.imageUrl,
-    //         description: req.body?.description,
-    //         validationStatus: req.body.validationStatus,
-    //     };
-    //     blueprintDao
-    //         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
-    //         .then(savedBlueprint => {
-    //             console.log('Blueprint was added successfully!');
-    //         })
-    //         .catch(error => {
-    //             console.error(error);
-    //         });
-    // }
-
     fs.writeFile(fileName + '.jdl', concatenatedJDL, err => {
         if (err) throw err;
         console.log('Json data written to JDL file');

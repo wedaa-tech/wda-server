@@ -11,10 +11,6 @@ blueprintSchema.statics = {
         return this.find(query);
     },
 
-    // getByProjectId: function (query) {
-    //     return this.find({ ...query, deleted: false });
-    // },
-
     getByProjectId: async function (query) {
         const blueprints = await this.aggregate([
             // Match the specific blueprint based on project_id and not deleted
@@ -58,31 +54,6 @@ blueprintSchema.statics = {
         return blueprints;
     },
     
-
-    // getByUserId: function (query) {
-    //     const projection = {
-    //         _id: 1,
-    //         project_id: 1,
-    //         projectName: '$request_json.projectName',
-    //         draft: '$request_json.services',
-    //         parentId: 1,
-    //         metadata: 1,
-    //         imageUrl: 1,
-    //         description: 1,
-    //         createdAt: 1,
-    //         updatedAt: 1,
-    //         validationStatus: 1,
-    //     };
-
-    //     return this.find(
-    //         {
-    //             ...query,
-    //             metadata: { $ne: null },
-    //             deleted: false,
-    //         },
-    //         projection,
-    //     ).sort({ updatedAt: -1 });
-    // },
     getByUserId: async function (query) {
         const pipeline = [
             // Match blueprints based on the query and not deleted
