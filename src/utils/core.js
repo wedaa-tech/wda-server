@@ -170,6 +170,8 @@ exports.generateZip = (folderPath, context) => {
             // Update the code_generation collection as COMPLETED [ASYNC]
             var codeGeneration = { status: 'COMPLETED',  error: null };
             updateCodeGeneration(codeGenerationId, codeGeneration);
+
+            console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
             console.error(err);
