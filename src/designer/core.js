@@ -268,10 +268,10 @@ const triggerTerraformGenerator = (folderPath, deployment, body, context) => {
         utils.createJsonFile(jsonFileForTerraform, infraJson);
         //Invoke tf-wdi generator
         generateTerraformFiles(jsonFileForTerraform, folderPath, context);
-        console.log('Zipping Architecture/Infrastructure files completed successfully.....');
+        console.log('Zipping Architecture/Infrastructure files.....');
     } else {
         // Generation of Architecture zip, with in the call back function of child process.
         utils.generateZip(folderPath, context);
-        console.log('Zipping Architecture files completed successfully.....');
+        console.log('Zipping Architecture files.....');
     }
 };
