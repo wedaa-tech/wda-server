@@ -74,7 +74,7 @@ exports.generateBlueprint = (folderPath, res) => {
  * The generated ZIP file is saved inside a directory corresponding to the user ID.
  *
  * @param {string} folderPath - The path to the folder whose contents will be archived.
- * @param {*} context 
+ * @param {*} context
  */
 exports.generateZip = (folderPath, context) => {
     // unmarshalling context object
@@ -150,7 +150,7 @@ exports.generateZip = (folderPath, context) => {
                     console.error(err);
                 } else {
                     // Extracting last 9 latter[random string] from the blueprintId
-                    randomString  = blueprintId.slice(-9);
+                    randomString = blueprintId.slice(-9);
                     files.forEach(file => {
                         if (file.endsWith(`${randomString}.json`) || file.endsWith(`${randomString}.jdl`)) {
                             if (!excludedFiles.includes(file)) {
@@ -168,7 +168,7 @@ exports.generateZip = (folderPath, context) => {
             });
 
             // Update the code_generation collection as COMPLETED [ASYNC]
-            var codeGeneration = {status: 'COMPLETED'};
+            var codeGeneration = { status: 'COMPLETED' };
             updateCodeGeneration(codeGenerationId, codeGeneration);
         })
         .catch(err => {

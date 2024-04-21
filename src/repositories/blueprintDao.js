@@ -18,19 +18,19 @@ blueprintSchema.statics = {
             // Lookup the latest code generation for the matched blueprint
             {
                 $lookup: {
-                    from: "code_generations",
-                    let: { 
-                        blueprintId: "$project_id",
-                        blueprintVersion: "$version"
-                     },
+                    from: 'code_generations',
+                    let: {
+                        blueprintId: '$project_id',
+                        blueprintVersion: '$version',
+                    },
                     pipeline: [
-                        { $match: { $expr: { $eq: ["$blueprintId", "$$blueprintId"] } } },
-                        { $match: { $expr: { $eq: ["$blueprintVersion", "$$blueprintVersion"] } } },
+                        { $match: { $expr: { $eq: ['$blueprintId', '$$blueprintId'] } } },
+                        { $match: { $expr: { $eq: ['$blueprintVersion', '$$blueprintVersion'] } } },
                         { $sort: { createdAt: -1 } }, // Sort code generations by createdAt in descending order
-                        { $limit: 1 } // Get only the latest code generation
+                        { $limit: 1 }, // Get only the latest code generation
                     ],
-                    as: "latestCodeGeneration"
-                }
+                    as: 'latestCodeGeneration',
+                },
             },
             // Project fields to include
             {
@@ -46,14 +46,14 @@ blueprintSchema.statics = {
                     description: 1,
                     validationStatus: 1,
                     version: 1,
-                    latestCodeGenerationStatus: { $arrayElemAt: ["$latestCodeGeneration.status", 0] } // Extract status from the latestCodeGeneration array
-                }
-            }
+                    latestCodeGenerationStatus: { $arrayElemAt: ['$latestCodeGeneration.status', 0] }, // Extract status from the latestCodeGeneration array
+                },
+            },
         ]);
 
         return blueprints;
     },
-    
+
     getByUserId: async function (query) {
         const pipeline = [
             // Match blueprints based on the query and not deleted
@@ -61,19 +61,19 @@ blueprintSchema.statics = {
             // Lookup the latest code generation for each matched blueprint
             {
                 $lookup: {
-                    from: "code_generations",
-                    let: { 
-                        blueprintId: "$project_id",
-                        blueprintVersion: "$version"
-                     },
+                    from: 'code_generations',
+                    let: {
+                        blueprintId: '$project_id',
+                        blueprintVersion: '$version',
+                    },
                     pipeline: [
-                        { $match: { $expr: { $eq: ["$blueprintId", "$$blueprintId"] } } },
-                        { $match: { $expr: { $eq: ["$blueprintVersion", "$$blueprintVersion"] } } },
+                        { $match: { $expr: { $eq: ['$blueprintId', '$$blueprintId'] } } },
+                        { $match: { $expr: { $eq: ['$blueprintVersion', '$$blueprintVersion'] } } },
                         { $sort: { createdAt: -1 } }, // Sort code generations by createdAt in descending order
-                        { $limit: 1 } // Get only the latest code generation
+                        { $limit: 1 }, // Get only the latest code generation
                     ],
-                    as: "latestCodeGeneration"
-                }
+                    as: 'latestCodeGeneration',
+                },
             },
             // Project fields to include
             {
@@ -89,11 +89,11 @@ blueprintSchema.statics = {
                     createdAt: 1,
                     updatedAt: 1,
                     validationStatus: 1,
-                    latestCodeGenerationStatus: { $arrayElemAt: ["$latestCodeGeneration.status", 0] } // Extract status from the latestCodeGeneration array
-                }
+                    latestCodeGenerationStatus: { $arrayElemAt: ['$latestCodeGeneration.status', 0] }, // Extract status from the latestCodeGeneration array
+                },
             },
             // Sort by updatedAt in descending order
-            { $sort: { updatedAt: -1 } }
+            { $sort: { updatedAt: -1 } },
         ];
 
         const result = await this.aggregate(pipeline);

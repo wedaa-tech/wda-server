@@ -34,7 +34,7 @@ exports.prototype = async function (blueprintInfo) {
     var context = {
         userId: userId,
         codeGenerationId: codeGenerationId,
-    }
+    };
 
     console.log('Generating prototype: ' + body.projectName + ', for user: ' + userId);
 
@@ -61,7 +61,13 @@ exports.prototype = async function (blueprintInfo) {
         }
         // Check if deployment type is minikube
         var minikube = '';
-        if (body.deployment !== undefined && body.deployment !== null && body.deployment.cloudProvider !== undefined && body.deployment.cloudProvider !== null && body.deployment.cloudProvider === 'minikube') {
+        if (
+            body.deployment !== undefined &&
+            body.deployment !== null &&
+            body.deployment.cloudProvider !== undefined &&
+            body.deployment.cloudProvider !== null &&
+            body.deployment.cloudProvider === 'minikube'
+        ) {
             minikube = '--minikube';
         }
 
@@ -171,7 +177,7 @@ exports.generate = async function (req, res) {
         var codeGeneration = {
             blueprintId: blueprint.blueprintId,
             blueprintVersion: blueprint.version,
-        }
+        };
         const codeGenerationId = await saveCodeGeneration(codeGeneration);
         // passing codeGenerationId & accessToken to message broker
         blueprint.codeGenerationId = codeGenerationId;

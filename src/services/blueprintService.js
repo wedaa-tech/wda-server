@@ -241,11 +241,11 @@ exports.saveBlueprint = function (req) {
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
         .then(savedBlueprint => {
             console.log('Blueprint saved successfully!');
-            return { 
+            return {
                 blueprintId: savedBlueprint.project_id,
                 version: savedBlueprint.version,
                 parentId: blueprint.parentId,
-             };
+            };
         })
         .catch(error => {
             console.error('Error saving blueprint', error);
@@ -258,24 +258,24 @@ exports.saveBlueprint = function (req) {
  * @returns {Promise<Object>} A promise that resolves with the retrieved blueprint object.
  * @throws {Error} Throws an error if there's an issue retrieving the blueprint.
  */
-exports.getBlueprintById =  function(blueprintId) {
+exports.getBlueprintById = function (blueprintId) {
     return blueprintDao
-    .getByProjectId({ project_id: blueprintId})
-    .then(result => {
-        if (Array.isArray(result) && result.length === 0) {
-            console.log('No blueprint with project Id: ' + req.params.project_id);
-            return;
-        } else if (Array.isArray(result) && result.length === 1) {
-            var uniqueResult = result[0];
-            console.log('Retrieved blueprint with project Id: ' + uniqueResult.project_id);
-            return uniqueResult;
-        } else {
-            console.log('Retrieved blueprint with project Id: ' + result.project_id);
-            return result;
-        }
-    })
-    .catch(error => {
-        console.error('Error retrieving blueprint:', error);
-        throw error;
-    });
-}
+        .getByProjectId({ project_id: blueprintId })
+        .then(result => {
+            if (Array.isArray(result) && result.length === 0) {
+                console.log('No blueprint with project Id: ' + req.params.project_id);
+                return;
+            } else if (Array.isArray(result) && result.length === 1) {
+                var uniqueResult = result[0];
+                console.log('Retrieved blueprint with project Id: ' + uniqueResult.project_id);
+                return uniqueResult;
+            } else {
+                console.log('Retrieved blueprint with project Id: ' + result.project_id);
+                return result;
+            }
+        })
+        .catch(error => {
+            console.error('Error retrieving blueprint:', error);
+            throw error;
+        });
+};

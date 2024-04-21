@@ -2,20 +2,18 @@ const { request } = require('express');
 const codeGenerationDao = require('../repositories/codeGenerationDao');
 
 exports.saveCodeGeneration = function (codeGeneration) {
-    return codeGenerationDao.createOrUpdate(codeGeneration)
-    .then(savedcodeGeneration => {
-            console.log('code generation saved successfully!');
+    return codeGenerationDao.createOrUpdate(codeGeneration).then(savedcodeGeneration => {
+        console.log('code generation saved successfully!');
         return savedcodeGeneration._id;
-    })
-}
+    });
+};
 
 exports.updateCodeGeneration = function (codeGenerationId, codeGeneration) {
-    return codeGenerationDao.createOrUpdate({_id:codeGenerationId}, codeGeneration)
-    .then(updatedcodeGeneration => {
-            console.log('code generation updated successfully!');
+    return codeGenerationDao.createOrUpdate({ _id: codeGenerationId }, codeGeneration).then(updatedcodeGeneration => {
+        console.log('code generation updated successfully!');
         return updatedcodeGeneration._id;
-    })
-}
+    });
+};
 
 exports.getCodeGenerationStatus = async function (req, res) {
     try {

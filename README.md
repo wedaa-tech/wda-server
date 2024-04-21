@@ -33,6 +33,7 @@ npm run docker:rabbitmq:up
 1. Create a copy of the .env.example file with the name .env [First Time Only]
 
 2. Add the API Keys for any 3rd party libraries, for example:
+
     - FLAGSMITH_API_KEY
 
 3. Start the server

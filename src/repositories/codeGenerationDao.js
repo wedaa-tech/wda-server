@@ -20,17 +20,16 @@ codeGenerationSchema.statics = {
             // Group by blueprintId and get the status of the latest record
             {
                 $group: {
-                    _id: "$blueprintId",
-                    status: { $first: "$status" }
-                }
+                    _id: '$blueprintId',
+                    status: { $first: '$status' },
+                },
             },
             // Project only the blueprintId and status fields
-            { $project: { _id: 0, blueprintId: "$_id", status: 1 } }
+            { $project: { _id: 0, blueprintId: '$_id', status: 1 } },
         ];
         const statusList = await this.aggregate(pipeline);
         return statusList;
     },
-
 };
 
 var codeGenerationModel = mongoose.model('code_generations', codeGenerationSchema);

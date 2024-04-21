@@ -20,5 +20,5 @@ module.exports = function (router) {
     router.post('/tips', tipsService.saveTip);
     router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
 
-    router.post('/code-generation-status',codeGeneration.getCodeGenerationStatus )
+    router.post('/code-generation-status', codeGeneration.getCodeGenerationStatus);
 };

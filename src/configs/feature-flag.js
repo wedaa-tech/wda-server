@@ -26,6 +26,3 @@ async function checkFlagsEnabled(flags) {
 }
 
 module.exports = { checkFlagsEnabled };
-
-
-

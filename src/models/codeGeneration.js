@@ -23,7 +23,7 @@ var codeGenerationSchema = new Schema(
             type: Number,
             unique: false,
             required: true,
-        }
+        },
     },
     {
         timestamps: true,
