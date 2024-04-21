@@ -168,7 +168,7 @@ exports.generateZip = (folderPath, context) => {
             });
 
             // Update the code_generation collection as COMPLETED [ASYNC]
-            var codeGeneration = { status: 'COMPLETED' };
+            var codeGeneration = { status: 'COMPLETED',  error: null };
             updateCodeGeneration(codeGenerationId, codeGeneration);
         })
         .catch(err => {

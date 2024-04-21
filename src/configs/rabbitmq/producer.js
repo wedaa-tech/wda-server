@@ -17,6 +17,7 @@ async function send(queue, msg) {
         }, 500);
     } catch (error) {
         console.error(error);
+        throw error;
     }
 }
 

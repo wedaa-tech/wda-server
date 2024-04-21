@@ -182,9 +182,15 @@ exports.generate = async function (req, res) {
         // passing codeGenerationId & accessToken to message broker
         blueprint.codeGenerationId = codeGenerationId;
         blueprint.accessToken = accessToken;
-        // TODO: Handle send with in try/catch
         // Send a message to the message queue for code generation
-        send(CODE_GENERATION, blueprint);
+        try{
+            await send(CODE_GENERATION, blueprint);
+        } catch (error) {
+            // code_generation is not yet submitted to message queue, as there is an error will pushing it to message queue
+            var codeGeneration = { error: error.message };
+            updateCodeGeneration(codeGenerationId, codeGeneration);
+            throw error;
+        }
         return res.status(200).json({ blueprintId: blueprint.blueprintId, parentId: blueprint.parentId });
     } catch (error) {
         console.error(error);
