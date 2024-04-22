@@ -1,5 +1,6 @@
 const blueprintDao = require('../repositories/blueprintDao');
-const utils = require('../utils/core')
+const utils = require('../utils/core');
+
 /**
  * Update specific blueprint with given project Id
  * @param {*} req
@@ -59,6 +60,7 @@ exports.saveAsDraft = function (req, res) {
         imageUrl: req.body?.imageUrl,
         description: req.body?.description,
         validationStatus: req.body?.validationStatus,
+        version: req.body?.version,
     };
     blueprintDao
         .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
@@ -196,5 +198,84 @@ exports.getProjectNames = function (req, res) {
         .catch(error => {
             console.error('Error retrieving projects:', error);
             return res.status(500).send({ message: 'Error retrieving projects' });
+        });
+};
+
+/**
+ * Saves a blueprint based on the provided request data.
+ * @param {*} req - The request object containing blueprint data.
+ * @returns {Promise<Object>} A promise that resolves to an object containing the blueprintId and parentId.
+ */
+exports.saveBlueprint = function (req) {
+    // Extract request body and user ID
+    const body = req.body;
+    const userId = req.kauth?.grant?.access_token?.content?.sub;
+    console.log('Saving blueprint: ' + body.projectName + ', for user: ' + userId);
+    // Generate blueprint ID if not provided [blueprintId alias for projectId]
+    if (!body.projectId) {
+        body.projectId = utils.generateProjectId(body.projectName);
+    }
+    // Construct blueprint object
+    var blueprint = {
+        project_id: body.projectId,
+        request_json: {
+            projectId: body.projectId,
+            projectName: body.projectName,
+            services: body.services,
+            communications: body.communications,
+            parentId: body.parentId,
+            validationStatus: body.validationStatus,
+            imageUrl: body.imageUrl,
+            deployment: body.deployment,
+        },
+        metadata: body.metadata,
+        user_id: req.kauth?.grant?.access_token?.content?.sub,
+        parentId: req.body?.parentId,
+        imageUrl: req.body?.imageUrl,
+        description: req.body?.description,
+        validationStatus: req.body?.validationStatus,
+        version: req.body?.version,
+    };
+    // Save blueprint to the database
+    return blueprintDao
+        .createOrUpdate({ project_id: blueprint.project_id }, blueprint)
+        .then(savedBlueprint => {
+            console.log('Blueprint saved successfully!');
+            return {
+                blueprintId: savedBlueprint.project_id,
+                version: savedBlueprint.version,
+                parentId: blueprint.parentId,
+            };
+        })
+        .catch(error => {
+            console.error('Error saving blueprint', error);
+        });
+};
+
+/**
+ * Retrieves a blueprint by its ID.
+ * @param {string} blueprintId - The ID of the blueprint to retrieve.
+ * @returns {Promise<Object>} A promise that resolves with the retrieved blueprint object.
+ * @throws {Error} Throws an error if there's an issue retrieving the blueprint.
+ */
+exports.getBlueprintById = function (blueprintId) {
+    return blueprintDao
+        .getByProjectId({ project_id: blueprintId })
+        .then(result => {
+            if (Array.isArray(result) && result.length === 0) {
+                console.log('No blueprint with project Id: ' + req.params.project_id);
+                return;
+            } else if (Array.isArray(result) && result.length === 1) {
+                var uniqueResult = result[0];
+                console.log('Retrieved blueprint with project Id: ' + uniqueResult.project_id);
+                return uniqueResult;
+            } else {
+                console.log('Retrieved blueprint with project Id: ' + result.project_id);
+                return result;
+            }
+        })
+        .catch(error => {
+            console.error('Error retrieving blueprint:', error);
+            throw error;
         });
 };

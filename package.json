@@ -12,11 +12,14 @@
         "docker:db:up": "docker compose -f docker/mongodb.yml up -d",
         "docker:db:down": "docker compose -f docker/mongodb.yml down",
         "docker:keycloak:up": "docker compose -f docker/keycloak.yml up -d",
-        "docker:keycloak:down": "docker compose -f docker/keycloak.yml down"
+        "docker:keycloak:down": "docker compose -f docker/keycloak.yml down",
+        "docker:rabbitmq:up": "docker compose -f docker/rabbitmq.yml up -d",
+        "docker:rabbitmq:down": "docker compose -f docker/rabbitmq.yml down"
     },
     "author": "WeDAA",
     "license": "ISC",
     "dependencies": {
+        "amqplib": "^0.10.3",
         "archiver": "^5.3.1",
         "chalk": "^4.1.2",
         "connect-timeout": "^1.9.0",
@@ -24,6 +27,7 @@
         "dotenv": "^16.1.4",
         "express": "^4.18.2",
         "express-session": "^1.17.3",
+        "flagsmith-nodejs": "^3.3.0",
         "keycloak-connect": "^21.1.1",
         "log-timestamp": "^0.3.0",
         "mongoose": "^7.2.1",

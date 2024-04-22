@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 const { nanoid } = require('nanoid');
+const { updateCodeGeneration } = require('../services/codeGenerationService');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -69,32 +70,65 @@ exports.generateBlueprint = (folderPath, res) => {
 };
 
 /**
- * The method will generate the zip of the any folder and attach it to the response
+ * Generates a ZIP archive containing the contents of a specified folder.
+ * The generated ZIP file is saved inside a directory corresponding to the user ID.
  *
- * @param {*} folderPath : Folder Path
- * @param {*} res : Response header
+ * @param {string} folderPath - The path to the folder whose contents will be archived.
+ * @param {*} context
  */
-exports.generateZip = (folderPath, res) => {
-    // Set a custom response header with blueprintId
+exports.generateZip = (folderPath, context) => {
+    // unmarshalling context object
+    const userId = context.userId;
+    const codeGenerationId = context.codeGenerationId;
+
     var blueprintId = folderPath;
+    // extracting the blueprintId from the folder path
     blueprintId = blueprintId.substring(2);
-    res.setHeader('blueprintId', blueprintId);
+
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     archive.on('error', function (err) {
-        res.status(500).send({ error: err.message });
+        console.error(err);
     });
 
-    // Set the content type of the response to a zip file.
-    res.attachment('archive.zip');
+    const rootFolder = process.env.BLUEPRINT_ROOT_FOLDER;
+    const blueprintFolderPath = `${rootFolder}/${userId}/${blueprintId}`;
 
-    // Pipe the archive to the response stream.
-    archive.pipe(res);
+    // Create the user's folder if it doesn't exist
+    if (!fs.existsSync(blueprintFolderPath)) {
+        fs.mkdirSync(blueprintFolderPath, { recursive: true });
+    }
+
+    // Get the current date and time
+    const currentDate = new Date();
+    // Format the date as MM-DD-YYYY-HHMMSS
+    const formattedDate = currentDate
+        .toLocaleDateString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+        })
+        .replace(/\//g, '-'); // Replace slashes with dashes
+
+    const formattedTime = currentDate
+        .toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false, // Ensure 24-hour format
+        })
+        .replace(/[:]/g, ''); // Remove colons
+
+    // Combine date and time
+    const formattedTimestamp = `${formattedDate}-${formattedTime}`;
+
+    const zipPath = `${blueprintFolderPath}/${formattedTimestamp}.zip`;
+    const output = fs.createWriteStream(`${process.cwd()}/${zipPath}`);
+
+    archive.pipe(output);
 
     // Add the folder to the archive.
     archive.directory(folderPath, false);
-
-    // archive.finalize();
 
     // Finalize the archive and delete the dump folders/files.
     archive
@@ -109,14 +143,16 @@ exports.generateZip = (folderPath, res) => {
                 }
             });
 
-            // Remove all .json and .jdl files except [ "package.json", "package-lock.json" ,"wdi-wda-example.json", "reminder.jdl" ]
-            const excludedFiles = ['package.json', 'package-lock.json', 'wdi-wda-example.json', 'reminder.jdl'];
+            // Remove all .json and .jdl files except [ "package.json", "package-lock.json" ]
+            const excludedFiles = ['package.json', 'package-lock.json'];
             fs.readdir(`${process.cwd()}`, (err, files) => {
                 if (err) {
                     console.error(err);
                 } else {
+                    // Extracting last 9 latter[random string] from the blueprintId
+                    randomString = blueprintId.slice(-9);
                     files.forEach(file => {
-                        if (file.endsWith('.json') || file.endsWith('.jdl')) {
+                        if (file.endsWith(`${randomString}.json`) || file.endsWith(`${randomString}.jdl`)) {
                             if (!excludedFiles.includes(file)) {
                                 fs.unlink(`${process.cwd()}/${file}`, err => {
                                     if (err) {
@@ -130,10 +166,15 @@ exports.generateZip = (folderPath, res) => {
                     });
                 }
             });
+
+            // Update the code_generation collection as COMPLETED [ASYNC]
+            var codeGeneration = { status: 'COMPLETED' };
+            updateCodeGeneration(codeGenerationId, codeGeneration);
+
+            console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
             console.error(err);
-            res.status(500).send({ error: err.message });
         });
 };
 
