@@ -2,7 +2,7 @@ const { request } = require('express');
 const codeGenerationDao = require('../repositories/codeGenerationDao');
 
 exports.saveCodeGeneration = function (codeGeneration) {
-    return codeGenerationDao.createOrUpdate(codeGeneration).then(savedcodeGeneration => {
+    return codeGenerationDao.create(codeGeneration).then(savedcodeGeneration => {
         console.log('code generation saved successfully!');
         return savedcodeGeneration._id;
     });
