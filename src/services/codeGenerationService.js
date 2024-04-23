@@ -1,5 +1,5 @@
-const { request } = require('express');
 const codeGenerationDao = require('../repositories/codeGenerationDao');
+const { codeGenerationStatus } = require('../utils/constants');
 
 exports.saveCodeGeneration = function (codeGeneration) {
     return codeGenerationDao.create(codeGeneration).then(savedcodeGeneration => {
@@ -28,3 +28,15 @@ exports.getCodeGenerationStatus = async function (req, res) {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+exports.checkIfCodeGenerationExists = async function (codeGeneration) {
+    try {
+        const { blueprintId, blueprintVersion } = codeGeneration;
+        const latestCodeGeneration = await codeGenerationDao.getByBlueprintIdAndVersion({ blueprintId, blueprintVersion });
+        return latestCodeGeneration && latestCodeGeneration.status === codeGenerationStatus.COMPLETED;
+    } catch (error) {
+        console.error('Error checking code generation:', error);
+        return false;
+    }
+}
+

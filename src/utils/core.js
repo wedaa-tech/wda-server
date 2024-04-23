@@ -3,6 +3,7 @@ const path = require('path');
 const archiver = require('archiver');
 const { nanoid } = require('nanoid');
 const { updateCodeGeneration } = require('../services/codeGenerationService');
+const { codeGenerationStatus } = require('./constants');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -168,7 +169,7 @@ exports.generateZip = (folderPath, context) => {
             });
 
             // Update the code_generation collection as COMPLETED [ASYNC]
-            var codeGeneration = { status: 'COMPLETED' };
+            var codeGeneration = { status: codeGenerationStatus.COMPLETED };
             updateCodeGeneration(codeGenerationId, codeGeneration);
 
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');

@@ -6,6 +6,10 @@ codeGenerationSchema.statics = {
         return this.find(query);
     },
 
+    getByBlueprintIdAndVersion: function (query) {
+        return this.findOne(query).sort({ createdAt: -1 });
+    },
+
     createOrUpdate: function (query, data) {
         return this.findOneAndUpdate(query, { $set: data }, { upsert: true, new: true }).then(codeGeneration => {
             return codeGeneration;

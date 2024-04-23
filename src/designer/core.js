@@ -8,8 +8,9 @@ const weave = require('../weaver/codeWeaver');
 const { saveBlueprint, getBlueprintById } = require('../services/blueprintService');
 const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
-const { saveCodeGeneration, updateCodeGeneration } = require('../services/codeGenerationService');
+const { saveCodeGeneration, updateCodeGeneration, checkIfCodeGenerationExists } = require('../services/codeGenerationService');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
+const { codeGenerationStatus } = require('../utils/constants.js'); 
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -20,7 +21,7 @@ exports.prototype = async function (blueprintInfo) {
     // update the code_generation to IN-PROGRESS
     const codeGenerationId = blueprintInfo.codeGenerationId;
     const accessToken = blueprintInfo.accessToken;
-    var codeGeneration = { status: 'IN-PROGRESS' };
+    var codeGeneration = { status: codeGenerationStatus.IN_PROGRESS };
     await updateCodeGeneration(codeGenerationId, codeGeneration);
 
     // get blueprint to process the prototype
@@ -174,22 +175,29 @@ exports.generate = async function (req, res) {
     try {
         const accessToken = req.kauth?.grant?.access_token?.token;
         const blueprint = await saveBlueprint(req);
-        var codeGeneration = {
+        var oldCodeGeneration = {
             blueprintId: blueprint.blueprintId,
             blueprintVersion: blueprint.version,
-        };
-        const codeGenerationId = await saveCodeGeneration(codeGeneration);
-        // passing codeGenerationId & accessToken to message broker
-        blueprint.codeGenerationId = codeGenerationId;
-        blueprint.accessToken = accessToken;
-        // Send a message to the message queue for code generation
-        try{
-            await send(CODE_GENERATION, blueprint);
-        } catch (error) {
-            // code_generation is not yet submitted to message queue, as there is an error will pushing it to message queue
-            var codeGeneration = { error: error.message };
-            updateCodeGeneration(codeGenerationId, codeGeneration);
-            throw error;
+        }
+        const codeGenerationExist = await checkIfCodeGenerationExists(oldCodeGeneration)
+        if (!codeGenerationExist) {
+            var codeGeneration = {
+                blueprintId: blueprint.blueprintId,
+                blueprintVersion: blueprint.version,
+            };
+            const codeGenerationId = await saveCodeGeneration(codeGeneration);
+            // passing codeGenerationId & accessToken to message broker
+            blueprint.codeGenerationId = codeGenerationId;
+            blueprint.accessToken = accessToken;
+            // Send a message to the message queue for code generation
+            try {
+                await send(CODE_GENERATION, blueprint);
+            } catch (error) {
+                // code_generation is not yet submitted to message queue, as there is an error will pushing it to message queue
+                var codeGeneration = { error: error.message };
+                updateCodeGeneration(codeGenerationId, codeGeneration);
+                throw error;
+            }
         }
         return res.status(200).json({ blueprintId: blueprint.blueprintId, parentId: blueprint.parentId });
     } catch (error) {
