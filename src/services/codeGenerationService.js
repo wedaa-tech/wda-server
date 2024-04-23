@@ -1,5 +1,5 @@
-const { request } = require('express');
 const codeGenerationDao = require('../repositories/codeGenerationDao');
+const { codeGenerationStatus } = require('../utils/constants');
 
 exports.saveCodeGeneration = function (codeGeneration) {
     return codeGenerationDao.create(codeGeneration).then(savedcodeGeneration => {
@@ -31,24 +31,12 @@ exports.getCodeGenerationStatus = async function (req, res) {
 
 exports.checkIfCodeGenerationExists = async function (codeGeneration) {
     try {
-        // Extract relevant data from the codeGeneration object
         const { blueprintId, blueprintVersion } = codeGeneration;
-        console.log(codeGeneration);
-        // Query the database to find the latest code generation record for the given blueprintId, version
-        const latestCodeGeneration = await codeGenerationDao.get({ blueprintId, blueprintVersion }).sort({ createdAt: -1 }).limit(1);
-        // If no record found, return false
-        if (!latestCodeGeneration || latestCodeGeneration.length === 0) {
-            return false;
-        }
-        // Check if the latest code generation record has status 'COMPLETED'
-        const latestStatus = latestCodeGeneration[0].status;
-        if (latestStatus === 'COMPLETED') {
-            return true;
-        } else {
-            return false;
-        }
+        const latestCodeGeneration = await codeGenerationDao.getByBlueprintIdAndVersion({ blueprintId, blueprintVersion });
+        return latestCodeGeneration && latestCodeGeneration.status === codeGenerationStatus.COMPLETED;
     } catch (error) {
         console.error('Error checking code generation:', error);
         return false;
     }
 }
+

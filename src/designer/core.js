@@ -10,6 +10,7 @@ const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const { saveCodeGeneration, updateCodeGeneration, checkIfCodeGenerationExists } = require('../services/codeGenerationService');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
+const { codeGenerationStatus } = require('../utils/constants.js'); 
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -20,7 +21,7 @@ exports.prototype = async function (blueprintInfo) {
     // update the code_generation to IN-PROGRESS
     const codeGenerationId = blueprintInfo.codeGenerationId;
     const accessToken = blueprintInfo.accessToken;
-    var codeGeneration = { status: 'IN-PROGRESS' };
+    var codeGeneration = { status: codeGenerationStatus.IN_PROGRESS };
     await updateCodeGeneration(codeGenerationId, codeGeneration);
 
     // get blueprint to process the prototype
