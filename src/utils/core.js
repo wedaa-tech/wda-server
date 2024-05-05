@@ -175,6 +175,12 @@ exports.generateZip = (folderPath, context) => {
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
+              // codeGeneration will be updated with FAILED status    
+              var codeGeneration = { 
+                error: err.message,
+                status: codeGenerationStatus.FAILED
+            };
+            updateCodeGeneration(codeGenerationId, codeGeneration);
             console.error(err);
         });
 };

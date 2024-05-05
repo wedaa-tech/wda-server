@@ -10,7 +10,7 @@ var codeGenerationSchema = new Schema(
         },
         status: {
             type: String,
-            enum: ['SUBMITTED', 'IN-PROGRESS', 'COMPLETED'],
+            enum: ['SUBMITTED', 'IN-PROGRESS', 'COMPLETED', 'FAILED'],
             default: 'SUBMITTED',
             required: true,
         },

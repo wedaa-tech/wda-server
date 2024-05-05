@@ -105,6 +105,12 @@ exports.prototype = async function (blueprintInfo) {
                     } catch (error) {
                         // if there is an error in AI CODE WEAVING, Code zip will not be generated
                         console.error('Error while weaving[propagated error]:', error);
+                        // codeGeneration will be updated with FAILED status    
+                        var codeGeneration = { 
+                            error: error.message,
+                            status: codeGenerationStatus.FAILED
+                        };
+                        updateCodeGeneration(codeGenerationId, codeGeneration);
                         utils.removeDump(folderPath);
                         return res.status(500).send({ error: 'Execution stopped' });
                     }
@@ -194,7 +200,10 @@ exports.generate = async function (req, res) {
                 await send(CODE_GENERATION, blueprint);
             } catch (error) {
                 // code_generation is not yet submitted to message queue, as there is an error will pushing it to message queue
-                var codeGeneration = { error: error.message };
+                var codeGeneration = { 
+                    error: error.message,
+                    status: codeGenerationStatus.FAILED
+                };
                 updateCodeGeneration(codeGenerationId, codeGeneration);
                 throw error;
             }
