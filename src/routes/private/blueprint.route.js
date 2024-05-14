@@ -5,6 +5,6 @@ module.exports = function (router) {
     router.delete('/blueprints/:project_id', blueprintService.deleteBlueprint);
     router.get('/blueprints/names', blueprintService.getProjectNames);
     router.put('/blueprints/:project_id', blueprintService.updateBlueprint);
-    router.get('/user/:project_id', blueprintService.verifyProject);
+    // router.get('/user/:project_id', blueprintService.verifyProject);
     router.post('/blueprints', blueprintService.saveAsDraft);
 };

@@ -10,7 +10,9 @@ const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const { saveCodeGeneration, updateCodeGeneration, checkIfCodeGenerationExists } = require('../services/codeGenerationService');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
-const { codeGenerationStatus } = require('../utils/constants.js'); 
+const { codeGenerationStatus,transactionStatus } = require('../utils/constants.js'); 
+const transactionLogDao = require('../repositories/transactionLogDao.js');
+const creditService = require('../services/creditService');
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -26,17 +28,40 @@ exports.prototype = async function (blueprintInfo) {
 
     // get blueprint to process the prototype
     const blueprint = await getBlueprintById(blueprintInfo.blueprintId);
-
     const body = blueprint.request_json;
     const userId = blueprint.user_id;
     const fileName = body.projectId;
+
+    // calculate the number of aiServices
+    let aiservicesCount = 0;
+    if (blueprint.metadata && blueprint.metadata.nodes) {
+        const { nodes } = blueprint.metadata;
+        Object.keys(nodes).forEach(key => {
+            if (key.startsWith("Service")) {
+                const service = nodes[key];
+                if (
+                    service?.data &&
+                    service?.data?.dbmlData &&
+                    service?.data?.description
+                ) {
+                    aiservicesCount++;
+                }
+            }
+        });
+    }
 
     // Form a context object which will contain the information to be passed to generate zip & update code_generation
     var context = {
         userId: userId,
         codeGenerationId: codeGenerationId,
+        AIServices:aiservicesCount,
     };
-
+    if(aiservicesCount>0){
+        //update the transaction status as completed
+        transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.PENDING, blueprintInfo.blueprintId);
+        //update the user credits
+        creditService.createOrUpdateUserCreditService(userId, aiservicesCount *-1 , aiservicesCount);
+        }
     console.log('Generating prototype: ' + body.projectName + ', for user: ' + userId);
 
     // boolean check to trigger Infrastructure file generation

@@ -5,6 +5,15 @@ const codeGenerationStatus = {
     FAILED: 'FAILED',
 };
 
+const transactionStatus = {
+    REQUESTED: 'REQUESTED',
+    CREDITED: 'CREDITED',
+    DEBITED: 'DEBITED',
+    REJECTED: 'REJECTED',
+    PENDING: 'PENDING',
+};
+
 module.exports = {
-    codeGenerationStatus
+    codeGenerationStatus,
+    transactionStatus,
 };

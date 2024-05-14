@@ -3,7 +3,8 @@ const path = require('path');
 const archiver = require('archiver');
 const { nanoid } = require('nanoid');
 const { updateCodeGeneration } = require('../services/codeGenerationService');
-const { codeGenerationStatus } = require('./constants');
+const { codeGenerationStatus, transactionStatus } = require('./constants');
+const transactionLogDao = require('../repositories/transactionLogDao');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -81,6 +82,7 @@ exports.generateZip = (folderPath, context) => {
     // unmarshalling context object
     const userId = context.userId;
     const codeGenerationId = context.codeGenerationId;
+    const creditsUsed=context.AIServices
 
     var blueprintId = folderPath;
     // extracting the blueprintId from the folder path
@@ -172,6 +174,11 @@ exports.generateZip = (folderPath, context) => {
             var codeGeneration = { status: codeGenerationStatus.COMPLETED };
             updateCodeGeneration(codeGenerationId, codeGeneration);
 
+
+            if(creditsUsed>0){
+                transactionLogDao.updateTransactionByBlueprintId(blueprintId, transactionStatus.DEBITED);
+            }
+
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
@@ -180,6 +187,11 @@ exports.generateZip = (folderPath, context) => {
                 error: err.message,
                 status: codeGenerationStatus.FAILED
             };
+            // Transaction will be updated with FAILED status if it is AiCodeGeneration   
+            if(creditsUsed>0){
+                transactionLogDao.updateTransactionByBlueprintId(blueprintId, transactionStatus.REJECTED);
+            }
+
             updateCodeGeneration(codeGenerationId, codeGeneration);
             console.error(err);
         });

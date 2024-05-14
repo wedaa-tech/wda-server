@@ -1,6 +1,8 @@
 var blueprintRoutes = require('./private/blueprint.route.js');
 var refArchitectureRoutes = require('./private/refArch.route.js');
 var projectRoutes = require('./private/project.route.js');
+var transactionRoutes = require('./private/transaction.route.js');
+var creditRoutes = require('./private/credit.route.js');
 
 var core = require('../designer/core.js');
 var feedbackService = require('../services/feedbackService.js');
@@ -12,7 +14,9 @@ module.exports = function (router) {
     blueprintRoutes(router);
     refArchitectureRoutes(router);
     projectRoutes(router);
-
+    transactionRoutes(router);
+    creditRoutes(router);
+    
     // Common private routes
     router.post('/generate', core.generate);
     router.get('/download/:blueprintId', core.download);
