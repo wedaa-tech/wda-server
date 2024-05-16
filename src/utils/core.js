@@ -5,7 +5,7 @@ const { nanoid } = require('nanoid');
 const { updateCodeGeneration } = require('../services/codeGenerationService');
 const { codeGenerationStatus, transactionStatus } = require('./constants');
 const transactionLogDao = require('../repositories/transactionLogDao');
-
+const creditService = require('../services/creditService');
 /**
  * The method will generate json file for the Terraform generator
  *
@@ -190,6 +190,7 @@ exports.generateZip = (folderPath, context) => {
             // Transaction will be updated with FAILED status if it is AiCodeGeneration   
             if(creditsUsed>0){
                 transactionLogDao.updateTransactionByBlueprintId(blueprintId, transactionStatus.REJECTED);
+                creditService.createOrUpdateUserCreditService(userId,creditsUsed,0)
             }
 
             updateCodeGeneration(codeGenerationId, codeGeneration);

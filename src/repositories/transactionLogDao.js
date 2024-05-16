@@ -99,12 +99,12 @@ updateTransactionByBlueprintId: async function(blueprintId,status) {
                     _id:1,
                     user_id:1,
                     credits: 1,
-                    createdAt: 1,
+                    updatedAt: 1,
                     creditsUsed: { $arrayElemAt: ['$user.creditsUsed', 0] },
                     creditsAvailable: { $arrayElemAt: ['$user.creditsAvailable', 0] },
                 }
             },
-            { $sort: { createdAt: -1 } },
+            { $sort: { updatedAt: -1 } },
         ]);
         return transactions;
     } catch (error) {
@@ -133,13 +133,13 @@ fetchTransactionsByUser: async function(query) {
                 $project: {
                     credits: 1,
                     status: 1,
-                    createdAt: 1,
+                    updatedAt: 1,
                     projectName: { $arrayElemAt: ['$blueprint.request_json.projectName', 0] },
                     imageUrl: { $arrayElemAt: ['$blueprint.imageUrl', 0] },
                     services: { $arrayElemAt: ['$blueprint.request_json.services', 0] }
                 }
             },
-            { $sort: { createdAt: -1 } },
+            { $sort: { updatedAt: -1 } },
         ])
         return transactions;
     } catch (error) {

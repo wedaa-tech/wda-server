@@ -136,6 +136,10 @@ exports.prototype = async function (blueprintInfo) {
                             status: codeGenerationStatus.FAILED
                         };
                         updateCodeGeneration(codeGenerationId, codeGeneration);
+                        if(aiservicesCount>0){
+                            transactionLogDao.updateTransactionByBlueprintId(blueprintInfo.blueprintId, transactionStatus.REJECTED);
+                            creditService.createOrUpdateUserCreditService(userId,aiservicesCount,0)
+                        }
                         utils.removeDump(folderPath);
                         return res.status(500).send({ error: 'Execution stopped' });
                     }
@@ -230,6 +234,10 @@ exports.generate = async function (req, res) {
                     status: codeGenerationStatus.FAILED
                 };
                 updateCodeGeneration(codeGenerationId, codeGeneration);
+                if(aiservicesCount>0){
+                    transactionLogDao.updateTransactionByBlueprintId(blueprintInfo.blueprintId, transactionStatus.REJECTED);
+                    creditService.createOrUpdateUserCreditService(userId,aiservicesCount,0)
+                }
                 throw error;
             }
         }
