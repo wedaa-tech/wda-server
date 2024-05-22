@@ -4,6 +4,8 @@ const { time } = require('console');
 const utils = require('../utils/core');
 const blueprintDao = require('../repositories/blueprintDao');
 const projectDao = require('../repositories/projectDao');
+const { generateDbmlScript } = require('../weaver/aicore');
+const { validateDbmlScript } = require('../utils/dbmlValidator');
 
 const serviceBase = {
     nodes: {},
@@ -364,46 +366,46 @@ async function addAsDraft(title, description, userId, metadata) {
 
 async function addDBMLScriptToService(accessToken, services) {
     try {
-        // Start timestamp
-        console.log('Starting all fetch calls:', new Date());
+        console.log('----Starting all fetch calls----');
 
         // Create an array to store promises for each fetch call
-        const fetchPromises = services.map(service => {
-            // Log the start time of each fetch call
-            console.log(`Starting fetch call for ${service.name}:`, new Date());
+        const fetchPromises = services.map(async service => {
+            console.log(`Starting fetch call for ${service.name}`);
+            let data = {
+                name: service.name,
+                description: service.description,
+            }
 
-            return fetch(process.env.AI_CORE_URL + '/dbml', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${accessToken}`,
-                },
-                body: JSON.stringify({
-                    name: service.name,
-                    description: service.description,
-                }),
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to add DBML script to service');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Extract the dbml part and assign it to service.dbml
-                    service.dbml = data.dbml;
-                    console.log('DBML script added successfully for', service.name);
-                })
-                .catch(error => {
-                    console.error('Error adding DBML script to service:', error);
-                });
+            let isValid = false;
+            let attempts = 0;
+            while (!isValid && attempts < 3) {
+                attempts++;
+                await generateDbmlScript(data, accessToken)
+                    .then(responseData => {
+                        service.dbml = responseData.dbml;
+                        // Validate the dbml script
+                        isValid = validateDbmlScript(service.dbml);
+                        if (!isValid) {
+                            console.log(`DBML script validation failed for ${service.name}. Attempt ${attempts} of 3.`);
+                        } else {
+                            console.log('DBML script added successfully for', service.name);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error adding DBML script to service:', error);
+                        isValid = false; // If an error occurs, we want to retry
+                    });
+            }
+
+            if (!isValid) {
+                console.error(`Failed to validate DBML script for ${service.name} after 3 attempts.`);
+            }
         });
 
         // Wait for all fetch calls to finish
         await Promise.all(fetchPromises);
 
-        // All fetch calls have finished
-        console.log('All fetch calls completed:', new Date());
+        console.log('----All fetch calls completed----');
         console.log('All DBML scripts added successfully');
     } catch (error) {
         console.error('Error adding DBML scripts:', error);
