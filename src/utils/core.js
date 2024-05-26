@@ -175,10 +175,10 @@ exports.generateZip = (folderPath, context) => {
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
-              // codeGeneration will be updated with FAILED status    
-              var codeGeneration = { 
+            // codeGeneration will be updated with FAILED status
+            var codeGeneration = {
                 error: err.message,
-                status: codeGenerationStatus.FAILED
+                status: codeGenerationStatus.FAILED,
             };
             updateCodeGeneration(codeGenerationId, codeGeneration);
             console.error(err);
@@ -297,4 +297,20 @@ exports.removeDump = folderPath => {
             });
         }
     });
+};
+
+/**
+ * Cleans up the code generation process by updating the status to FAILED and removing temporary files.
+ *
+ * @param {string} codeGenerationId - The ID of the code generation process.
+ * @param {string} errorMessage - The error message to be logged.
+ * @param {string} folderPath - The path of the folder to remove.
+ */
+exports.cleanUp = (codeGenerationId, errorMessage, folderPath) => {
+    const codeGeneration = {
+        error: errorMessage,
+        status: codeGenerationStatus.FAILED,
+    };
+    updateCodeGeneration(codeGenerationId, codeGeneration);
+    this.removeDump(folderPath);
 };

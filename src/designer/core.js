@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { nanoid } = require('nanoid');
 const utils = require('../utils/core');
 const jdlConverter = require('../utils/jsonToJdl');
 const exec = require('child_process').exec;
@@ -10,7 +9,7 @@ const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const { saveCodeGeneration, updateCodeGeneration, checkIfCodeGenerationExists } = require('../services/codeGenerationService');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
-const { codeGenerationStatus } = require('../utils/constants.js'); 
+const { codeGenerationStatus } = require('../utils/constants.js');
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -39,7 +38,7 @@ exports.prototype = async function (blueprintInfo) {
 
     console.log('Generating prototype: ' + body.projectName + ', for user: ' + userId);
 
-    // boolean check to trigger Infrastructure file generation
+    // Boolean check to trigger Infrastructure file generation
     var deployment = false;
     if (body.deployment !== undefined && body.deployment !== null) {
         deployment = true;
@@ -55,11 +54,14 @@ exports.prototype = async function (blueprintInfo) {
     // JSON to JDL, with 5 sec wait for the json to get generated
     setTimeout(function () {
         console.log('Waiting 5 sec for the jdl to be generated');
-        const response = jdlConverter.createJdlFromJson(fileName);
-        // check if the error response object exists before returning it
-        if (response) {
-            return response;
+        const folderPath = `./${body.projectId}`;
+        try {
+            jdlConverter.createJdlFromJson(fileName);
+        } catch (error) {
+            utils.cleanUp(codeGenerationId, error.message, folderPath);
+            return;
         }
+
         // Check if deployment type is minikube
         var minikube = '';
         if (
@@ -87,15 +89,17 @@ exports.prototype = async function (blueprintInfo) {
 
                 if (error !== null) {
                     console.log('---------exec error: ---------\n[' + error + ']');
+                    utils.cleanUp(codeGenerationId, error.message, folderPath);
+                    return;
                 }
-
                 console.log('Architecture Generation completed successfully.....');
 
-                const folderPath = `./${body.projectId}`;
                 var services = body.services;
 
                 // Stitching AI code starts from here
                 aiEnabled = await checkFlagsEnabled('ai_wizard');
+                // TODO: Below code will never excute [Can be removed in future]
+                aiEnabled = false;
                 if (aiEnabled) {
                     console.log('****************************************************');
                     try {
@@ -105,14 +109,8 @@ exports.prototype = async function (blueprintInfo) {
                     } catch (error) {
                         // if there is an error in AI CODE WEAVING, Code zip will not be generated
                         console.error('Error while weaving[propagated error]:', error);
-                        // codeGeneration will be updated with FAILED status    
-                        var codeGeneration = { 
-                            error: error.message,
-                            status: codeGenerationStatus.FAILED
-                        };
-                        updateCodeGeneration(codeGenerationId, codeGeneration);
-                        utils.removeDump(folderPath);
-                        return res.status(500).send({ error: 'Execution stopped' });
+                        utils.cleanUp(codeGenerationId, error.message, folderPath);
+                        return;
                     }
                     console.log('****************************************************');
                 }
@@ -184,8 +182,8 @@ exports.generate = async function (req, res) {
         var oldCodeGeneration = {
             blueprintId: blueprint.blueprintId,
             blueprintVersion: blueprint.version,
-        }
-        const codeGenerationExist = await checkIfCodeGenerationExists(oldCodeGeneration)
+        };
+        const codeGenerationExist = await checkIfCodeGenerationExists(oldCodeGeneration);
         if (!codeGenerationExist) {
             var codeGeneration = {
                 blueprintId: blueprint.blueprintId,
@@ -200,11 +198,7 @@ exports.generate = async function (req, res) {
                 await send(CODE_GENERATION, blueprint);
             } catch (error) {
                 // code_generation is not yet submitted to message queue, as there is an error will pushing it to message queue
-                var codeGeneration = { 
-                    error: error.message,
-                    status: codeGenerationStatus.FAILED
-                };
-                updateCodeGeneration(codeGenerationId, codeGeneration);
+                utils.cleanUp(codeGenerationId, error.message, folderPath);
                 throw error;
             }
         }
@@ -234,6 +228,8 @@ const generateTerraformFiles = (fileName, folderPath, context) => {
 
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
+            utils.cleanUp(context.codeGenerationId, error.message, folderPath);
+            return;
         }
 
         // Generation of Infrastructure zip file with in the callback function of child process.
@@ -262,6 +258,8 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
 
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
+            utils.cleanUp(context.codeGenerationId, error.message, folderPath);
+            return;
         }
         triggerTerraformGenerator(folderPath, deployment, body, context);
     });

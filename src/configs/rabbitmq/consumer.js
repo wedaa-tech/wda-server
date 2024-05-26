@@ -15,7 +15,7 @@ async function consume(queue) {
         channel.consume(
             queue,
             msg => {
-                console.log(`[consumer] [${queue}] Received:'${msg.content.toString()}'`);
+                console.log(`[consumer] [${queue}] Received:'${msg.content.toString().length > 30 ? msg.content.toString().substring(0, 30) + '...' : msg.content.toString()}'`);
                 if (queue === CODE_GENERATION) {
                     // Parse the message content to a JSON object
                     const blueprint = JSON.parse(msg.content.toString());

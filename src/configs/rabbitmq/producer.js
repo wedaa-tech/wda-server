@@ -11,7 +11,7 @@ async function send(queue, msg) {
         // Convert the JSON object to a string
         const jsonMsg = JSON.stringify(msg);
         channel.sendToQueue(queue, Buffer.from(jsonMsg));
-        console.log(`[producer] [${queue}] Sent:    '${jsonMsg}'`);
+        console.log(`[producer] [${queue}] Sent:    '${jsonMsg.length > 30 ? jsonMsg.substring(0, 30) + '...' : jsonMsg}'`);
         setTimeout(() => {
             connection.close();
         }, 500);

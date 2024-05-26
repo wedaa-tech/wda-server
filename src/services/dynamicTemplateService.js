@@ -1,11 +1,10 @@
 const path = require('path');
 const fs = require('fs');
-const { time } = require('console');
 const utils = require('../utils/core');
 const blueprintDao = require('../repositories/blueprintDao');
 const projectDao = require('../repositories/projectDao');
 const { generateDbmlScript } = require('../weaver/aicore');
-const { validateDbmlScript } = require('../utils/dbmlValidator');
+const { validateDbmlScript } = require('../utils/dbmlParser/dbmlValidator');
 
 const serviceBase = {
     nodes: {},
@@ -378,7 +377,7 @@ async function addDBMLScriptToService(accessToken, services) {
 
             let isValid = false;
             let attempts = 0;
-            while (!isValid && attempts < 3) {
+            while (!isValid && attempts < 5) {
                 attempts++;
                 await generateDbmlScript(data, accessToken)
                     .then(responseData => {
@@ -386,7 +385,7 @@ async function addDBMLScriptToService(accessToken, services) {
                         // Validate the dbml script
                         isValid = validateDbmlScript(service.dbml);
                         if (!isValid) {
-                            console.log(`DBML script validation failed for ${service.name}. Attempt ${attempts} of 3.`);
+                            console.log(`DBML script validation failed for ${service.name}. Attempt ${attempts} of 5.`);
                         } else {
                             console.log('DBML script added successfully for', service.name);
                         }
@@ -398,7 +397,8 @@ async function addDBMLScriptToService(accessToken, services) {
             }
 
             if (!isValid) {
-                console.error(`Failed to validate DBML script for ${service.name} after 3 attempts.`);
+                console.error(`Failed to validate DBML script for ${service.name} after 5 attempts.`);
+                service.dbml= '';
             }
         });
 
