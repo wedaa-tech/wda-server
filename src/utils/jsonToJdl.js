@@ -1,9 +1,11 @@
-const blueprintDao = require('../repositories/blueprintDao');
-const refArchDao = require('../repositories/refArchitectureDao');
 const fs = require('fs');
+const { prepareEntityData } = require('./dbmlParser/dbmlToJson');
+const { getEntityNames } = require('./dbmlParser/dbmlValidator');
+const { checkFlagsEnabled } = require('../configs/feature-flag.js');
 
-exports.createJdlFromJson = (fileName, metadata, req, res) => {
+exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     console.log('processing json to jdl with the file name:', fileName);
+    jdlEntitiesEnabled = await checkFlagsEnabled('jdl_entities');
 
     // read the JSON file
     const jsonData = JSON.parse(fs.readFileSync(fileName + '.json', 'utf8'));
@@ -58,11 +60,11 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
             applicationErrorList.push('Database Port cannot be empty');
         }
 
-        // return error response
+        // throw error response
         if (applicationErrorList.length > 0) {
             applicationError[i] = applicationErrorList;
-            console.log(applicationError);
-            return res.status(400).send(applicationError);
+            console.err(applicationError);
+            throw new Error(applicationError);
         }
 
         // below attributes are conditionally checked and added to jdl file in each application block
@@ -114,6 +116,12 @@ exports.createJdlFromJson = (fileName, metadata, req, res) => {
             databaseType = 'sql';
         }
 
+        var entities, entitiesString;
+        if (!clientFramework) {
+            entities = getEntityNames(applications[i].dbmlData);
+            entitiesString = entities.join(', ');
+        }
+
         // Conversion of json to jdl (Application Options)
         var data = `
 application {
@@ -140,9 +148,9 @@ application {
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample ? `withExample true` : ''}
     }
-}
-    
-`;
+    ${!clientFramework && entitiesString && jdlEntitiesEnabled ? `entities ${entitiesString}` : ''}
+}\n`;
+
         data = data.replace(/^\s*[\r\n]/gm, ''); // remove extra lines from jdl data
         appData.push(data);
     }
@@ -170,10 +178,9 @@ communication {
 `;
                 communicationData.push(data);
             } else {
-                console.log('communication framework is not supported, must below to one of the following: ' + communicationBrokers);
-                return res
-                    .status(400)
-                    .send('communication framework is not supported, must below to one of the following: ' + communicationBrokers);
+                // throw error response
+                console.err('communication framework is not supported, must below to one of the following: ' + communicationBrokers);
+                throw new Error('communication framework is not supported, must below to one of the following: ' + communicationBrokers);
             }
         }
     }
@@ -237,10 +244,10 @@ communication {
             }
         }
 
-        // return error response
+        // throw error response
         if (deploymentError.length > 0) {
-            console.log(deploymentError);
-            return res.status(400).send(deploymentError);
+            console.err(deploymentError);
+            throw new Error(deploymentError);
         }
 
         // preprocessing deployment block, before jdl generation
@@ -327,6 +334,23 @@ deployment {
     if (deployment !== undefined) {
         combinedData = combinedData.concat(deploymentData);
     }
+
+    //Entities
+    if (jdlEntitiesEnabled) {
+        entityData = prepareEntityData(applications);
+        if (entityData !== undefined) {
+            combinedData = combinedData.concat(entityData);
+        }
+
+        optionsData = `
+    use serviceClass, serviceImpl, pagination for *
+    `;
+
+        if (optionsData !== undefined) {
+            combinedData = combinedData.concat(optionsData);
+        }
+    }
+
     const combinedArrayData = Array.from(combinedData);
     const concatenatedJDL = combinedArrayData.join(' ');
 

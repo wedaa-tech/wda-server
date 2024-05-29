@@ -10,8 +10,13 @@ async function send(queue, msg) {
         await channel.assertQueue(queue, { durable: false });
         // Convert the JSON object to a string
         const jsonMsg = JSON.stringify(msg);
+        // Updating the logMsg to remove sensitive information
+        var logMsg = msg;
+        delete logMsg.accessToken;
+        logMsg = JSON.stringify(logMsg);
+
         channel.sendToQueue(queue, Buffer.from(jsonMsg));
-        console.log(`[producer] [${queue}] Sent:    '${jsonMsg}'`);
+        console.log(`[producer] [${queue}] Sent:    '${logMsg}`);
         setTimeout(() => {
             connection.close();
         }, 500);
