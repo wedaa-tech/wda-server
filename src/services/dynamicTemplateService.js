@@ -373,32 +373,14 @@ async function addDBMLScriptToService(accessToken, services) {
             let data = {
                 name: service.name,
                 description: service.description,
-            }
+            };
 
-            let isValid = false;
-            let attempts = 0;
-            while (!isValid && attempts < 5) {
-                attempts++;
-                await generateDbmlScript(data, accessToken)
-                    .then(responseData => {
-                        service.dbml = responseData.dbml;
-                        // Validate the dbml script
-                        isValid = validateDbmlScript(service.dbml);
-                        if (!isValid) {
-                            console.log(`DBML script validation failed for ${service.name}. Attempt ${attempts} of 5.`);
-                        } else {
-                            console.log('DBML script added successfully for', service.name);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error adding DBML script to service:', error);
-                        isValid = false; // If an error occurs, we want to retry
-                    });
-            }
-
-            if (!isValid) {
-                console.error(`Failed to validate DBML script for ${service.name} after 5 attempts.`);
-                service.dbml= '';
+            try {
+                service.dbml = await retryFunction(generateAndValidateDbml, 5, data, accessToken);
+                console.log('DBML script added successfully for', service.name);
+            } catch (error) {
+                console.error(`Failed to validate DBML script for ${service.name} after 5 attempts:`, error);
+                service.dbml = '';
             }
         });
 
@@ -410,4 +392,29 @@ async function addDBMLScriptToService(accessToken, services) {
     } catch (error) {
         console.error('Error adding DBML scripts:', error);
     }
+}
+
+// Reusable retry function
+async function retryFunction(func, retries, ...args) {
+    let attempts = 0;
+    while (attempts < retries) {
+        attempts++;
+        try {
+            const result = await func(...args);
+            return result;
+        } catch (error) {
+            if (attempts === retries) throw error;
+            console.log(`Attempt ${attempts}/${retries} failed: ${error.message}. Retrying...`);
+        }
+    }
+}
+
+// Function to generate DBML script and validate
+async function generateAndValidateDbml(data, accessToken) {
+    const responseData = await generateDbmlScript(data, accessToken);
+    const isValid = validateDbmlScript(responseData.dbml);
+    if (!isValid) {
+        throw new Error('DBML script validation failed');
+    }
+    return responseData.dbml;
 }

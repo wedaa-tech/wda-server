@@ -38,5 +38,4 @@ exports.checkIfCodeGenerationExists = async function (codeGeneration) {
         console.error('Error checking code generation:', error);
         return false;
     }
-}
-
+};

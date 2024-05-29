@@ -6,5 +6,5 @@ const codeGenerationStatus = {
 };
 
 module.exports = {
-    codeGenerationStatus
+    codeGenerationStatus,
 };
