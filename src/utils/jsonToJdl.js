@@ -1,9 +1,11 @@
 const fs = require('fs');
 const { prepareEntityData } = require('./dbmlParser/dbmlToJson');
 const { getEntityNames } = require('./dbmlParser/dbmlValidator');
+const { checkFlagsEnabled } = require('../configs/feature-flag.js');
 
-exports.createJdlFromJson = (fileName, metadata, req, res) => {
+exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     console.log('processing json to jdl with the file name:', fileName);
+    jdlEntitiesEnabled = await checkFlagsEnabled('jdl_entities');
 
     // read the JSON file
     const jsonData = JSON.parse(fs.readFileSync(fileName + '.json', 'utf8'));
@@ -146,7 +148,7 @@ application {
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample ? `withExample true` : ''}
     }
-    ${!clientFramework && entitiesString ? `entities ${entitiesString}` : ''}
+    ${!clientFramework && entitiesString && jdlEntitiesEnabled ? `entities ${entitiesString}` : ''}
 }\n`;
 
         data = data.replace(/^\s*[\r\n]/gm, ''); // remove extra lines from jdl data
@@ -334,17 +336,19 @@ deployment {
     }
 
     //Entities
-    entityData = prepareEntityData(applications);
-    if (entityData !== undefined) {
-        combinedData = combinedData.concat(entityData);
-    }
+    if (jdlEntitiesEnabled) {
+        entityData = prepareEntityData(applications);
+        if (entityData !== undefined) {
+            combinedData = combinedData.concat(entityData);
+        }
 
-    optionsData = `
-use serviceClass, serviceImpl, pagination for *
+        optionsData = `
+    use serviceClass, serviceImpl, pagination for *
     `;
 
-    if (optionsData !== undefined) {
-        combinedData = combinedData.concat(optionsData);
+        if (optionsData !== undefined) {
+            combinedData = combinedData.concat(optionsData);
+        }
     }
 
     const combinedArrayData = Array.from(combinedData);
