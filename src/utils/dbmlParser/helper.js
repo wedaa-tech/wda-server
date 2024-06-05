@@ -1,5 +1,4 @@
 const { Parser } = require('@dbml/core');
-const { toCamelCase } = require('./dbmlToJson');
 const { dbmlParseError } = require('./error');
 
 /**
@@ -22,30 +21,31 @@ exports.validateDbmlScript = dbml => {
 };
 
 /**
- * Parses a DBML script to extract and return a list of entity names.
+ * Parses a DBML script to extract and return a list of table names.
  *
- * This function parses the provided DBML script using the Parser and extracts entity names from the parsed
- * schema tables. The entity names are returned in camel case format.
+ * This function parses the provided DBML script using the Parser and extracts table names from the parsed
+ * schema tables. The table names are returned in snake_case format[Default format of dbml script].
  *
  * @param {string} dbml - The DBML script to be parsed.
- * @returns {string[]} An array of entity names in camel case format.
+ * @returns {string[]} An array of table names in snake_case format.
  * @throws Will throw an error if the DBML parsing fails, including a detailed error message.
  */
-exports.getEntityNames = dbml => {
+exports.getTableNames = dbml => {
     try {
         const database = new Parser().parse(dbml, 'dbml');
         console.log('DBML parsing successful');
-        var entities = [];
+        var tables = [];
         database.schemas.forEach(schema => {
             schema.tables.forEach(table => {
-                const capitalizedName = toCamelCase(table.name.charAt(0).toUpperCase() + table.name.slice(1));
-                entities.push(capitalizedName);
+                tables.push(table.name);
             });
         });
-        return entities;
+        return tables;
     } catch (error) {
         console.error('Error parsing DBML:', error);
         const errorMessage = dbmlParseError(error);
         throw new Error(errorMessage);
     }
 };
+
+

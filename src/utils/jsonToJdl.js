@@ -1,11 +1,12 @@
 const fs = require('fs');
-const { prepareEntityData } = require('./dbmlParser/dbmlToJson');
-const { getEntityNames } = require('./dbmlParser/dbmlValidator');
+const { prepareEntityData, getDuplicateTableNames } = require('./dbmlParser/dbmlToJson');
+const { getTableNames } = require('./dbmlParser/helper.js');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
+const { randomStringGenerator, capitalizeName, toCamelCase } = require('./helper.js');
 
 exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     console.log('processing json to jdl with the file name:', fileName);
-    jdlEntitiesEnabled = await checkFlagsEnabled('jdl_entities');
+    const jdlEntitiesEnabled = await checkFlagsEnabled('jdl_entities');
 
     // read the JSON file
     const jsonData = JSON.parse(fs.readFileSync(fileName + '.json', 'utf8'));
@@ -26,6 +27,9 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var messageBrokers = ['rabbitmq', 'kafka'];
     var databaseTypes = ['postgresql', 'mysql', 'mongodb'];
     var logManagementTypes = ['eck'];
+
+    // Get the Duplicate Table Names form the DBML script if any.
+    duplicateEntityList = getDuplicateTableNames(applications, applicationCount);
 
     for (let i = 0; i < applicationCount; i++) {
         // Skip jdl config formation if applicationFramework is docusaurus
@@ -116,9 +120,25 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
             databaseType = 'sql';
         }
 
+        // Adding randomString to the application, which might required for generating unique entities/relations.
+        applications[i].microservicRandomPrefix = randomStringGenerator(5);
+
         var entities, entitiesString;
         if (!clientFramework) {
-            entities = getEntityNames(applications[i].dbmlData);
+            entities = getTableNames(applications[i].dbmlData);
+
+            // Iterate over entities and check for duplicates, if exist prefix random string to it.
+            entities.forEach((entityName, index) => {
+                if (duplicateEntityList.includes(entityName)) {
+                    // [Future Release]: Random prefix can be replaced with logic object in future.
+                    entities[index] = `${entityName}${applications[i].microservicRandomPrefix}`;
+                }
+            });
+
+            entities.forEach((entity, index) => {
+                entities[index] = capitalizeName(toCamelCase(entity));
+            });
+
             entitiesString = entities.join(', ');
         }
 
@@ -296,7 +316,8 @@ communication {
         }
 
         // set monitoring as istio for external-lb
-        //TODO: should be changed to some other attribute, else monitoring with prometheus provided by jhipster won't work
+        //[Future Release]: monitoring attribute should be changed to some other attribute,
+        //                  else monitoring with prometheus provided by jhipster won't work.
         var monitoring = 'no';
         if (deployment.monitoring !== undefined && deployment.monitoring !== '' && deployment.monitoring === 'true') {
             monitoring = 'istio';
@@ -343,8 +364,8 @@ deployment {
         }
 
         optionsData = `
-    use serviceClass, serviceImpl, pagination for *
-    `;
+use serviceClass, serviceImpl, pagination for *
+`;
 
         if (optionsData !== undefined) {
             combinedData = combinedData.concat(optionsData);

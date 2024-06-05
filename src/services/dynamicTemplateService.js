@@ -4,7 +4,7 @@ const utils = require('../utils/core');
 const blueprintDao = require('../repositories/blueprintDao');
 const projectDao = require('../repositories/projectDao');
 const { generateDbmlScript } = require('../weaver/aicore');
-const { validateDbmlScript } = require('../utils/dbmlParser/dbmlValidator');
+const { validateDbmlScript } = require('../utils/dbmlParser/helper');
 
 const serviceBase = {
     nodes: {},

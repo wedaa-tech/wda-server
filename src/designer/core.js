@@ -98,7 +98,7 @@ exports.prototype = async function (blueprintInfo) {
 
                 // Stitching AI code starts from here
                 aiEnabled = await checkFlagsEnabled('ai_wizard');
-                // TODO: Below code will never excute [Can be removed in future]
+                // [Future Release]: Below code will never be excuted.
                 aiEnabled = false;
                 if (aiEnabled) {
                     console.log('****************************************************');
