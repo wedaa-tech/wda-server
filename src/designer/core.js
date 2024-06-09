@@ -155,6 +155,7 @@ exports.download = function (req, res) {
         files.sort();
 
         const latestZip = path.join(folderPath, files[files.length - 1]);
+        console.log('[Downloading latest ZIP]:', latestZip);
         // Set the Content-Disposition header to specify the filename
         const fileName = `${blueprintId}.zip`;
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);

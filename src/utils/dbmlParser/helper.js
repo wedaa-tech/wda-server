@@ -48,4 +48,47 @@ exports.getTableNames = dbml => {
     }
 };
 
+/**
+ * Returns the duplicate table names in snake_case format.
+ *
+ * @param {Array} applications - The array of application objects.
+ * @returns {Array<string>} - An array of duplicate table names in snake_case format.
+ * @throws {Error} - Throws an error if there is an issue parsing DBML.
+ */
+exports.getDuplicateTableNames = applications => {
+    try {
+        const applicationCount = Object.keys(applications).length;
+        const tableNames = {};
+        const duplicateTables = [];
+
+        for (let i = 0; i < applicationCount; i++) {
+            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
+                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
+                database.schemas.forEach(schema => {
+                    schema.tables.forEach(table => {
+                        if (tableNames[table.name]) {
+                            tableNames[table.name] += 1;
+                        } else {
+                            tableNames[table.name] = 1;
+                        }
+                    });
+                });
+            }
+        }
+
+        for (const [tableName, count] of Object.entries(tableNames)) {
+            if (count > 1) {
+                duplicateTables.push(tableName);
+            }
+        }
+
+        return duplicateTables;
+    } catch (error) {
+        console.error('Error parsing DBML:', error);
+        const errorMessage = dbmlParseError(error);
+        throw new Error(errorMessage);
+    }
+};
+
+
 

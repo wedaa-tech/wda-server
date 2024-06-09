@@ -1,6 +1,6 @@
 const fs = require('fs');
-const { prepareEntityData, getDuplicateTableNames } = require('./dbmlParser/dbmlToJson');
-const { getTableNames } = require('./dbmlParser/helper.js');
+const { prepareEntityData } = require('./dbmlParser/dbmlToJson');
+const { getTableNames, getDuplicateTableNames } = require('./dbmlParser/helper.js');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
 const { randomStringGenerator, capitalizeName, toCamelCase } = require('./helper.js');
 
@@ -28,8 +28,8 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var databaseTypes = ['postgresql', 'mysql', 'mongodb'];
     var logManagementTypes = ['eck'];
 
-    // Get the Duplicate Table Names form the DBML script if any.
-    duplicateEntityList = getDuplicateTableNames(applications, applicationCount);
+    // Get the Duplicate Table/Entity Names form the DBML script if any.
+    duplicateEntities = getDuplicateTableNames(applications);
 
     for (let i = 0; i < applicationCount; i++) {
         // Skip jdl config formation if applicationFramework is docusaurus
@@ -121,7 +121,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         }
 
         // Adding randomString to the application, which might required for generating unique entities/relations.
-        applications[i].microservicRandomPrefix = randomStringGenerator(5);
+        applications[i].prefix = randomStringGenerator(5);
 
         var entities, entitiesString;
         if (!clientFramework) {
@@ -129,9 +129,9 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
 
             // Iterate over entities and check for duplicates, if exist prefix random string to it.
             entities.forEach((entityName, index) => {
-                if (duplicateEntityList.includes(entityName)) {
-                    // [Future Release]: Random prefix can be replaced with logic object in future.
-                    entities[index] = `${entityName}${applications[i].microservicRandomPrefix}`;
+                if (duplicateEntities.includes(entityName)) {
+                    // [Future Release]: Random prefix can be replaced with logical object in future.
+                    entities[index] = `${entityName}${applications[i].prefix}`;
                 }
             });
 

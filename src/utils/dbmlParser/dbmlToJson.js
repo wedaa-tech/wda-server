@@ -1,6 +1,7 @@
 const { Parser } = require('@dbml/core');
 const { dbmlParseError } = require('./error');
 const { capitalizeName, toCamelCase } = require('../helper');
+const { getDuplicateTableNames } = require('./helper');
 
 // Function to map dbml field types with the jdl field types
 function mapFieldType(type) {
@@ -75,7 +76,7 @@ function mapRelationshipType(relation1, relation2) {
  * @param {Object} database - The database object parsed from DBML.
  * @returns {string} A formatted string containing all the relationships in JDL syntax.
  */
-exports.parseRelationships = (database, duplicateEntityList, microservicRandomPrefix) => {
+exports.parseRelationships = (database, duplicateEntities, prefix) => {
     let relationships = '';
 
     database.schemas.forEach(schema => {
@@ -89,12 +90,12 @@ exports.parseRelationships = (database, duplicateEntityList, microservicRandomPr
                     var endpoint2TableName = capitalizeName(endpoint2.tableName);
 
                     // [Future Release]: Random prefix can be replaced with logic object in future.
-                    if (duplicateEntityList.includes(endpoint1.tableName)) {
-                        endpoint1TableName = capitalizeName(endpoint1TableName + microservicRandomPrefix);
+                    if (duplicateEntities.includes(endpoint1.tableName)) {
+                        endpoint1TableName = capitalizeName(endpoint1TableName + prefix);
                     }
                     // [Future Release]: Random prefix can be replaced with logic object in future.
-                    if (duplicateEntityList.includes(endpoint2.tableName)) {
-                        endpoint2TableName = capitalizeName(endpoint2TableName + microservicRandomPrefix);
+                    if (duplicateEntities.includes(endpoint2.tableName)) {
+                        endpoint2TableName = capitalizeName(endpoint2TableName + prefix);
                     }
 
                     relationships += `
@@ -123,13 +124,13 @@ exports.prepareEntityData = applications => {
     const applicationCount = Object.keys(applications).length;
     let entityData = '';
 
-    const duplicateEntityList = this.getDuplicateTableNames(applications, applicationCount);
+    const duplicateEntities = getDuplicateTableNames(applications);
 
     try {
         for (let i = 0; i < applicationCount; i++) {
             if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
                 const database = new Parser().parse(applications[i].dbmlData, 'dbml');
-                var microservicRandomPrefix = applications[i].microservicRandomPrefix;
+                var prefix = applications[i].prefix;
 
                 // Iterate through the schemas and tables to form the entityData
                 database.schemas.forEach(schema => {
@@ -150,10 +151,10 @@ exports.prepareEntityData = applications => {
                         });
 
                         var capitalizedName = capitalizeName(table.name);
-                       
-                        // [Future Release]: Random prefix can be replaced with logic object in future.
-                        if (duplicateEntityList.includes(table.name)) {
-                            capitalizedName = capitalizeName(table.name + microservicRandomPrefix);
+
+                        // [Future Release]: Random prefix can be replaced with logical object in future.
+                        if (duplicateEntities.includes(table.name)) {
+                            capitalizedName = capitalizeName(table.name + prefix);
                         }
 
                         // Remove the last comma and add table's entity data to the entityData string
@@ -162,7 +163,7 @@ entity ${toCamelCase(capitalizedName)} {${fieldsData.slice(0, -1)}
 }\n`;
                     });
                 });
-                realtionshipData = this.parseRelationships(database, duplicateEntityList, microservicRandomPrefix);
+                realtionshipData = this.parseRelationships(database, duplicateEntities, prefix);
                 entityData += realtionshipData;
             }
         }
@@ -175,44 +176,3 @@ entity ${toCamelCase(capitalizedName)} {${fieldsData.slice(0, -1)}
     }
 };
 
-/**
- * Returns the duplicate table names in snake_case format.
- * 
- * @param {Array} applications - The array of application objects.
- * @param {number} applicationCount - The number of applications to process.
- * @returns {Array<string>} - An array of duplicate table names in snake_case format.
- * @throws {Error} - Throws an error if there is an issue parsing DBML.
- */
-exports.getDuplicateTableNames = (applications, applicationCount) => {
-    try {
-        const tableNames = {};
-        const duplicateEntityList = [];
-
-        for (let i = 0; i < applicationCount; i++) {
-            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
-                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
-                database.schemas.forEach(schema => {
-                    schema.tables.forEach(table => {
-                        if (tableNames[table.name]) {
-                            tableNames[table.name] += 1;
-                        } else {
-                            tableNames[table.name] = 1;
-                        }
-                    });
-                });
-            }
-        }
-
-        for (const [tableName, count] of Object.entries(tableNames)) {
-            if (count > 1) {
-                duplicateEntityList.push(tableName);
-            }
-        }
-
-        return duplicateEntityList;
-    } catch (error) {
-        console.error('Error parsing DBML:', error);
-        const errorMessage = dbmlParseError(error);
-        throw new Error(errorMessage);
-    }
-};
