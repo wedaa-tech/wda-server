@@ -98,7 +98,7 @@ exports.prototype = async function (blueprintInfo) {
 
                 // Stitching AI code starts from here
                 aiEnabled = await checkFlagsEnabled('ai_wizard');
-                // TODO: Below code will never excute [Can be removed in future]
+                // [Future Release]: Below code will never be excuted.
                 aiEnabled = false;
                 if (aiEnabled) {
                     console.log('****************************************************');
@@ -155,6 +155,7 @@ exports.download = function (req, res) {
         files.sort();
 
         const latestZip = path.join(folderPath, files[files.length - 1]);
+        console.log('[Downloading latest ZIP]:', latestZip);
         // Set the Content-Disposition header to specify the filename
         const fileName = `${blueprintId}.zip`;
         res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
