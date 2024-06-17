@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const utils = require('../utils/core');
+const creditCore = require('../utils/creditcore.js');
 const jdlConverter = require('../utils/jsonToJdl');
 const exec = require('child_process').exec;
 const weave = require('../weaver/codeWeaver');
@@ -9,7 +10,7 @@ const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const { saveCodeGeneration, updateCodeGeneration, checkIfCodeGenerationExists } = require('../services/codeGenerationService');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
-const { codeGenerationStatus } = require('../utils/constants.js');
+const { codeGenerationStatus,transactionStatus } = require('../utils/constants.js');
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -30,12 +31,49 @@ exports.prototype = async function (blueprintInfo) {
     const userId = blueprint.user_id;
     const fileName = body.projectId;
 
+    let aiservicesCount = 0;
+    if (blueprint.metadata && blueprint.metadata.nodes) {
+        const { nodes } = blueprint.metadata;
+        Object.keys(nodes).forEach(key => {
+            if (key.startsWith("Service")) {
+                const service = nodes[key];
+                if (
+                    service?.data &&
+                    service?.data?.dbmlData &&
+                    service?.data?.description
+                ) {
+                    aiservicesCount++;
+                }
+            }
+        });
+    }
+
+    if(aiservicesCount>0){
+        //update the transaction status as completed
+        var transaction = {
+            "userid":userId,
+            "credits":aiservicesCount,
+            "status":transactionStatus.PENDING,
+            "blueprintid":blueprintInfo.blueprintId
+        }
+        var credits = {
+            "userid":userId,
+            "creditsAvailable": -1*aiservicesCount,
+            "creditsused": aiservicesCount
+        }
+        await creditCore.addTransactioLog(transaction,accessToken)
+        // transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.PENDING, blueprintInfo.blueprintId);
+        //update the user credits
+        // creditService.createOrUpdateUserCreditService(userId, aiservicesCount *-1 , aiservicesCount);
+        await creditCore.updateUserCredit(credits,accessToken)
+        }
     // Form a context object which will contain the information to be passed to generate zip & update code_generation
     var context = {
         userId: userId,
         codeGenerationId: codeGenerationId,
+        AIServices:aiservicesCount,
+        accessToken:accessToken
     };
-
     console.log('Generating prototype: ' + body.projectName + ', for user: ' + userId);
 
     // Boolean check to trigger Infrastructure file generation
@@ -59,6 +97,22 @@ exports.prototype = async function (blueprintInfo) {
             jdlConverter.createJdlFromJson(fileName);
         } catch (error) {
             utils.cleanUp(codeGenerationId, error.message, folderPath);
+            if(aiservicesCount > 0){
+                //update the transaction status as completed
+                var transaction = {
+                    "userid":userId,
+                    "credits":aiservicesCount,
+                    "status":transactionStatus.FAILED,
+                    "blueprintid":blueprintInfo.blueprintId
+                }
+                var credits = {
+                    "userid":userId,
+                    "creditsAvailable": aiservicesCount,
+                    "creditsused": -1*aiservicesCount
+                }
+                creditCore.updateTransactionLog(transaction,accessToken)
+                creditCore.updateUserCredit(credits,accessToken)
+                }
             return;
         }
 
@@ -90,6 +144,22 @@ exports.prototype = async function (blueprintInfo) {
                 if (error !== null) {
                     console.log('---------exec error: ---------\n[' + error + ']');
                     utils.cleanUp(codeGenerationId, error.message, folderPath);
+                    if(aiservicesCount > 0){
+                        //update the transaction status as completed
+                        var transaction = {
+                            "userid":userId,
+                            "credits":aiservicesCount,
+                            "status":transactionStatus.FAILED,
+                            "blueprintid":blueprintInfo.blueprintId
+                        }
+                        var credits = {
+                            "userid":userId,
+                            "creditsAvailable": aiservicesCount,
+                            "creditsused": -1*aiservicesCount
+                        }
+                        creditCore.updateTransactionLog(transaction,accessToken)
+                        creditCore.updateUserCredit(credits,accessToken)
+                        }
                     return;
                 }
                 console.log('Architecture Generation completed successfully.....');
@@ -110,6 +180,22 @@ exports.prototype = async function (blueprintInfo) {
                         // if there is an error in AI CODE WEAVING, Code zip will not be generated
                         console.error('Error while weaving[propagated error]:', error);
                         utils.cleanUp(codeGenerationId, error.message, folderPath);
+                        if(aiservicesCount > 0){
+                            //update the transaction status as completed
+                            var transaction = {
+                                "userid":userId,
+                                "credits":aiservicesCount,
+                                "status":transactionStatus.FAILED,
+                                "blueprintid":blueprintInfo.blueprintId
+                            }
+                            var credits = {
+                                "userid":userId,
+                                "creditsAvailable": aiservicesCount,
+                                "creditsused": -1*aiservicesCount
+                            }
+                            creditCore.updateTransactionLog(transaction,accessToken)
+                            creditCore.updateUserCredit(credits,accessToken)
+                            }
                         return;
                     }
                     console.log('****************************************************');
@@ -229,6 +315,23 @@ const generateTerraformFiles = (fileName, folderPath, context) => {
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
             utils.cleanUp(context.codeGenerationId, error.message, folderPath);
+            let aiservicesCount=context.AIServices;
+            if(aiservicesCount > 0){
+                //update the transaction status as completed
+                var transaction = {
+                    "userid":userId,
+                    "credits":aiservicesCount,
+                    "status":transactionStatus.FAILED,
+                    "blueprintid":blueprintInfo.blueprintId
+                }
+                var credits = {
+                    "userid":userId,
+                    "creditsAvailable": aiservicesCount,
+                    "creditsused": -1*aiservicesCount
+                }
+                creditCore.updateTransactionLog(transaction,context.accessToken)
+                creditCore.updateUserCredit(credits,context.accessToken)
+                }
             return;
         }
 
@@ -259,6 +362,22 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
             utils.cleanUp(context.codeGenerationId, error.message, folderPath);
+            if(aiservicesCount > 0){
+                //update the transaction status as completed
+                var transaction = {
+                    "userid":userId,
+                    "credits":aiservicesCount,
+                    "status":transactionStatus.FAILED,
+                    "blueprintid":blueprintInfo.blueprintId
+                }
+                var credits = {
+                    "userid":userId,
+                    "creditsAvailable": aiservicesCount,
+                    "creditsused": -1*aiservicesCount
+                }
+                creditCore.updateTransactionLog(transaction,context.accessToken)
+                creditCore.updateUserCredit(credits,context.accessToken)
+                }
             return;
         }
         triggerTerraformGenerator(folderPath, deployment, body, context);
