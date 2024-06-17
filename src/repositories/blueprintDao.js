@@ -135,6 +135,44 @@ blueprintSchema.statics = {
     deleteByParentId: function (query) {
         return this.updateMany(query, { $set: { deleted: true } }).exec();
     },
+
+    getByProjectIds: async function (projectIds) {
+        const blueprints = await this.aggregate([
+            { $match: { project_id: { $in: projectIds }, deleted: false } },
+            {
+                $lookup: {
+                    from: 'code_generations',
+                    let: { blueprintId: '$project_id', blueprintVersion: '$version' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$blueprintId', '$$blueprintId'] } } },
+                        { $match: { $expr: { $eq: ['$blueprintVersion', '$$blueprintVersion'] } } },
+                        { $sort: { createdAt: -1 } },
+                        { $limit: 1 },
+                    ],
+                    as: 'latestCodeGeneration',
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    project_id: 1,
+                    request_json: 1,
+                    metadata: 1,
+                    user_id: 1,
+                    deleted: 1,
+                    parentId: 1,
+                    imageUrl: 1,
+                    description: 1,
+                    validationStatus: 1,
+                    version: 1,
+                    latestCodeGenerationStatus: { $arrayElemAt: ['$latestCodeGeneration.status', 0] },
+                },
+            },
+        ]);
+
+        return blueprints;
+    },
+
 };
 
 var blueprintModel = mongoose.model('blueprints', blueprintSchema);
