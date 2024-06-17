@@ -7,4 +7,5 @@ module.exports = function (router) {
     router.put('/blueprints/:project_id', blueprintService.updateBlueprint);
     router.get('/user/:project_id', blueprintService.verifyProject);
     router.post('/blueprints', blueprintService.saveAsDraft);
+    router.post('/getBlueprintData',blueprintService.getData)
 };

@@ -171,7 +171,10 @@ exports.generateZip = (folderPath, context) => {
             // Update the code_generation collection as COMPLETED [ASYNC]
             var codeGeneration = { status: codeGenerationStatus.COMPLETED };
             updateCodeGeneration(codeGenerationId, codeGeneration);
-
+            if(aiservicesCount>0){
+                //update the transaction status as completed
+                transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.PENDING, blueprintInfo.blueprintId);
+            }
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
@@ -180,6 +183,12 @@ exports.generateZip = (folderPath, context) => {
                 error: err.message,
                 status: codeGenerationStatus.FAILED,
             };
+            if(aiservicesCount>0){
+                //update the transaction status as completed
+                transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.FAILED, blueprintInfo.blueprintId);
+                //update the user credits
+                creditService.createOrUpdateUserCreditService(userId, aiservicesCount,aiservicesCount);
+                }
             updateCodeGeneration(codeGenerationId, codeGeneration);
             console.error(err);
         });
