@@ -51,20 +51,17 @@ exports.prototype = async function (blueprintInfo) {
     if(aiservicesCount>0){
         //update the transaction status as completed
         var transaction = {
-            "userid":userId,
+            "userId":userId,
             "credits":aiservicesCount,
             "status":transactionStatus.PENDING,
-            "blueprintid":blueprintInfo.blueprintId
+            "blueprintId":blueprintInfo.blueprintId
         }
         var credits = {
-            "userid":userId,
+            "userId":userId,
             "creditsAvailable": -1*aiservicesCount,
-            "creditsused": aiservicesCount
+            "creditsUsed": aiservicesCount
         }
         await creditCore.addTransactioLog(transaction,accessToken)
-        // transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.PENDING, blueprintInfo.blueprintId);
-        //update the user credits
-        // creditService.createOrUpdateUserCreditService(userId, aiservicesCount *-1 , aiservicesCount);
         await creditCore.updateUserCredit(credits,accessToken)
         }
     // Form a context object which will contain the information to be passed to generate zip & update code_generation
@@ -100,15 +97,15 @@ exports.prototype = async function (blueprintInfo) {
             if(aiservicesCount > 0){
                 //update the transaction status as completed
                 var transaction = {
-                    "userid":userId,
+                    "userId":userId,
                     "credits":aiservicesCount,
                     "status":transactionStatus.FAILED,
-                    "blueprintid":blueprintInfo.blueprintId
+                    "blueprintId":blueprintInfo.blueprintId
                 }
                 var credits = {
-                    "userid":userId,
+                    "userId":userId,
                     "creditsAvailable": aiservicesCount,
-                    "creditsused": -1*aiservicesCount
+                    "creditsUsed": -1*aiservicesCount
                 }
                 creditCore.updateTransactionLog(transaction,accessToken)
                 creditCore.updateUserCredit(credits,accessToken)
@@ -147,15 +144,15 @@ exports.prototype = async function (blueprintInfo) {
                     if(aiservicesCount > 0){
                         //update the transaction status as completed
                         var transaction = {
-                            "userid":userId,
+                            "userId":userId,
                             "credits":aiservicesCount,
                             "status":transactionStatus.FAILED,
-                            "blueprintid":blueprintInfo.blueprintId
+                            "blueprintId":blueprintInfo.blueprintId
                         }
                         var credits = {
-                            "userid":userId,
+                            "userId":userId,
                             "creditsAvailable": aiservicesCount,
-                            "creditsused": -1*aiservicesCount
+                            "creditsUsed": -1*aiservicesCount
                         }
                         creditCore.updateTransactionLog(transaction,accessToken)
                         creditCore.updateUserCredit(credits,accessToken)
@@ -183,15 +180,15 @@ exports.prototype = async function (blueprintInfo) {
                         if(aiservicesCount > 0){
                             //update the transaction status as completed
                             var transaction = {
-                                "userid":userId,
+                                "userId":userId,
                                 "credits":aiservicesCount,
                                 "status":transactionStatus.FAILED,
-                                "blueprintid":blueprintInfo.blueprintId
+                                "blueprintId":blueprintInfo.blueprintId
                             }
                             var credits = {
-                                "userid":userId,
+                                "userId":userId,
                                 "creditsAvailable": aiservicesCount,
-                                "creditsused": -1*aiservicesCount
+                                "creditsUsed": -1*aiservicesCount
                             }
                             creditCore.updateTransactionLog(transaction,accessToken)
                             creditCore.updateUserCredit(credits,accessToken)
@@ -319,15 +316,15 @@ const generateTerraformFiles = (fileName, folderPath, context) => {
             if(aiservicesCount > 0){
                 //update the transaction status as completed
                 var transaction = {
-                    "userid":userId,
+                    "userId":userId,
                     "credits":aiservicesCount,
                     "status":transactionStatus.FAILED,
-                    "blueprintid":blueprintInfo.blueprintId
+                    "blueprintId":blueprintInfo.blueprintId
                 }
                 var credits = {
-                    "userid":userId,
+                    "userId":userId,
                     "creditsAvailable": aiservicesCount,
-                    "creditsused": -1*aiservicesCount
+                    "creditsUsed": -1*aiservicesCount
                 }
                 creditCore.updateTransactionLog(transaction,context.accessToken)
                 creditCore.updateUserCredit(credits,context.accessToken)
@@ -365,15 +362,15 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
             if(aiservicesCount > 0){
                 //update the transaction status as completed
                 var transaction = {
-                    "userid":userId,
+                    "userId":userId,
                     "credits":aiservicesCount,
                     "status":transactionStatus.FAILED,
-                    "blueprintid":blueprintInfo.blueprintId
+                    "blueprintId":blueprintInfo.blueprintId
                 }
                 var credits = {
-                    "userid":userId,
+                    "userId":userId,
                     "creditsAvailable": aiservicesCount,
-                    "creditsused": -1*aiservicesCount
+                    "creditsUsed": -1*aiservicesCount
                 }
                 creditCore.updateTransactionLog(transaction,context.accessToken)
                 creditCore.updateUserCredit(credits,context.accessToken)

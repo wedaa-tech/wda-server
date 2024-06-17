@@ -3,7 +3,8 @@ const path = require('path');
 const archiver = require('archiver');
 const { nanoid } = require('nanoid');
 const { updateCodeGeneration } = require('../services/codeGenerationService');
-const { codeGenerationStatus } = require('./constants');
+const { codeGenerationStatus,transactionStatus } = require('./constants');
+const creditCore = require('../utils/creditcore.js');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -81,7 +82,7 @@ exports.generateZip = (folderPath, context) => {
     // unmarshalling context object
     const userId = context.userId;
     const codeGenerationId = context.codeGenerationId;
-
+    var aiservicesCount = context.AIServices;
     var blueprintId = folderPath;
     // extracting the blueprintId from the folder path
     blueprintId = blueprintId.substring(2);
@@ -172,8 +173,14 @@ exports.generateZip = (folderPath, context) => {
             var codeGeneration = { status: codeGenerationStatus.COMPLETED };
             updateCodeGeneration(codeGenerationId, codeGeneration);
             if(aiservicesCount>0){
+                var transaction = {
+                    "userId":userId,
+                    "credits":aiservicesCount,
+                    "status":transactionStatus.DEBITED,
+                    "blueprintId":blueprintId
+                }
+                creditCore.updateTransactionLog(transaction,context.accessToken)
                 //update the transaction status as completed
-                transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.PENDING, blueprintInfo.blueprintId);
             }
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
@@ -185,9 +192,20 @@ exports.generateZip = (folderPath, context) => {
             };
             if(aiservicesCount>0){
                 //update the transaction status as completed
-                transactionLogDao.createTransactionByUser(userId, aiservicesCount, transactionStatus.FAILED, blueprintInfo.blueprintId);
                 //update the user credits
-                creditService.createOrUpdateUserCreditService(userId, aiservicesCount,aiservicesCount);
+                var transaction = {
+                    "userId":userId,
+                    "credits":aiservicesCount,
+                    "status":transactionStatus.FAILED,
+                    "blueprintId":blueprintId
+                }
+                var credits = {
+                    "userId":userId,
+                    "creditsAvailable": aiservicesCount,
+                    "creditsUsed": -1*aiservicesCount
+                }
+                creditCore.updateTransactionLog(transaction,context.accessToken)
+                creditCore.updateUserCredit(credits,context.accessToken)
                 }
             updateCodeGeneration(codeGenerationId, codeGeneration);
             console.error(err);
