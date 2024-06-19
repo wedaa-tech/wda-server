@@ -144,7 +144,7 @@ exports.prepareEntityData = applications => {
                                 fieldType = 'Long';
                             } else {
                                 fieldName = toCamelCase(field.name);
-                                fieldType = mapFieldType(field.type.type_name);
+                                fieldType = mapFieldType(field.type.type_name.toLowerCase());
                             }
 
                             fieldsData += `\n    ${fieldName} ${fieldType},`;
