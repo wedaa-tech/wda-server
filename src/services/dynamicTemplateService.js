@@ -376,10 +376,10 @@ async function addDBMLScriptToService(accessToken, services) {
             };
 
             try {
-                service.dbml = await retryFunction(generateAndValidateDbml, 5, data, accessToken);
+                service.dbml = await generateAndValidateDbml(data, accessToken);
                 console.log('DBML script added successfully for', service.name);
             } catch (error) {
-                console.error(`Failed to validate DBML script for ${service.name} after 5 attempts:`, error);
+                console.error(`Failed to validate DBML script for ${service.name}:`, error);
                 service.dbml = '';
             }
         });
