@@ -7,7 +7,7 @@ var feedbackService = require('../services/feedbackService.js');
 var tipsService = require('../services/tipsService.js');
 var dynamicTemplate = require('../services/dynamicTemplateService.js');
 var codeGeneration = require('../services/codeGenerationService.js');
-
+var projectnames = require('../services/projectNameService.js')
 module.exports = function (router) {
     blueprintRoutes(router);
     refArchitectureRoutes(router);
@@ -19,6 +19,6 @@ module.exports = function (router) {
     router.get('/feedback', feedbackService.getFeedbacks);
     router.post('/tips', tipsService.saveTip);
     router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
-
+    router.get('/project-names',projectnames.getProjectNames)
     router.post('/code-generation-status', codeGeneration.getCodeGenerationStatus);
 };
