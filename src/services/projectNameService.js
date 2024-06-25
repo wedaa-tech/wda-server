@@ -18,18 +18,8 @@ exports.getProjectNames = async function (req, res) {
             console.error("Error fetching blueprint project names:", err);
             return res.status(500).send({ error: "Failed to fetch blueprint project names" });
         }
-        
-        let refArchitectureProjectNames = [];
-        try {
-            refArchitectureProjectNames = await refArchitectureDao.getAllProjectNames();
-        } catch (err) {
-            console.error("Error fetching reference architecture project names:", err);
-            return res.status(500).send({ error: "Failed to fetch reference architecture project names" });
-        }
-        
-        const ProjectNames = [...blueprintProjectNames, ...refArchitectureProjectNames];
         console.log("Fetched Project Names");
-        return res.status(200).send({ ProjectNames: ProjectNames });
+        return res.status(200).send({ ProjectNames: blueprintProjectNames });
         
     } catch (err) {
         console.error("Error:", err);
