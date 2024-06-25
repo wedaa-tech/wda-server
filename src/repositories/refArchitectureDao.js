@@ -24,6 +24,13 @@ refArchitectureSchema.statics = {
     delete: function (query) {
         return this.deleteOne(query);
     },
+
+    getAllProjectNames: function () {
+        return this.find(
+            { 'request_json.projectName': { $exists: true } },
+            { 'request_json.projectName': 1, _id: 0 }
+        ).then(results => results.map(result => result.request_json.projectName));
+    }
 };
 
 var refArchitectureModel = mongoose.model('refArchitecture', refArchitectureSchema);
