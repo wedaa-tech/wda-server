@@ -121,17 +121,17 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         }
 
         // Adding randomString to the application, which might required for generating unique entities/relations.
-        applications[i].prefix = randomStringGenerator(5);
+        applications[i].suffix = randomStringGenerator(5);
 
         var entities, entitiesString;
         if (!clientFramework) {
             entities = getTableNames(applications[i].dbmlData);
 
-            // Iterate over entities and check for duplicates, if exist prefix random string to it.
+            // Iterate over entities and check for duplicates, if exist suffix random string to it.
             entities.forEach((entityName, index) => {
                 if (duplicateEntities.includes(entityName)) {
-                    // [Future Release]: Random prefix can be replaced with logical object in future.
-                    entities[index] = `${entityName}${applications[i].prefix}`;
+                    // [Future Release]: Random suffix can be replaced with logical object in future.
+                    entities[index] = `${entityName}${applications[i].suffix}`;
                 }
             });
 
@@ -172,6 +172,7 @@ application {
 }\n`;
 
         data = data.replace(/^\s*[\r\n]/gm, ''); // remove extra lines from jdl data
+        data += '\n';
         appData.push(data);
     }
 
