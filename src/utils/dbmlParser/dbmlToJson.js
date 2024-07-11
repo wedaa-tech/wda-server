@@ -1,7 +1,7 @@
 const { Parser } = require('@dbml/core');
 const { dbmlParseError } = require('./error');
 const { capitalizeName, toCamelCase } = require('../helper');
-const { getDuplicateTableNames } = require('./helper');
+const { getDuplicateTableNames, getDuplicateEnums } = require('./helper');
 
 // Function to map dbml field types with the jdl field types
 function mapFieldType(type) {
@@ -76,7 +76,7 @@ function mapRelationshipType(relation1, relation2) {
  * @param {Object} database - The database object parsed from DBML.
  * @returns {string} A formatted string containing all the relationships in JDL syntax.
  */
-exports.parseRelationships = (database, duplicateEntities, prefix) => {
+exports.parseRelationships = (database, duplicateEntities, suffix) => {
     let relationships = '';
 
     database.schemas.forEach(schema => {
@@ -89,13 +89,13 @@ exports.parseRelationships = (database, duplicateEntities, prefix) => {
                     var endpoint1TableName = capitalizeName(endpoint1.tableName);
                     var endpoint2TableName = capitalizeName(endpoint2.tableName);
 
-                    // [Future Release]: Random prefix can be replaced with logic object in future.
+                    // [Future Release]: Random suffix can be replaced with logic object in future.
                     if (duplicateEntities.includes(endpoint1.tableName)) {
-                        endpoint1TableName = capitalizeName(endpoint1TableName + prefix);
+                        endpoint1TableName = capitalizeName(endpoint1TableName + suffix);
                     }
-                    // [Future Release]: Random prefix can be replaced with logic object in future.
+                    // [Future Release]: Random suffix can be replaced with logic object in future.
                     if (duplicateEntities.includes(endpoint2.tableName)) {
-                        endpoint2TableName = capitalizeName(endpoint2TableName + prefix);
+                        endpoint2TableName = capitalizeName(endpoint2TableName + suffix);
                     }
 
                     relationships += `
@@ -108,6 +108,54 @@ relationship ${relationshipType} {
     });
 
     return relationships;
+};
+
+/**
+ * Prepares enum data from the provided applications.
+ *
+ * This function processes a list of applications, parsing their DBML data to extract
+ * enum definitions and formats them into a string. It also handles duplicate enum names by appending a suffix.
+ *
+ * @param {Object[]} applications - An array of application objects.
+ * @param {string} applications[].clientFramework - The client framework used by the application.
+ * @param {string} applications[].dbmlData - The DBML data for the application.
+ * @param {string} applications[].suffix - A suffix to be appended to duplicate enum names.
+ * @returns {string} - A formatted string containing all the enum definitions.
+ * @throws {Error} - Throws an error if there's an issue parsing the DBML data.
+ */
+exports.prepareEnumData = applications => {
+    const applicationCount = Object.keys(applications).length;
+    try {
+        const duplicateEnums = getDuplicateEnums(applications);
+        let enumData = '';
+
+        for (let i = 0; i < applicationCount; i++) {
+            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
+                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
+                var suffix = applications[i].suffix;
+                database.schemas.forEach(schema => {
+                    schema.enums.forEach(enumeration => {
+                        let capitalizedUniqueEnum = capitalizeName(toCamelCase(enumeration.name));
+                        // check for duplicate Enums [snake_case], add suffix to it 
+                        if (duplicateEnums.includes(enumeration.name)) {
+                            capitalizedUniqueEnum = capitalizeName(toCamelCase(enumeration.name + suffix));
+                        }
+                        const values = enumeration.values.map(value => value.name.toUpperCase());
+
+                        enumData += `
+enum ${capitalizedUniqueEnum} {
+    ${values.join(',\n    ')}
+}\n`;
+                    });
+                });
+            }
+        }
+        return enumData;
+    } catch (error) {
+        console.error('Error parsing DBML:', error);
+        const errorMessage = dbmlParseError(error);
+        throw new Error(errorMessage);
+    }
 };
 
 /**
@@ -125,24 +173,43 @@ exports.prepareEntityData = applications => {
     let entityData = '';
 
     const duplicateEntities = getDuplicateTableNames(applications);
+    const duplicateEnums = getDuplicateEnums(applications);
+    let enumData = this.prepareEnumData(applications);
 
+    entityData += enumData;
     try {
         for (let i = 0; i < applicationCount; i++) {
             if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
                 const database = new Parser().parse(applications[i].dbmlData, 'dbml');
-                var prefix = applications[i].prefix;
+                var suffix = applications[i].suffix;
 
                 // Iterate through the schemas and tables to form the entityData
                 database.schemas.forEach(schema => {
+                    // get the list of Enums for this application
+                    let appEnums = [];
+                    schema.enums.forEach(enumeration => {
+                        appEnums.push(enumeration.name);
+                    });
+
+                    // Mapping the Table attributes to respective datatypes
                     schema.tables.forEach(table => {
                         let fieldsData = '';
 
                         table.fields.forEach(field => {
                             let fieldName, fieldType;
                             if (field.pk) {
+                                // primary key Mapping
                                 fieldName = '@Id ' + toCamelCase(field.name);
                                 fieldType = 'Long';
+                            } else if (appEnums.includes(field.type.type_name)) {
+                                // enum mapping
+                                fieldName = toCamelCase(field.name);
+                                fieldType = capitalizeName(toCamelCase(field.type.type_name));
+                                if (duplicateEnums.includes(field.type.type_name)) {
+                                    fieldType = capitalizeName(toCamelCase(field.type.type_name + suffix));
+                                }
                             } else {
+                                // datatype mapping
                                 fieldName = toCamelCase(field.name);
                                 fieldType = mapFieldType(field.type.type_name.toLowerCase());
                             }
@@ -152,9 +219,9 @@ exports.prepareEntityData = applications => {
 
                         var capitalizedName = capitalizeName(table.name);
 
-                        // [Future Release]: Random prefix can be replaced with logical object in future.
+                        // [Future Release]: Random suffix can be replaced with logical object in future.
                         if (duplicateEntities.includes(table.name)) {
-                            capitalizedName = capitalizeName(table.name + prefix);
+                            capitalizedName = capitalizeName(table.name + suffix);
                         }
 
                         // Remove the last comma and add table's entity data to the entityData string
@@ -163,7 +230,7 @@ entity ${toCamelCase(capitalizedName)} {${fieldsData.slice(0, -1)}
 }\n`;
                     });
                 });
-                realtionshipData = this.parseRelationships(database, duplicateEntities, prefix);
+                realtionshipData = this.parseRelationships(database, duplicateEntities, suffix);
                 entityData += realtionshipData;
             }
         }
@@ -175,4 +242,3 @@ entity ${toCamelCase(capitalizedName)} {${fieldsData.slice(0, -1)}
         throw new Error(errorMessage);
     }
 };
-
