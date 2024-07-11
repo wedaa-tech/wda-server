@@ -1,0 +1,52 @@
+# This configuration is intended for development purpose, it's **your** responsibility to harden it for production
+name: wedaa-backend
+services:
+  app:
+    image: wedaa-server
+    ports:
+    - 127.0.0.1:3001:3001
+    environment:     
+      - DB_URI=mongodb://mongodb:27017/
+      - MONGODB_DATABASE=wedaa-db  
+      - KC_HOST=http://keycloak:9080
+      - AI_CORE_URL=https://app.wedaa.tech:9001
+      - BLUEPRINT_ROOT_FOLDER=code_archives
+
+      ### NEW RELIC CONFIG ### 
+      - NEW_RELIC_LICENSE_KEY=
+      - NEW_RELIC_APP_NAME=
+
+      ### MESSAGE QUEUE CONFIG ###
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+
+      ## FLAGSMITH CONFIG ###
+      - FLAGSMITH_API_KEY=
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - -f
+        - http://localhost:3001/health
+      interval: 5s
+      timeout: 5s
+      retries: 40
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  mongodb:
+    extends:
+      file: ./docker/mongodb.yml
+      service: mongodb
+  keycloak:
+    extends:
+      file: ./docker/keycloak.yml
+      service: keycloak
+  rabbitmq:
+    extends:
+      file: ./docker/rabbitmq.yml
+      service: rabbitmq
