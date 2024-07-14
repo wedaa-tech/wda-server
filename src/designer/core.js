@@ -61,6 +61,7 @@ exports.prototype = async function (blueprintInfo) {
             "creditsAvailable": -1*aiservicesCount,
             "creditsUsed": aiservicesCount
         }
+        // TODO: Error Handling must be taking care!
         await creditCore.addTransactioLog(transaction,accessToken)
         await creditCore.updateUserCredit(credits,accessToken)
         }
