@@ -1,6 +1,5 @@
 async function addTransactioLog(data, accessToken) {
     try {
-        console.log('transaction Data',data);
         const response = await fetch(process.env.CREDIT_SERVICE_URL + '/api/transaction', {
             method: 'POST',
             headers: {
@@ -43,7 +42,6 @@ async function updateTransactionLog(data, accessToken) {
 
 async function updateUserCredit(data, accessToken) {
     try {
-        console.log('credit Data',data);
         const response = await fetch(process.env.CREDIT_SERVICE_URL + '/api/credits', {
             method: 'PUT',
             headers: {
