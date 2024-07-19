@@ -1,4 +1,4 @@
-async function addTransactioLog(data, accessToken) {
+async function addTransaction(data, accessToken) {
     try {
         const response = await fetch(process.env.CREDIT_SERVICE_URL + '/api/transaction', {
             method: 'POST',
@@ -19,7 +19,7 @@ async function addTransactioLog(data, accessToken) {
     }
 }
 
-async function updateTransactionLog(data, accessToken) {
+async function updateTransaction(data, accessToken) {
     try {
         const response = await fetch(process.env.CREDIT_SERVICE_URL + '/api/transaction', {
             method: 'PUT',
@@ -63,7 +63,7 @@ async function updateUserCredit(data, accessToken) {
 
 
 module.exports = {
-    addTransactioLog,
-    updateTransactionLog,
+    addTransaction,
+    updateTransaction,
     updateUserCredit,
 };

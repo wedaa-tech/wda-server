@@ -280,7 +280,7 @@ exports.getBlueprintById = function (blueprintId) {
         });
 };
 
-exports.getData = async function (req, res) {
+exports.getMetadata = async function (req, res) {
     const blueprintIds = req.body;
 
     try {
