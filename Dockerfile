@@ -37,6 +37,10 @@ RUN git clone https://github.com/wedaa-tech/jhipster-blueprints.git && \
 RUN groupadd -r wedaa && useradd -r -g wedaa -s /bin/bash -m wedaa && \
     chown -R wedaa:wedaa /usr/src/app
 
+# Add this after creating the user and before switching users
+RUN mkdir -p /usr/src/app/code_archives && \
+    chown -R wedaa:wedaa /usr/src/app/code_archives
+
 # Switch to the new user
 USER wedaa
 
