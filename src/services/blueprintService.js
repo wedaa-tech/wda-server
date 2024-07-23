@@ -279,3 +279,28 @@ exports.getBlueprintById = function (blueprintId) {
             throw error;
         });
 };
+
+exports.getMetadata = async function (req, res) {
+    const blueprintIds = req.body;
+
+    try {
+        const blueprints = await blueprintDao.getByProjectIds(blueprintIds);
+
+        const responses = blueprints.map(blueprint => {
+            const servicesWithDbml = Object.values(blueprint.metadata.nodes)
+                .filter(node => node.data && node.data.dbmlData)
+                .map(node => node.data.applicationName);
+            return {
+                projectId: blueprint.project_id,
+                services: servicesWithDbml,
+                imageUrl: blueprint.imageUrl,
+                parentId: blueprint.parentId
+            };
+        });
+        return res.status(200).send(responses);
+    } catch (error) {
+        console.error('Error retrieving blueprint:', error);
+        return res.status(500).send({ error: 'Error retrieving blueprint' });
+    }
+};
+

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const utils = require('../utils/core');
+const creditCore = require('../utils/credits.js');
 const jdlConverter = require('../utils/jsonToJdl');
 const exec = require('child_process').exec;
 const weave = require('../weaver/codeWeaver');
@@ -9,7 +10,7 @@ const { send } = require('../configs/rabbitmq/producer');
 const { CODE_GENERATION } = require('../configs/rabbitmq/constants');
 const { saveCodeGeneration, updateCodeGeneration, checkIfCodeGenerationExists } = require('../services/codeGenerationService');
 const { checkFlagsEnabled } = require('../configs/feature-flag.js');
-const { codeGenerationStatus } = require('../utils/constants.js');
+const { codeGenerationStatus, transactionStatus } = require('../utils/constants.js');
 
 /**
  * Generates a prototype based on the provided blueprint Info.
@@ -29,6 +30,38 @@ exports.prototype = async function (blueprintInfo) {
     const body = blueprint.request_json;
     const userId = blueprint.user_id;
     const fileName = body.projectId;
+
+    const services = blueprint.request_json.services;
+    // Use filter to count services with valid dbmlData
+    const dbmlCount = Object.values(services).filter(service => service.dbmlData).length;
+    var creditContext = {};
+
+    if (dbmlCount > 0) {
+        // update the transaction status as completed
+        var transaction = {
+            userId: userId,
+            credits: dbmlCount,
+            status: transactionStatus.PENDING,
+            blueprintId: blueprintInfo.blueprintId,
+        };
+        var credits = {
+            userId: userId,
+            creditsAvailable: -1 * dbmlCount,
+            creditsUsed: dbmlCount,
+        };
+        // [Future Release]: Error handling should be implemented!
+        const response = await creditCore.addTransaction(transaction, accessToken);
+        await creditCore.updateUserCredit(credits, accessToken);
+
+        // Form a credit context object which will contain the information to be passed to update credits, when Failed.
+        creditContext = {
+            transactionId: response.id,
+            userId: userId,
+            dbmlCount: dbmlCount,
+            blueprintId: blueprintInfo.blueprintId,
+            accessToken: accessToken,
+        };
+    }
 
     // Form a context object which will contain the information to be passed to generate zip & update code_generation
     var context = {
@@ -58,7 +91,7 @@ exports.prototype = async function (blueprintInfo) {
         try {
             jdlConverter.createJdlFromJson(fileName);
         } catch (error) {
-            utils.cleanUp(codeGenerationId, error.message, folderPath);
+            utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext);
             return;
         }
 
@@ -89,7 +122,7 @@ exports.prototype = async function (blueprintInfo) {
 
                 if (error !== null) {
                     console.log('---------exec error: ---------\n[' + error + ']');
-                    utils.cleanUp(codeGenerationId, error.message, folderPath);
+                    utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext);
                     return;
                 }
                 console.log('Architecture Generation completed successfully.....');
@@ -109,7 +142,7 @@ exports.prototype = async function (blueprintInfo) {
                     } catch (error) {
                         // if there is an error in AI CODE WEAVING, Code zip will not be generated
                         console.error('Error while weaving[propagated error]:', error);
-                        utils.cleanUp(codeGenerationId, error.message, folderPath);
+                        utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext);
                         return;
                     }
                     console.log('****************************************************');
@@ -120,9 +153,9 @@ exports.prototype = async function (blueprintInfo) {
                 var documentGenerator = !!docsDetails;
                 if (documentGenerator) {
                     console.log('Generating Docusaurus files...');
-                    generateDocusaurusFiles(fileName, folderPath, deployment, body, context);
+                    generateDocusaurusFiles(fileName, folderPath, deployment, body, context, creditContext);
                 } else {
-                    triggerTerraformGenerator(folderPath, deployment, body, context);
+                    triggerTerraformGenerator(folderPath, deployment, body, context, creditContext);
                 }
             },
         );
@@ -216,8 +249,9 @@ exports.generate = async function (req, res) {
  * @param {string} fileName   : random string with 9 characters
  * @param {string} folderPath : combination of the projectName + fileName
  * @param {string} context    : contains userId, codeGenerationId
+ * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
-const generateTerraformFiles = (fileName, folderPath, context) => {
+const generateTerraformFiles = (fileName, folderPath, context, creditContext) => {
     exec(`yo tf-wdi --file ./${fileName}.json`, function (error, stdout, stderr) {
         if (stdout !== '') {
             console.log('---------stdout: ---------\n' + stdout);
@@ -229,12 +263,12 @@ const generateTerraformFiles = (fileName, folderPath, context) => {
 
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
-            utils.cleanUp(context.codeGenerationId, error.message, folderPath);
+            utils.cleanUp(context.codeGenerationId, error.message, folderPath, creditContext);
             return;
         }
 
         // Generation of Infrastructure zip file with in the callback function of child process.
-        utils.generateZip(folderPath, context);
+        utils.generateZip(folderPath, context, creditContext);
     });
 };
 
@@ -246,8 +280,9 @@ const generateTerraformFiles = (fileName, folderPath, context) => {
  * @param {*} deployment : deployment check boolean
  * @param {*} body       : request body
  * @param {*} context    : contains userId, codeGenerationId
+ * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
-const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context) => {
+const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context, creditContext) => {
     exec(`cd ${folderPath} && yo docusaurus --file ../${fileName}-docusaurus.json`, function (error, stdout, stderr) {
         if (stdout !== '') {
             console.log('---------stdout: ---------\n' + stdout);
@@ -259,10 +294,10 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
 
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
-            utils.cleanUp(context.codeGenerationId, error.message, folderPath);
+            utils.cleanUp(context.codeGenerationId, error.message, folderPath, creditContext);
             return;
         }
-        triggerTerraformGenerator(folderPath, deployment, body, context);
+        triggerTerraformGenerator(folderPath, deployment, body, context, creditContext);
     });
 };
 
@@ -273,8 +308,9 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
  * @param {*} deployment : deployment check boolean
  * @param {*} body       : request body
  * @param {*} context    : contains userId, codeGenerationId
+ * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
-const triggerTerraformGenerator = (folderPath, deployment, body, context) => {
+const triggerTerraformGenerator = (folderPath, deployment, body, context, creditContext) => {
     // If deployment is true, then generate Terraform files as well and then generate the zip archive.
     if (deployment) {
         console.log('Generating Infrastructure files...');
@@ -283,9 +319,9 @@ const triggerTerraformGenerator = (folderPath, deployment, body, context) => {
         // Generate json file for infraJson, if deployment is true
         utils.createJsonFile(jsonFileForTerraform, infraJson);
         //Invoke tf-wdi generator
-        generateTerraformFiles(jsonFileForTerraform, folderPath, context);
+        generateTerraformFiles(jsonFileForTerraform, folderPath, context, creditContext);
     } else {
         // Generation of Architecture zip, with in the call back function of child process.
-        utils.generateZip(folderPath, context);
+        utils.generateZip(folderPath, context, creditContext);
     }
 };

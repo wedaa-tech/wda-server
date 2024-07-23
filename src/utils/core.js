@@ -3,7 +3,8 @@ const path = require('path');
 const archiver = require('archiver');
 const { nanoid } = require('nanoid');
 const { updateCodeGeneration } = require('../services/codeGenerationService');
-const { codeGenerationStatus } = require('./constants');
+const { codeGenerationStatus, transactionStatus } = require('./constants');
+const creditCore = require('./credits.js');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -75,13 +76,14 @@ exports.generateBlueprint = (folderPath, res) => {
  * The generated ZIP file is saved inside a directory corresponding to the user ID.
  *
  * @param {string} folderPath - The path to the folder whose contents will be archived.
- * @param {*} context
+ * @param {*} context    - contains userId, codeGenerationId
+ * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
-exports.generateZip = (folderPath, context) => {
+exports.generateZip = (folderPath, context, creditContext) => {
     // unmarshalling context object
     const userId = context.userId;
     const codeGenerationId = context.codeGenerationId;
-
+    const dbmlCount = creditContext.dbmlCount;
     var blueprintId = folderPath;
     // extracting the blueprintId from the folder path
     blueprintId = blueprintId.substring(2);
@@ -172,6 +174,19 @@ exports.generateZip = (folderPath, context) => {
             var codeGeneration = { status: codeGenerationStatus.COMPLETED };
             updateCodeGeneration(codeGenerationId, codeGeneration);
 
+            // Update the credit transaction status as COMPLETED
+            if (dbmlCount > 0) {
+                var transaction = {
+                    id: creditContext.transactionId,
+                    userId: userId,
+                    credits: dbmlCount,
+                    status: transactionStatus.DEBITED,
+                    blueprintId: blueprintId,
+                };
+                // [Future Release]: Error handling should be implemented!
+                creditCore.updateTransaction(transaction, creditContext.accessToken);
+            }
+
             console.log('%%%%----ZIP GENERATION COMPLETED----%%%%%');
         })
         .catch(err => {
@@ -181,6 +196,13 @@ exports.generateZip = (folderPath, context) => {
                 status: codeGenerationStatus.FAILED,
             };
             updateCodeGeneration(codeGenerationId, codeGeneration);
+
+            // credit transaction status will be updated with FAILED status
+            if (dbmlCount > 0) {
+                this.creditTransactionFailed(creditContext.accessToken);
+                this.rollbackCredits(creditContext.accessToken);
+            }
+
             console.error(err);
         });
 };
@@ -305,12 +327,69 @@ exports.removeDump = folderPath => {
  * @param {string} codeGenerationId - The ID of the code generation process.
  * @param {string} errorMessage - The error message to be logged.
  * @param {string} folderPath - The path of the folder to remove.
+ * @param {*}      creditContext - The credit context used to clean up credit related transactions.
  */
-exports.cleanUp = (codeGenerationId, errorMessage, folderPath) => {
+exports.cleanUp = (codeGenerationId, errorMessage, folderPath, creditContext) => {
     const codeGeneration = {
         error: errorMessage,
         status: codeGenerationStatus.FAILED,
     };
     updateCodeGeneration(codeGenerationId, codeGeneration);
     this.removeDump(folderPath);
+
+    if (creditContext && Object.keys(creditContext).length > 0) {
+        this.creditTransactionFailed(creditContext);
+        this.rollbackCredits(creditContext);
+    }
+};
+
+/**
+ * Rolls back credits for a user by adjusting their available and used credits.
+ *
+ * This function takes a credit context object that contains information about
+ * the user's credit usage and reverses the credits used. It
+ * calls the credits service to update the user's credit status.
+ *
+ * @param {Object} creditContext - The context object containing credit information.
+ *
+ */
+exports.rollbackCredits = creditContext => {
+    var credits = {
+        userId: creditContext.userId,
+        creditsAvailable: creditContext.dbmlCount,
+        creditsUsed: -1 * creditContext.dbmlCount,
+    };
+    console.log('rolling back user credits');
+    // [Future Release]: Error handling should be implemented!
+    try {
+        creditCore.updateUserCredit(credits, creditContext.accessToken);
+    } catch (error) {
+        console.error('Error updating user credits:', error);
+    }
+};
+
+/**
+ * Updates the transaction status to "Failed".
+ *
+ * This function is used to update the status of a credit transaction to indicate
+ * that it has failed. It calls the credits service to update transaction status.
+ *
+ * @param {Object} creditContext - The context object containing transaction details.
+ *
+ */
+exports.creditTransactionFailed = creditContext => {
+    var transaction = {
+        id: creditContext.transactionId,
+        userId: creditContext.userId,
+        credits: creditContext.dbmlCount,
+        status: transactionStatus.FAILED,
+        blueprintId: creditContext.blueprintId,
+    };
+    console.log('updating transaction status to FAILED');
+     // [Future Release]: Error handling should be implemented!
+    try {
+        creditCore.updateTransaction(transaction, creditContext.accessToken);
+    } catch (error) {
+        console.error('Error updating transaction:', error);
+    }
 };

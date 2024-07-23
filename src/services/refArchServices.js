@@ -39,8 +39,13 @@ exports.saveRefArch = function (req, res) {
         })
         .catch(error => {
             console.error(error);
-            return res.status(500).send({ message: 'Error saving architecture' });
+            if (error.code === 11000 && error.codeName === 'DuplicateKey') {
+                return res.status(400).send({ message: 'Architecture with this name already exists' });
+            } else {
+                return res.status(500).send({ message: error.message });
+            }
         });
+return res.status(200);
 };
 
 /**
