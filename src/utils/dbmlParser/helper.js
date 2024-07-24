@@ -62,7 +62,8 @@ exports.getDuplicateTableNames = applications => {
         const duplicateTables = [];
 
         for (let i = 0; i < applicationCount; i++) {
-            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
+            // loose equality, check for null and undefined.
+            if (applications[i].applicationFramework === 'spring' && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
                 const database = new Parser().parse(applications[i].dbmlData, 'dbml');
                 database.schemas.forEach(schema => {
                     schema.tables.forEach(table => {
@@ -104,7 +105,8 @@ exports.getDuplicateEnums = applications => {
         const duplicateEnums = [];
 
         for (let i = 0; i < applicationCount; i++) {
-            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
+            // loose equality, check for null and undefined.
+            if (applications[i].applicationFramework === 'spring' && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
                 const database = new Parser().parse(applications[i].dbmlData, 'dbml');
                 database.schemas.forEach(schema => {
                     schema.enums.forEach(enumeration => {
@@ -130,5 +132,4 @@ exports.getDuplicateEnums = applications => {
         const errorMessage = dbmlParseError(error);
         throw new Error(errorMessage);
     }
-
-}
+};
