@@ -130,13 +130,14 @@ exports.prepareEnumData = applications => {
         let enumData = '';
 
         for (let i = 0; i < applicationCount; i++) {
-            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
+            // loose equality, check for null and undefined.
+            if (applications[i].clientFramework == null && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
                 const database = new Parser().parse(applications[i].dbmlData, 'dbml');
                 var suffix = applications[i].suffix;
                 database.schemas.forEach(schema => {
                     schema.enums.forEach(enumeration => {
                         let capitalizedUniqueEnum = capitalizeName(toCamelCase(enumeration.name));
-                        // check for duplicate Enums [snake_case], add suffix to it 
+                        // check for duplicate Enums [snake_case], add suffix to it
                         if (duplicateEnums.includes(enumeration.name)) {
                             capitalizedUniqueEnum = capitalizeName(toCamelCase(enumeration.name + suffix));
                         }
@@ -179,7 +180,8 @@ exports.prepareEntityData = applications => {
     entityData += enumData;
     try {
         for (let i = 0; i < applicationCount; i++) {
-            if (applications[i].clientFramework === undefined || applications[i].clientFramework === null) {
+            // loose equality, check for null and undefined.
+            if (applications[i].clientFramework == null && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
                 const database = new Parser().parse(applications[i].dbmlData, 'dbml');
                 var suffix = applications[i].suffix;
 

@@ -124,7 +124,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         applications[i].suffix = randomStringGenerator(5);
 
         var entities, entitiesString;
-        if (!clientFramework) {
+        if (!clientFramework && applications[i].dbmlData != null) {
             entities = getTableNames(applications[i].dbmlData);
 
             // Iterate over entities and check for duplicates, if exist suffix random string to it.
