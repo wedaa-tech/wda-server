@@ -3,7 +3,7 @@ const fs = require('fs');
 const utils = require('../utils/core');
 const blueprintDao = require('../repositories/blueprintDao');
 const projectDao = require('../repositories/projectDao');
-const { generateDbmlScript } = require('../weaver/aicore');
+const { generateDbmlScript, regenerateDbmlScript } = require('../weaver/aicore');
 const { validateDbmlScript } = require('../utils/dbmlParser/helper');
 
 const serviceBase = {
@@ -411,7 +411,23 @@ async function retryFunction(func, retries, ...args) {
 
 // Function to generate DBML script and validate
 async function generateAndValidateDbml(data, accessToken) {
-    const responseData = await generateDbmlScript(data, accessToken);
+    console.log("Generating DBML script");
+    var responseData = await generateDbmlScript(data, accessToken);
+    const isValid = validateDbmlScript(responseData.dbml);
+    if (!isValid) {
+        // If initial DBML script is invalid, regenerate and validate
+        data.dbml = responseData.dbml;
+        console.log(data.dbml);
+        console.log("Regenerating DBML script");
+        const dbml = await regenerateAndValidateDbml(data, accessToken);
+        return dbml;
+    }
+    return responseData.dbml;
+}
+
+// Function to regenerate DBML script and validate
+async function regenerateAndValidateDbml(data, accessToken) {
+    const responseData = await regenerateDbmlScript(data, accessToken);
     const isValid = validateDbmlScript(responseData.dbml);
     if (!isValid) {
         throw new Error('DBML script validation failed');
