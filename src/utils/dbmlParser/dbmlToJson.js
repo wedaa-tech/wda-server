@@ -192,12 +192,27 @@ exports.prepareEntityData = applications => {
                     schema.enums.forEach(enumeration => {
                         appEnums.push(enumeration.name);
                     });
+                    let fks = [];
+                    schema.refs.forEach(ref => {
+                        if (ref.endpoints.length === 2) {
+                            const [endpoint1, endpoint2] = ref.endpoints;
+                            if (endpoint1.relation !== "1") {
+                                fks.push(...endpoint1.fieldNames)
+                            }
+                            if (endpoint2.relation !== "1") {
+                                fks.push(...endpoint2.fieldNames)
+                            }
+                        }
+                    })
 
                     // Mapping the Table attributes to respective datatypes
                     schema.tables.forEach(table => {
                         let fieldsData = '';
 
                         table.fields.forEach(field => {
+                            if (fks.includes(field.name)) {
+                                return;
+                            }
                             let fieldName, fieldType;
                             if (field.pk) {
                                 // primary key Mapping
