@@ -1,6 +1,9 @@
 const { Parser } = require('@dbml/core');
 const { dbmlParseError } = require('./error');
 
+// Initialize a single Parser instance
+const parserInstance = new Parser();
+
 /**
  * Validates a DBML script by attempting to parse it.
  *
@@ -11,7 +14,7 @@ const { dbmlParseError } = require('./error');
  */
 exports.validateDbmlScript = dbml => {
     try {
-        new Parser().parse(dbml, 'dbml');
+        parserInstance.parse(dbml, 'dbml');
         console.log('DBML parsing successful');
         return true;
     } catch (error) {
@@ -32,7 +35,7 @@ exports.validateDbmlScript = dbml => {
  */
 exports.getTableNames = dbml => {
     try {
-        const database = new Parser().parse(dbml, 'dbml');
+        const database = parserInstance.parse(dbml, 'dbml');
         console.log('DBML parsing successful');
         var tables = [];
         database.schemas.forEach(schema => {
@@ -64,7 +67,7 @@ exports.getDuplicateTableNames = applications => {
         for (let i = 0; i < applicationCount; i++) {
             // loose equality, check for null and undefined.
             if (applications[i].applicationFramework === 'spring' && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
-                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
+                const database = parserInstance.parse(applications[i].dbmlData, 'dbml');
                 database.schemas.forEach(schema => {
                     schema.tables.forEach(table => {
                         if (tableNames[table.name]) {
@@ -107,7 +110,7 @@ exports.getDuplicateEnums = applications => {
         for (let i = 0; i < applicationCount; i++) {
             // loose equality, check for null and undefined.
             if (applications[i].applicationFramework === 'spring' && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
-                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
+                const database = parserInstance.parse(applications[i].dbmlData, 'dbml');
                 database.schemas.forEach(schema => {
                     schema.enums.forEach(enumeration => {
                         if (enums[enumeration.name]) {
@@ -150,7 +153,7 @@ exports.validateIncomingDbmlScript = function (req, res) {
     try {
         const body = req.body;
         const dbml = body.dbml;
-        new Parser().parse(dbml, 'dbml');
+        parserInstance.parse(dbml, 'dbml');
         console.log('DBML parsing successful');
         res.sendStatus(200);
     } catch (error) {
