@@ -1,6 +1,9 @@
 const { Parser } = require('@dbml/core');
 const { dbmlParseError } = require('./error');
 
+// Initialize a single Parser instance
+const parserInstance = new Parser();
+
 /**
  * Validates a DBML script by attempting to parse it.
  *
@@ -11,7 +14,7 @@ const { dbmlParseError } = require('./error');
  */
 exports.validateDbmlScript = dbml => {
     try {
-        new Parser().parse(dbml, 'dbml');
+        parserInstance.parse(dbml, 'dbml');
         console.log('DBML parsing successful');
         return true;
     } catch (error) {
@@ -32,7 +35,7 @@ exports.validateDbmlScript = dbml => {
  */
 exports.getTableNames = dbml => {
     try {
-        const database = new Parser().parse(dbml, 'dbml');
+        const database = parserInstance.parse(dbml, 'dbml');
         console.log('DBML parsing successful');
         var tables = [];
         database.schemas.forEach(schema => {
@@ -64,7 +67,7 @@ exports.getDuplicateTableNames = applications => {
         for (let i = 0; i < applicationCount; i++) {
             // loose equality, check for null and undefined.
             if (applications[i].applicationFramework === 'spring' && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
-                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
+                const database = parserInstance.parse(applications[i].dbmlData, 'dbml');
                 database.schemas.forEach(schema => {
                     schema.tables.forEach(table => {
                         if (tableNames[table.name]) {
@@ -107,7 +110,7 @@ exports.getDuplicateEnums = applications => {
         for (let i = 0; i < applicationCount; i++) {
             // loose equality, check for null and undefined.
             if (applications[i].applicationFramework === 'spring' && applications[i].dbmlData != null && applications[i].dbmlData !== '') {
-                const database = new Parser().parse(applications[i].dbmlData, 'dbml');
+                const database = parserInstance.parse(applications[i].dbmlData, 'dbml');
                 database.schemas.forEach(schema => {
                     schema.enums.forEach(enumeration => {
                         if (enums[enumeration.name]) {
@@ -131,5 +134,46 @@ exports.getDuplicateEnums = applications => {
         console.error('Error parsing DBML:', error);
         const errorMessage = dbmlParseError(error);
         throw new Error(errorMessage);
+    }
+};
+
+/**
+ * Validates the incoming DBML script by attempting to parse it.
+ * 
+ * If the DBML parsing is successful, returns an HTTP 200 OK response.
+ * If there is an error during parsing, returns an HTTP 400 Bad Request response
+ * with a detailed error message and the location of the error.
+ *
+ * @param {Object} req - The HTTP request object containing the DBML script in the body.
+ * @param {Object} res - The HTTP response object used to send back the status and error details.
+ * 
+ * @returns {void} Sends an HTTP response based on the result of DBML parsing.
+ */
+exports.validateIncomingDbmlScript = function (req, res) {
+    try {
+        const body = req.body;
+        const dbml = body.dbml;
+        parserInstance.parse(dbml, 'dbml');
+        console.log('DBML parsing successful');
+        res.sendStatus(200);
+    } catch (error) {
+        console.error('Error parsing DBML:', error);
+        let errorResponse = {
+            error: 'An unknown error occurred'
+        };
+
+        // Check if the error object contains 'diags'
+        if (error.diags && Array.isArray(error.diags)) {
+            // Assuming the first diagnostic message is sufficient
+            const diag = error.diags[0];
+            if (diag.expected && diag.location) {
+                errorResponse.error = diag.message;
+                errorResponse.offset = diag.location.start.offset;
+                errorResponse.line = diag.location.start.line;
+                errorResponse.column = diag.location.start.column;
+            }
+        }
+
+        res.status(400).json(errorResponse);
     }
 };

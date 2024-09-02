@@ -6,6 +6,7 @@ const { randomStringGenerator, capitalizeName, toCamelCase } = require('./helper
 
 exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     console.log('processing json to jdl with the file name:', fileName);
+    // TODO: Error Hanlding should be taken care if there is problem with flagsmith
     const jdlEntitiesEnabled = await checkFlagsEnabled('jdl_entities');
 
     // read the JSON file

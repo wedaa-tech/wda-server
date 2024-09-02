@@ -130,6 +130,7 @@ exports.prototype = async function (blueprintInfo) {
                 var services = body.services;
 
                 // Stitching AI code starts from here
+                // TODO: Error Hanlding should be taken care if there is problem with flagsmith
                 aiEnabled = await checkFlagsEnabled('ai_wizard');
                 // [Future Release]: Below code will never be excuted.
                 aiEnabled = false;
