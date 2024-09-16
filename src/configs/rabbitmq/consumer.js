@@ -9,8 +9,7 @@ async function consume(queue) {
         const connectionString = `amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}`;
         const connection = await amqp.connect(connectionString);
         const channel = await connection.createChannel();
-        // const queue = 'code_generation';
-        await channel.assertQueue(queue, { durable: false });
+        await channel.assertQueue(queue, { durable: true });
         console.log(`[consumer] [${queue}] Waiting for messages in ${queue}.`);
         channel.consume(
             queue,
