@@ -25,7 +25,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var clientFrameworks = ['react', 'angular', 'vue'];
     var serviceDiscoveryTypes = ['eureka', 'consul'];
     var messageBrokers = ['rabbitmq', 'kafka'];
-    var databaseTypes = ['postgresql', 'mysql', 'mongodb','h2Memory'];
+    var databaseTypes = ['postgresql', 'mysql', 'mongodb', 'h2Memory'];
     var logManagementTypes = ['eck'];
 
     // Get the Duplicate Table/Entity Names form the DBML script if any.
@@ -119,10 +119,10 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         ) {
             databaseType = 'sql';
         }
-        if(
-            applications[i].prodDatabaseType !==undefined &&
+        if (
+            applications[i].prodDatabaseType !== undefined &&
             applications[i].prodDatabaseType.toLowerCase() == 'h2memory'
-        ){
+        ) {
             databaseType = 'h2Memory';
         }
 
@@ -158,15 +158,14 @@ application {
         serverPort ${applications[i].serverPort}
         ${databaseType === 'no' ? 'databaseType no\n        prodDatabaseType no' : ''}
         ${databaseType === 'mongodb' ? 'databaseType mongodb' : ''}
-        ${
-            databaseType === 'sql'
+        ${databaseType === 'sql'
                 ? `databaseType sql\n        devDatabaseType ${applications[
-                      i
-                  ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
+                    i
+                ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
                 : ''
-        }
+            }
         ${(databaseType === 'h2Memory') ? `devDatabaseType h2Memory\n`
-      : ''}
+                : ''}
 
         ${databaseType !== 'no' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
@@ -344,11 +343,10 @@ deployment {
     ${ingressType ? `istio true` : `istio false`}
     ${ingressType ? `ingressDomain "${deployment.ingressDomain.toLowerCase()}"` : ``}
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
-    ${
-        dynamicStorage && deployment.kubernetesStorageClassName !== undefined
-            ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
-            : ''
-    }
+    ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined
+                ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
+                : ''
+            }
     ${dynamicStorage && deployment.cloudProvider === 'aws' ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
     ${monitoring === 'istio' ? `monitoring istio` : `monitoring no`}
 }
