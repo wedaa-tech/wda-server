@@ -7,7 +7,7 @@ async function send(queue, msg) {
         const connectionString = `amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}`;
         const connection = await amqp.connect(connectionString);
         const channel = await connection.createChannel();
-        await channel.assertQueue(queue, { durable: false });
+        await channel.assertQueue(queue, { durable: true });
         // Convert the JSON object to a string
         const jsonMsg = JSON.stringify(msg);
         // Updating the logMsg to remove sensitive information

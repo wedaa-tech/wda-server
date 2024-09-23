@@ -5,6 +5,8 @@ const { nanoid } = require('nanoid');
 const { updateCodeGeneration } = require('../services/codeGenerationService');
 const { codeGenerationStatus, transactionStatus } = require('./constants');
 const creditCore = require('./credits.js');
+const { createAndSendNotification } = require('./notifications/notification.js');
+const { notificationTemplates } = require('./notifications/constants.js');
 
 /**
  * The method will generate json file for the Terraform generator
@@ -76,7 +78,7 @@ exports.generateBlueprint = (folderPath, res) => {
  * The generated ZIP file is saved inside a directory corresponding to the user ID.
  *
  * @param {string} folderPath - The path to the folder whose contents will be archived.
- * @param {*} context    - contains userId, codeGenerationId
+ * @param {*} context    - contains userId, codeGenerationId, prototypeName
  * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
 exports.generateZip = (folderPath, context, creditContext) => {
@@ -173,6 +175,9 @@ exports.generateZip = (folderPath, context, creditContext) => {
             // Update the code_generation collection as COMPLETED [ASYNC]
             var codeGeneration = { status: codeGenerationStatus.COMPLETED };
             updateCodeGeneration(codeGenerationId, codeGeneration);
+            // [Trigger Notification], CODE_READY
+            var prototypeName = context.prototypeName;
+            createAndSendNotification(userId, prototypeName, notificationTemplates.CODE_READY);
 
             // Update the credit transaction status as COMPLETED
             if (dbmlCount > 0) {
@@ -328,13 +333,20 @@ exports.removeDump = folderPath => {
  * @param {string} errorMessage - The error message to be logged.
  * @param {string} folderPath - The path of the folder to remove.
  * @param {*}      creditContext - The credit context used to clean up credit related transactions.
+ * @param {*}      context -  contains userId, codeGenerationId, prototypeName
+ * 
  */
-exports.cleanUp = (codeGenerationId, errorMessage, folderPath, creditContext) => {
+exports.cleanUp = (codeGenerationId, errorMessage, folderPath, creditContext, context) => {
     const codeGeneration = {
         error: errorMessage,
         status: codeGenerationStatus.FAILED,
     };
     updateCodeGeneration(codeGenerationId, codeGeneration);
+    // [Trigger Notification], CODE_GENERATION_FAILED
+    var prototypeName = context.prototypeName;
+    var userId = context.userId;
+    createAndSendNotification(userId, prototypeName, notificationTemplates.CODE_GENERATION_FAILED); // Can send the custom Error Messgae as well.
+
     this.removeDump(folderPath);
 
     if (creditContext && Object.keys(creditContext).length > 0) {

@@ -30,6 +30,7 @@ exports.prototype = async function (blueprintInfo) {
     const body = blueprint.request_json;
     const userId = blueprint.user_id;
     const fileName = body.projectId;
+    const prototypeName = blueprint.request_json.projectName;
 
     const services = blueprint.request_json.services;
     // Use filter to count services with valid dbmlData
@@ -63,10 +64,11 @@ exports.prototype = async function (blueprintInfo) {
         };
     }
 
-    // Form a context object which will contain the information to be passed to generate zip & update code_generation
+    // Form a context object which will contain the information to be passed to generate zip, update code_generation & send notification
     var context = {
         userId: userId,
         codeGenerationId: codeGenerationId,
+        prototypeName: prototypeName,
     };
 
     console.log('Generating prototype: ' + body.projectName + ', for user: ' + userId);
@@ -91,7 +93,7 @@ exports.prototype = async function (blueprintInfo) {
         try {
             jdlConverter.createJdlFromJson(fileName);
         } catch (error) {
-            utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext);
+            utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext, context);
             return;
         }
 
@@ -122,7 +124,7 @@ exports.prototype = async function (blueprintInfo) {
 
                 if (error !== null) {
                     console.log('---------exec error: ---------\n[' + error + ']');
-                    utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext);
+                    utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext, context);
                     return;
                 }
                 console.log('Architecture Generation completed successfully.....');
@@ -143,7 +145,7 @@ exports.prototype = async function (blueprintInfo) {
                     } catch (error) {
                         // if there is an error in AI CODE WEAVING, Code zip will not be generated
                         console.error('Error while weaving[propagated error]:', error);
-                        utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext);
+                        utils.cleanUp(codeGenerationId, error.message, folderPath, creditContext, context);
                         return;
                     }
                     console.log('****************************************************');
@@ -214,11 +216,13 @@ exports.generate = async function (req, res) {
     try {
         const accessToken = req.kauth?.grant?.access_token?.token;
         const blueprint = await saveBlueprint(req);
+
         var oldCodeGeneration = {
             blueprintId: blueprint.blueprintId,
             blueprintVersion: blueprint.version,
         };
         const codeGenerationExist = await checkIfCodeGenerationExists(oldCodeGeneration);
+
         if (!codeGenerationExist) {
             var codeGeneration = {
                 blueprintId: blueprint.blueprintId,
@@ -232,8 +236,16 @@ exports.generate = async function (req, res) {
             try {
                 await send(CODE_GENERATION, blueprint);
             } catch (error) {
+                // Form a context object which will contain the information to be passed to update code_generation & send notification
+                const userId = blueprint.user_id;
+                const prototypeName = blueprint.request_json.projectName;
+                var context = {
+                    userId: userId,
+                    codeGenerationId: codeGenerationId,
+                    prototypeName: prototypeName,
+                };
+                utils.cleanUp(codeGenerationId, error.message, null, null, context);
                 // code_generation is not yet submitted to message queue, as there is an error will pushing it to message queue
-                utils.cleanUp(codeGenerationId, error.message, folderPath);
                 throw error;
             }
         }
@@ -249,7 +261,7 @@ exports.generate = async function (req, res) {
  *
  * @param {string} fileName   : random string with 9 characters
  * @param {string} folderPath : combination of the projectName + fileName
- * @param {string} context    : contains userId, codeGenerationId
+ * @param {string} context    : contains userId, codeGenerationId, prototypeName
  * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
 const generateTerraformFiles = (fileName, folderPath, context, creditContext) => {
@@ -264,7 +276,7 @@ const generateTerraformFiles = (fileName, folderPath, context, creditContext) =>
 
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
-            utils.cleanUp(context.codeGenerationId, error.message, folderPath, creditContext);
+            utils.cleanUp(context.codeGenerationId, error.message, folderPath, creditContext, context);
             return;
         }
 
@@ -280,7 +292,7 @@ const generateTerraformFiles = (fileName, folderPath, context, creditContext) =>
  * @param {*} folderPath : combination of filename and project name
  * @param {*} deployment : deployment check boolean
  * @param {*} body       : request body
- * @param {*} context    : contains userId, codeGenerationId
+ * @param {*} context    : contains userId, codeGenerationId, prototypeName
  * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
 const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context, creditContext) => {
@@ -295,7 +307,7 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
 
         if (error !== null) {
             console.log('---------exec error: ---------\n[' + error + ']');
-            utils.cleanUp(context.codeGenerationId, error.message, folderPath, creditContext);
+            utils.cleanUp(context.codeGenerationId, error.message, folderPath, creditContext, context);
             return;
         }
         triggerTerraformGenerator(folderPath, deployment, body, context, creditContext);
@@ -308,7 +320,7 @@ const generateDocusaurusFiles = (fileName, folderPath, deployment, body, context
  * @param {*} folderPath : combination of filename and project name
  * @param {*} deployment : deployment check boolean
  * @param {*} body       : request body
- * @param {*} context    : contains userId, codeGenerationId
+ * @param {*} context    : contains userId, codeGenerationId, prototypeName
  * @param {*} creditContext - The credit context used to clean up credit related transactions.
  */
 const triggerTerraformGenerator = (folderPath, deployment, body, context, creditContext) => {
