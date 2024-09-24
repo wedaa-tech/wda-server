@@ -58,7 +58,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
             applicationErrorList.push('Server Port cannot be empty');
         }
         if (
-            applications[i].prodDatabaseType !== undefined &&
+            applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType !== 'h2Memory' &&
             (applications[i].databasePort === undefined || applications[i].databasePort === '')
         ) {
             applicationErrorList.push('Database Port cannot be empty');
@@ -167,7 +167,7 @@ application {
         ${(databaseType === 'h2Memory') ? `devDatabaseType h2Memory\n`
                 : ''}
 
-        ${databaseType !== 'no' ? `databasePort ${applications[i].databasePort}` : ''}
+        ${databaseType !== 'no' && databaseType !== 'h2Memory' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : 'serviceDiscoveryType no'}
