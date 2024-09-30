@@ -21,7 +21,7 @@ services:
       - RABBITMQ_PORT=5672
 
       ## FLAGSMITH CONFIG ###
-      - FLAGSMITH_API_KEY=
+      - FLAGSMITH_API_KEY=ser.huDMnLvUSAAuuYemryQxD9
     healthcheck:
       test:
         - CMD

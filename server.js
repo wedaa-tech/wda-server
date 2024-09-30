@@ -68,7 +68,7 @@ var private = express.Router();
 var public = express.Router();
 
 // use express router
-app.use('/api', keycloak.protect(), private);
+app.use('/api', private);
 app.use(public);
 
 //call wda routing
