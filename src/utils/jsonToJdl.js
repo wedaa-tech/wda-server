@@ -22,7 +22,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var logManagementType = false;
     var serviceDiscoveryType = false;
 
-    var blueprints = ['go', 'gomicro', 'react', 'angular', 'vue'];
+    var blueprints = ['go', 'gomicro', 'react', 'angular', 'vue', 'fastapi'];
     var clientFrameworks = ['react', 'angular', 'vue'];
     var serviceDiscoveryTypes = ['eureka', 'consul'];
     var messageBrokers = ['rabbitmq', 'kafka'];
