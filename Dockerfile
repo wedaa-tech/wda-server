@@ -31,7 +31,8 @@ RUN git clone https://github.com/wedaa-tech/jhipster-blueprints.git && \
     cd jhipster-blueprints/generator-jhipster-gomicro && npm install && npm link && \
     cd ../generator-jhipster-react && npm install && npm link && \
     cd ../generator-jhipster-angular && npm install && npm link && \
-    cd ../docusaurus-generator && npm install && npm link 
+    cd ../docusaurus-generator && npm install && npm link && \
+    cd ../generator-jhipster-fastapi && npm install && npm link
 
 # Add user and change ownership of the app directory
 RUN groupadd -r wedaa && useradd -r -g wedaa -s /bin/bash -m wedaa && \
