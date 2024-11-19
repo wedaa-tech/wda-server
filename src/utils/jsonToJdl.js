@@ -67,7 +67,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         // throw error response
         if (applicationErrorList.length > 0) {
             applicationError[i] = applicationErrorList;
-            console.info(applicationError);
+            console.error(applicationError);
             throw new Error(applicationError);
         }
 
@@ -109,17 +109,17 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         if (applications[i].prodDatabaseType === undefined) {
             databaseType = 'no';
         }
-        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
+        else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
             databaseType = 'mongodb';
         }
-        if (
+        else if (
             applications[i].prodDatabaseType !== undefined &&
             applications[i].prodDatabaseType.toLowerCase() !== 'mongodb' &&
             databaseTypes.includes(applications[i].prodDatabaseType)
         ) {
             databaseType = 'sql';
         }
-        if (
+        else if (
             applications[i].prodDatabaseType !== undefined &&
             applications[i].prodDatabaseType.toLowerCase() == 'h2memory'
         ) {
@@ -162,11 +162,8 @@ application {
                 ? `databaseType sql\n        devDatabaseType ${applications[
                     i
                 ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
-                : ''
+                : `devDatabaseType h2Memory\n`
             }
-        ${(databaseType === 'h2Memory') ? `devDatabaseType h2Memory\n`
-                : ''}
-
         ${databaseType !== 'no' && databaseType !== 'h2Memory' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
