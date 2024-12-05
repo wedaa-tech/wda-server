@@ -78,6 +78,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         var clientFramework = false;
         var messageBroker = false;
         var databaseType = false;
+        var buildTool = false;
 
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true;
@@ -119,6 +120,9 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
             databaseTypes.includes(applications[i].prodDatabaseType)
         ) {
             databaseType = 'sql';
+        }
+        if ('spring' === applications[i]?.applicationFramework.toLowerCase() && applications[i]?.buildTool !== null) {
+            buildTool = applications[i].buildTool;
         }
 
         // Adding randomString to the application, which might required for generating unique entities/relations.
@@ -168,6 +172,7 @@ application {
         ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : 'clientFramework no'}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample ? `withExample true` : ''}
+        ${buildTool ? `buildTool ${applications[i]?.buildTool.toLowerCase()}` : ''}
     }
     ${!clientFramework && entitiesString && jdlEntitiesEnabled ? `entities ${entitiesString}` : ''}
 }\n`;
