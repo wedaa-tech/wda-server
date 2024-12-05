@@ -172,7 +172,7 @@ application {
         ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : 'clientFramework no'}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample ? `withExample true` : ''}
-        ${buildTool !== false ? `buildTool ${applications[i]?.buildTool.toLowerCase()}` : ''}
+        ${buildTool ? `buildTool ${applications[i]?.buildTool.toLowerCase()}` : ''}
     }
     ${!clientFramework && entitiesString && jdlEntitiesEnabled ? `entities ${entitiesString}` : ''}
 }\n`;
