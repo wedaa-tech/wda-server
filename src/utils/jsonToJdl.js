@@ -6,6 +6,7 @@ const { randomStringGenerator, capitalizeName, toCamelCase } = require('./helper
 
 exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     console.log('processing json to jdl with the file name:', fileName);
+    // TODO: Error Hanlding should be taken care if there is problem with flagsmith
     const jdlEntitiesEnabled = await checkFlagsEnabled('jdl_entities');
 
     // read the JSON file
@@ -21,7 +22,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var logManagementType = false;
     var serviceDiscoveryType = false;
 
-    var blueprints = ['go', 'gomicro', 'react', 'angular', 'vue'];
+    var blueprints = ['go', 'gomicro', 'react', 'angular', 'vue', 'fastapi'];
     var clientFrameworks = ['react', 'angular', 'vue'];
     var serviceDiscoveryTypes = ['eureka', 'consul'];
     var messageBrokers = ['rabbitmq', 'kafka'];
@@ -58,7 +59,8 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
             applicationErrorList.push('Server Port cannot be empty');
         }
         if (
-            applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType !== 'h2Memory' &&
+            applications[i].prodDatabaseType !== undefined &&
+            applications[i].prodDatabaseType !== 'h2Memory' &&
             (applications[i].databasePort === undefined || applications[i].databasePort === '')
         ) {
             applicationErrorList.push('Database Port cannot be empty');
@@ -77,6 +79,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         var clientFramework = false;
         var messageBroker = false;
         var databaseType = false;
+        var buildTool = false;
 
         if (applications[i].applicationFramework !== undefined && blueprints.includes(applications[i].applicationFramework)) {
             appFramework = true;
@@ -108,22 +111,19 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         }
         if (applications[i].prodDatabaseType === undefined) {
             databaseType = 'no';
-        }
-        else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
+        } else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
             databaseType = 'mongodb';
-        }
-        else if (
+        } else if (
             applications[i].prodDatabaseType !== undefined &&
             applications[i].prodDatabaseType.toLowerCase() !== 'mongodb' &&
             databaseTypes.includes(applications[i].prodDatabaseType)
         ) {
             databaseType = 'sql';
-        }
-        else if (
-            applications[i].prodDatabaseType !== undefined &&
-            applications[i].prodDatabaseType.toLowerCase() == 'h2memory'
-        ) {
+        } else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() == 'h2memory') {
             databaseType = 'h2Memory';
+        }
+        if ('spring' === applications[i]?.applicationFramework.toLowerCase() && applications[i]?.buildTool !== null) {
+            buildTool = applications[i].buildTool;
         }
 
         // Adding randomString to the application, which might required for generating unique entities/relations.
@@ -158,12 +158,13 @@ application {
         serverPort ${applications[i].serverPort}
         ${databaseType === 'no' ? 'databaseType no\n        prodDatabaseType no' : ''}
         ${databaseType === 'mongodb' ? 'databaseType mongodb' : ''}
-        ${databaseType === 'sql'
+        ${
+            databaseType === 'sql'
                 ? `databaseType sql\n        devDatabaseType ${applications[
-                    i
-                ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
+                      i
+                  ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
                 : `devDatabaseType h2Memory\n`
-            }
+        }
         ${databaseType !== 'no' && databaseType !== 'h2Memory' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
@@ -171,6 +172,7 @@ application {
         ${clientFramework ? `clientFramework ${applications[i].clientFramework.toLowerCase()}` : 'clientFramework no'}
         ${appFramework ? `blueprint [${applications[i].applicationFramework.toLowerCase()}]` : ''}
         ${withExample ? `withExample true` : ''}
+        ${buildTool ? `buildTool ${applications[i]?.buildTool.toLowerCase()}` : ''}
     }
     ${!clientFramework && entitiesString && jdlEntitiesEnabled ? `entities ${entitiesString}` : ''}
 }\n`;
@@ -340,10 +342,11 @@ deployment {
     ${ingressType ? `istio true` : `istio false`}
     ${ingressType ? `ingressDomain "${deployment.ingressDomain.toLowerCase()}"` : ``}
     ${dynamicStorage ? `kubernetesUseDynamicStorage ${deployment.kubernetesUseDynamicStorage.toLowerCase()}` : ''}
-    ${dynamicStorage && deployment.kubernetesStorageClassName !== undefined
-                ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
-                : ''
-            }
+    ${
+        dynamicStorage && deployment.kubernetesStorageClassName !== undefined
+            ? `kubernetesStorageClassName "${deployment.kubernetesStorageClassName.toLowerCase()}"`
+            : ''
+    }
     ${dynamicStorage && deployment.cloudProvider === 'aws' ? `kubernetesStorageProvisioner "ebs.csi.aws.com"` : ''}
     ${monitoring === 'istio' ? `monitoring istio` : `monitoring no`}
 }

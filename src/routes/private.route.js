@@ -8,6 +8,7 @@ var tipsService = require('../services/tipsService.js');
 var dynamicTemplate = require('../services/dynamicTemplateService.js');
 var codeGeneration = require('../services/codeGenerationService.js');
 var projectnames = require('../services/projectNameService.js')
+var dbmlhelper = require('../utils/dbmlParser/helper.js')
 module.exports = function (router) {
     blueprintRoutes(router);
     refArchitectureRoutes(router);
@@ -21,4 +22,5 @@ module.exports = function (router) {
     router.post('/dynamic-template', dynamicTemplate.getDynamicTemplate);
     router.get('/project-names',projectnames.getProjectNames)
     router.post('/code-generation-status', codeGeneration.getCodeGenerationStatus);
+    router.post('/validate-dbml', dbmlhelper.validateIncomingDbmlScript);
 };
