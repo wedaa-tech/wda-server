@@ -26,7 +26,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var clientFrameworks = ['react', 'angular', 'vue'];
     var serviceDiscoveryTypes = ['eureka', 'consul'];
     var messageBrokers = ['rabbitmq', 'kafka'];
-    var databaseTypes = ['postgresql', 'mysql', 'mongodb'];
+    var databaseTypes = ['postgresql', 'mysql', 'mongodb', 'h2Memory'];
     var logManagementTypes = ['eck'];
 
     // Get the Duplicate Table/Entity Names form the DBML script if any.
@@ -53,13 +53,14 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
             applicationErrorList.push('Authentication Type cannot be empty');
         }
         if (applications[i].prodDatabaseType !== undefined && !databaseTypes.includes(applications[i].prodDatabaseType)) {
-            applicationErrorList.push('Unknow Database Type, database must be among the following: ' + databaseTypes);
+            applicationErrorList.push('Unknown Database Type, database must be among the following: ' + databaseTypes);
         }
         if (applications[i].serverPort === undefined || applications[i].serverPort === '') {
             applicationErrorList.push('Server Port cannot be empty');
         }
         if (
             applications[i].prodDatabaseType !== undefined &&
+            applications[i].prodDatabaseType !== 'h2Memory' &&
             (applications[i].databasePort === undefined || applications[i].databasePort === '')
         ) {
             applicationErrorList.push('Database Port cannot be empty');
@@ -68,7 +69,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         // throw error response
         if (applicationErrorList.length > 0) {
             applicationError[i] = applicationErrorList;
-            console.err(applicationError);
+            console.error(applicationError);
             throw new Error(applicationError);
         }
 
@@ -110,16 +111,16 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         }
         if (applications[i].prodDatabaseType === undefined) {
             databaseType = 'no';
-        }
-        if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
+        } else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
             databaseType = 'mongodb';
-        }
-        if (
+        } else if (
             applications[i].prodDatabaseType !== undefined &&
             applications[i].prodDatabaseType.toLowerCase() !== 'mongodb' &&
             databaseTypes.includes(applications[i].prodDatabaseType)
         ) {
             databaseType = 'sql';
+        } else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() == 'h2memory') {
+            databaseType = 'h2Memory';
         }
         if ('spring' === applications[i]?.applicationFramework.toLowerCase() && applications[i]?.buildTool !== null) {
             buildTool = applications[i].buildTool;
@@ -146,7 +147,6 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
 
             entitiesString = entities.join(', ');
         }
-
         // Conversion of json to jdl (Application Options)
         var data = `
 application {
@@ -163,9 +163,9 @@ application {
                 ? `databaseType sql\n        devDatabaseType ${applications[
                       i
                   ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
-                : ''
+                : `devDatabaseType h2Memory\n`
         }
-        ${databaseType !== 'no' ? `databasePort ${applications[i].databasePort}` : ''}
+        ${databaseType !== 'no' && databaseType !== 'h2Memory' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
         ${serviceDiscoveryType ? `serviceDiscoveryType ${applications[i].serviceDiscoveryType.toLowerCase()}` : 'serviceDiscoveryType no'}
