@@ -27,6 +27,7 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
     var serviceDiscoveryTypes = ['eureka', 'consul'];
     var messageBrokers = ['rabbitmq', 'kafka'];
     var databaseTypes = ['postgresql', 'mysql', 'mongodb', 'h2Memory'];
+    var sqlDatabaseTypes = ['postgresql','mysql']
     var logManagementTypes = ['eck'];
 
     // Get the Duplicate Table/Entity Names form the DBML script if any.
@@ -111,16 +112,14 @@ exports.createJdlFromJson = async (fileName, metadata, req, res) => {
         }
         if (applications[i].prodDatabaseType === undefined) {
             databaseType = 'no';
-        } else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
+        } else if (applications[i].prodDatabaseType.toLowerCase() === 'mongodb') {
             databaseType = 'mongodb';
-        } else if (
-            applications[i].prodDatabaseType !== undefined &&
-            applications[i].prodDatabaseType.toLowerCase() !== 'mongodb' &&
-            databaseTypes.includes(applications[i].prodDatabaseType)
+        }  else if (applications[i].prodDatabaseType.toLowerCase() == 'h2memory') {
+            databaseType = 'h2Memory';
+        }  else if (
+            sqlDatabaseTypes.includes(applications[i].prodDatabaseType)
         ) {
             databaseType = 'sql';
-        } else if (applications[i].prodDatabaseType !== undefined && applications[i].prodDatabaseType.toLowerCase() == 'h2memory') {
-            databaseType = 'h2Memory';
         }
         if ('spring' === applications[i]?.applicationFramework.toLowerCase() && applications[i]?.buildTool !== null) {
             buildTool = applications[i].buildTool;
