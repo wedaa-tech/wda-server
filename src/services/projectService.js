@@ -1,5 +1,6 @@
 const projectDao = require('../repositories/projectDao');
 const blueprintDao = require('../repositories/blueprintDao');
+const { getPresignedUrl } = require('../utils/aws-s3/s3Client');
 
 /**
  * save project to the db
@@ -70,24 +71,67 @@ exports.getProject = function (req, res) {
         });
 };
 
+// Commenting out the old getArchitectures !!!
+// TODO: Remove after testing 
+
+// /**
+//  * Get all architectures with given project Id
+//  * @param {*} req
+//  * @param {*} res
+//  */
+// exports.getArchitectures = function (req, res) {
+//     const userId = req.kauth.grant.access_token.content.sub;
+//     const parentId = req.params?.parentId;
+//     blueprintDao
+//         .getByUserId({ user_id: userId, parentId: parentId })
+//         .then(results => {
+//             console.log('Retrieved architectures of user:', userId);
+//             return res.status(200).json({ data: results });
+//         })
+//         .catch(error => {
+//             console.error('Error retrieving architectures:', error);
+//             return res.status(500).send({ message: 'Error retrieving blueprints' });
+//         });
+// };
+
+
+
 /**
  * Get all architectures with given project Id
  * @param {*} req
  * @param {*} res
  */
-exports.getArchitectures = function (req, res) {
-    const userId = req.kauth.grant.access_token.content.sub;
-    const parentId = req.params?.parentId;
-    blueprintDao
-        .getByUserId({ user_id: userId, parentId: parentId })
-        .then(results => {
-            console.log('Retrieved architectures of user:', userId);
-            return res.status(200).json({ data: results });
-        })
-        .catch(error => {
-            console.error('Error retrieving architectures:', error);
-            return res.status(500).send({ message: 'Error retrieving blueprints' });
-        });
+exports.getArchitectures = async function (req, res) {
+  const userId = req.kauth.grant.access_token.content.sub;
+  const parentId = req.params?.parentId;
+
+  try {
+    console.log('Retrieved architectures of user:', userId);
+    const results = await blueprintDao.getByUserId({ user_id: userId, parentId: parentId });
+    console.log(':::Generating preSignedUrl for retrieved architectures of user:::');
+    const resultWithPresignedUrls = await Promise.all(
+      results.map(async (blueprint) => {
+        if (blueprint.imageKey) { 
+          try {
+            const presignedUrl = await getPresignedUrl(blueprint.imageKey);
+            return {
+              ...blueprint,
+              imagePresignedUrl: presignedUrl,
+            };
+          } catch (err) {
+            console.warn(`[S3] Failed to get URL for ${blueprint.imageKey}: ${err.message}`);
+            return blueprint;
+          }
+        } 
+        return blueprint;
+      })
+    );
+
+    return res.status(200).json({ data: resultWithPresignedUrls });
+  } catch (error) {
+    console.error('Error retrieving architectures:', error);
+    return res.status(500).send({ message: 'Error retrieving blueprints' });
+  }
 };
 
 /**

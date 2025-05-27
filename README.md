@@ -53,8 +53,11 @@ npm run docker:rabbitmq:up
 2. Add the API Keys for any 3rd party libraries, for example:
 
     - FLAGSMITH_API_KEY
+3. Add the Aws S3 credentials, for example:
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
 
-3. Start the server
+4. Start the server
 ```
 node server.js
 ```

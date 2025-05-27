@@ -249,7 +249,12 @@ exports.generate = async function (req, res) {
                 throw error;
             }
         }
-        return res.status(200).json({ blueprintId: blueprint.blueprintId, parentId: blueprint.parentId });
+        return res.status(200).json({ 
+            blueprintId: blueprint.blueprintId,
+            parentId: blueprint.parentId,
+            imageKey: blueprint.imageKey,
+            imageUploadUrl: blueprint.imageUploadUrl
+         });
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: 'Error generating blueprint' });
