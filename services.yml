@@ -1,0 +1,17 @@
+# services.yml
+name: wedaa-services
+services:
+  mongodb:
+    extends:
+      file: ./docker/mongodb.yml
+      service: mongodb
+
+  keycloak:
+    extends:
+      file: ./docker/keycloak.yml
+      service: keycloak
+
+  rabbitmq:
+    extends:
+      file: ./docker/rabbitmq.yml
+      service: rabbitmq

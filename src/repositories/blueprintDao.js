@@ -85,6 +85,7 @@ blueprintSchema.statics = {
                     parentId: 1,
                     metadata: 1,
                     imageUrl: 1,
+                    imageKey: 1,
                     description: 1,
                     createdAt: 1,
                     updatedAt: 1,

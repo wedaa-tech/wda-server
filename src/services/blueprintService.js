@@ -1,4 +1,5 @@
 const blueprintDao = require('../repositories/blueprintDao');
+const { generateImageUploadDetails } = require('../utils/aws-s3/filter');
 const utils = require('../utils/core');
 
 /**
@@ -206,7 +207,7 @@ exports.getProjectNames = function (req, res) {
  * @param {*} req - The request object containing blueprint data.
  * @returns {Promise<Object>} A promise that resolves to an object containing the blueprintId and parentId.
  */
-exports.saveBlueprint = function (req) {
+exports.saveBlueprint = async function (req) {
     // Extract request body and user ID
     const body = req.body;
     const userId = req.kauth?.grant?.access_token?.content?.sub;
@@ -215,6 +216,30 @@ exports.saveBlueprint = function (req) {
     if (!body.projectId) {
         body.projectId = utils.generateProjectId(body.projectName);
     }
+
+    // ⬇️ Fire-and-get pre-signed url for image to upload to S3
+    let imageKey = '';
+    let imageUploadUrl = '';
+
+    /**
+     * imageUrl : is the base64 encoded image txt but not the actual url,
+     * Only generate the Image pre-signed url to upload to s3 if and only if
+     * `imageUrl` attribute is not present in the body.
+     * 
+     */
+    if (!body?.imageUrl) {
+        await generateImageUploadDetails(userId, body.projectId)
+            .then(({ imageKey: key, preSignedUrl }) => {
+                imageKey = key;
+                imageUploadUrl = preSignedUrl;
+                console.log('[S3 Upload] Key:', imageKey);
+                console.log('[S3 Upload] PUT Pre-Signed URL:', imageUploadUrl);
+            })
+            .catch(err => {
+                console.error('[S3 Upload] Failed to generate PUT pre-signed URL:', err.message);
+            }); 
+    }
+
     // Construct blueprint object
     var blueprint = {
         project_id: body.projectId,
@@ -231,7 +256,8 @@ exports.saveBlueprint = function (req) {
         metadata: body.metadata,
         user_id: req.kauth?.grant?.access_token?.content?.sub,
         parentId: req.body?.parentId,
-        imageUrl: req.body?.imageUrl,
+        imageUrl: req.body?.imageUrl, // this is base64 encoded image txt
+        imageKey: imageKey,
         description: req.body?.description,
         validationStatus: req.body?.validationStatus,
         version: req.body?.version,
@@ -245,6 +271,8 @@ exports.saveBlueprint = function (req) {
                 blueprintId: savedBlueprint.project_id,
                 version: savedBlueprint.version,
                 parentId: blueprint.parentId,
+                imageKey: savedBlueprint.imageKey,
+                imageUploadUrl: imageUploadUrl
             };
         })
         .catch(error => {
