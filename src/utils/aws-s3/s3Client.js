@@ -12,7 +12,7 @@ const s3 = require('./s3Config');
 async function getPresignedUrl(key, expiresInSeconds = 300) {
   try {
     const command = new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET,
+      Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
     });
 
@@ -34,11 +34,13 @@ async function getPresignedUrl(key, expiresInSeconds = 300) {
  */
 async function getPutPresignedUrl(key, contentType = 'application/octet-stream', expiresInSeconds = 300) {
   try {
+
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET,
+      Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       ContentType: contentType,
     });
+
 
     const url = await getSignedUrl(s3, command, { expiresIn: expiresInSeconds });
     console.log(`[S3] Generated pre-signed PUT URL: ${url}`);

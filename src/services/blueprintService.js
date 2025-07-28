@@ -227,7 +227,7 @@ exports.saveBlueprint = async function (req) {
      * `imageUrl` attribute is not present in the body.
      * 
      */
-    if (body?.imageUrl) {
+    if (!body?.imageUrl) {
         await generateImageUploadDetails(userId, body.projectId)
             .then(({ imageKey: key, preSignedUrl }) => {
                 imageKey = key;
@@ -237,7 +237,7 @@ exports.saveBlueprint = async function (req) {
             })
             .catch(err => {
                 console.error('[S3 Upload] Failed to generate PUT pre-signed URL:', err.message);
-            });
+            }); 
     }
 
     // Construct blueprint object
