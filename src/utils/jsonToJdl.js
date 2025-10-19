@@ -159,11 +159,10 @@ application {
         ${databaseType === 'mongodb' ? 'databaseType mongodb' : ''}
         ${
             databaseType === 'sql'
-                ? `databaseType sql\n        devDatabaseType ${applications[
-                      i
-                  ].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
-                : `devDatabaseType h2Memory\n`
+                ? `databaseType sql\n        devDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}\n        prodDatabaseType ${applications[i].prodDatabaseType.toLowerCase()}`
+                : ``
         }
+        ${databaseType == 'h2Memory' ? `devDatabaseType h2Memory` : ''}
         ${databaseType !== 'no' && databaseType !== 'h2Memory' ? `databasePort ${applications[i].databasePort}` : ''}
         ${messageBroker ? `messageBroker ${applications[i].messageBroker.toLowerCase()}` : ''}
         ${logManagementType ? `logManagementType ${applications[i].logManagementType.toLowerCase()}` : 'logManagementType no'}
