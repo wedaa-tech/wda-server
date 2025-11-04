@@ -18,21 +18,22 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Download and install generator-tf-wdi
+# Clone and install generator-tf-wdi
 RUN git clone https://github.com/wedaa-tech/generator-tf-wdi.git && \
     cd generator-tf-wdi && npm install && npm link
 
-# Download and install generator-jhipster
+# Clone and install generator-jhipster
 RUN git clone https://github.com/wedaa-tech/generator-jhipster.git && \
     cd generator-jhipster && npm install && npm link
 
-# Download and install jhipster-blueprints and their components
+# Clone and install all JHipster blueprints while ignoring peer dependency conflicts using --legacy-peer-deps
 RUN git clone https://github.com/wedaa-tech/jhipster-blueprints.git && \
-    cd jhipster-blueprints/generator-jhipster-gomicro && npm install && npm link && \
-    cd ../generator-jhipster-react && npm install && npm link && \
-    cd ../generator-jhipster-angular && npm install && npm link && \
-    cd ../docusaurus-generator && npm install && npm link && \
-    cd ../generator-jhipster-fastapi && npm install && npm link
+    cd jhipster-blueprints/generator-jhipster-gomicro && npm install --legacy-peer-deps && npm link && \
+    cd ../generator-jhipster-react && npm install --legacy-peer-deps && npm link && \
+    cd ../generator-jhipster-angular && npm install --legacy-peer-deps && npm link && \
+    cd ../docusaurus-generator && npm install --legacy-peer-deps && npm link && \
+    cd ../generator-jhipster-fastapi && npm install --legacy-peer-deps && npm link
+
 
 # Add user and change ownership of the app directory
 RUN groupadd -r wedaa && useradd -r -g wedaa -s /bin/bash -m wedaa && \
