@@ -1,0 +1,58 @@
+# Use Node 18 base image
+FROM node:18.13.0
+
+# Install Git
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
+# Create working directory
+WORKDIR /usr/src/app
+
+# Install Yeoman globally
+RUN npm install -g yo@4.3.1
+
+# Copy package files from wda-server
+COPY wda-server/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the wda-server application code
+COPY wda-server/ ./
+
+# Copy local generator projects from root (build context)
+COPY generator-tf-wdi ./generator-tf-wdi
+COPY generator-jhipster ./generator-jhipster
+COPY jhipster-blueprints ./jhipster-blueprints
+
+# Install and link generator-tf-wdi
+RUN cd generator-tf-wdi && npm install && npm link
+
+# Install and link generator-jhipster
+RUN cd generator-jhipster && npm install && npm link
+
+# Install and link each JHipster blueprint component
+RUN cd jhipster-blueprints/generator-jhipster-gomicro && npm install --legacy-peer-deps && npm link && \
+    cd ../generator-jhipster-react && npm install --legacy-peer-deps && npm link && \
+    cd ../generator-jhipster-angular && npm install --legacy-peer-deps && npm link && \
+    cd ../docusaurus-generator && npm install --legacy-peer-deps && npm link && \
+    cd ../generator-jhipster-fastapi && npm install --legacy-peer-deps && npm link
+
+
+# Add user and set permissions
+RUN groupadd -r wedaa && useradd -r -g wedaa -s /bin/bash -m wedaa && \
+    mkdir -p /usr/src/app/code_archives && \
+    chown -R wedaa:wedaa /usr/src/app
+
+# Switch to the non-root user
+USER wedaa
+
+# Set environment variables
+ENV NEW_RELIC_NO_CONFIG_FILE=true \
+    NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true \
+    NEW_RELIC_LOG=stdout
+
+# Expose app port
+EXPOSE 3001
+
+# Start the application
+CMD [ "node", "server.js" ]
